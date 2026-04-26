@@ -1,0 +1,36 @@
+{
+  "required_artifacts": [
+    "_state.json",
+    "inputs_manifest.json",
+    "extracted_context.json",
+    "consistency_report.json",
+    "export-manifest-template.json",
+    "qa_report.md",
+    "qa_scores.json",
+    "brand-system.md",
+    "founder-voice-guide.md",
+    "product-positioning.md",
+    "audience-map.md",
+    "claims-and-proof-library.md",
+    "visual-style-guide.md",
+    "campaign-production-workflow.md",
+    "asset-qa-checklist.md",
+    "reusable-prompt-library.md"
+  ],
+  "required_brief_templates": [
+    "landing-hero.md",
+    "readme-graphic.md",
+    "launch-announce.md",
+    "investor-one-pager.md",
+    "municipal-buyer-email.md",
+    "product-explainer.md",
+    "social-graphic.md",
+    "conference-slide.md",
+    "press-pitch.md",
+    "demo-script.md",
+    "comparison-page.md"
+  ],
+  "required_section_headings": {
+    "brand-system.md": ["Mission", "Audience", "Positioning", "Tone", "Visual identity", "Vocabulary", "Claims", "Prohibited language"]
+  }
+}

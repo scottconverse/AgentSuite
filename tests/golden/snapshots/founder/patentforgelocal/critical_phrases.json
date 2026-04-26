@@ -1,0 +1,18 @@
+{
+  "must_appear_somewhere": [
+    "PatentForgeLocal",
+    "offline",
+    "inventor",
+    "provisional"
+  ],
+  "must_not_appear_anywhere": [
+    "revolutionize",
+    "seamless",
+    "best-in-class",
+    "world-class",
+    "industry-leading",
+    "cutting-edge",
+    "next-generation",
+    "synergy"
+  ]
+}
