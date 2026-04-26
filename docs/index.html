@@ -1,13 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgentSuite</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentSuite — reasoning agents for vague intent → precise artifacts</title>
+  <meta name="description" content="Seven role-specific reasoning agents that turn vague human intent into precise operating artifacts. Open-source, MIT-licensed, MCP-compatible with Codex, Claude Code, and Cowork.">
+  <style>
+    :root {
+      --fg: #1a1a1a;
+      --muted: #555;
+      --bg: #fafafa;
+      --accent: #2a4d8f;
+      --code-bg: #f0f0f0;
+      --border: #ddd;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+      color: var(--fg);
+      background: var(--bg);
+      line-height: 1.6;
+    }
+    h1 { font-size: 2rem; margin-bottom: 0.25rem; letter-spacing: -0.02em; }
+    h1 .v { font-size: 0.9rem; color: var(--muted); margin-left: 0.5rem; font-weight: normal; }
+    .lede { font-size: 1.15rem; color: var(--muted); margin: 0 0 2rem; }
+    h2 { font-size: 1.25rem; margin-top: 2.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.25rem; }
+    pre { background: var(--code-bg); padding: 1rem; border-radius: 4px; overflow-x: auto; font-size: 0.9rem; }
+    code { background: var(--code-bg); padding: 0.1em 0.3em; border-radius: 3px; font-size: 0.9em; }
+    pre code { background: transparent; padding: 0; }
+    a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; }
+    a:hover { border-bottom-color: var(--accent); }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+    .card { padding: 1rem; border: 1px solid var(--border); border-radius: 4px; background: white; }
+    .card h3 { margin: 0 0 0.5rem; font-size: 1rem; }
+    .card p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+    footer { margin-top: 4rem; padding-top: 1rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85rem; }
+    @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+  </style>
 </head>
 <body>
-    <h1>AgentSuite</h1>
-    <p>Seven role-specific reasoning agents. v0.1.0.</p>
-    <p>Full landing page: see Task 36 in implementation plan.</p>
+  <header>
+    <h1>AgentSuite <span class="v">v0.1.0</span></h1>
+    <p class="lede">Seven role-specific reasoning agents that turn vague intent into precise operating artifacts. Open-source. MCP-compatible with Codex, Claude Code, and Cowork.</p>
+  </header>
+
+  <h2>What it does</h2>
+  <p>AgentSuite codifies the operating system around AI generation. Each agent walks a six-stage pipeline (intake → extract → spec → execute → qa → approval), persists 26 artifacts to disk, and promotes approved output into a long-lived <code>_kernel/</code> that downstream agents consume. The result is a reusable creative-ops or product-ops layer, not a one-off content generator.</p>
+
+  <h2>Install</h2>
+  <pre><code>pip install agentsuite
+# or, no install:
+uvx agentsuite-mcp</code></pre>
+
+  <h2>Quick start (CLI)</h2>
+  <pre><code>export ANTHROPIC_API_KEY=sk-ant-...
+agentsuite founder run \
+  --business-goal "Launch PatentForgeLocal v1" \
+  --project-slug pfl \
+  --inputs-dir ./examples/patentforgelocal</code></pre>
+
+  <h2>Quick start (MCP)</h2>
+  <p><strong>Codex</strong> — add to <code>~/.codex/mcp.toml</code>:</p>
+  <pre><code>[servers.agentsuite]
+command = "uvx"
+args = ["agentsuite-mcp"]
+
+[servers.agentsuite.env]
+AGENTSUITE_ENABLED_AGENTS = "founder"</code></pre>
+
+  <p><strong>Claude Code / Cowork</strong> — add to <code>.mcp.json</code>:</p>
+  <pre><code>{
+  "mcpServers": {
+    "agentsuite": {
+      "command": "uvx",
+      "args": ["agentsuite-mcp"],
+      "env": {"AGENTSUITE_ENABLED_AGENTS": "founder"}
+    }
+  }
+}</code></pre>
+
+  <h2>Roadmap</h2>
+  <div class="grid">
+    <div class="card"><h3>v0.1 Founder</h3><p>Brand system, brief library, voice guide, prompt library. Shipped.</p></div>
+    <div class="card"><h3>v0.2 Design</h3><p>Brief generation + brand QA scoring.</p></div>
+    <div class="card"><h3>v0.3 Product</h3><p>PM intent → UI spec → coding handoff.</p></div>
+    <div class="card"><h3>v0.4 Engineering</h3><p>Annotated bug reports, PR review visuals.</p></div>
+    <div class="card"><h3>v0.5 Marketing</h3><p>Multilingual localization briefs.</p></div>
+    <div class="card"><h3>v0.6 Trust/Risk</h3><p>Synthetic-evidence red team.</p></div>
+    <div class="card" style="grid-column: 1 / -1;"><h3>v0.7 CIO</h3><p>Vendor capability decomposition for renegotiation.</p></div>
+  </div>
+
+  <h2>Documentation</h2>
+  <ul>
+    <li><a href="https://github.com/scottconverse/AgentSuite/blob/main/README.md">README</a> — install, quickstart, configuration</li>
+    <li><a href="https://github.com/scottconverse/AgentSuite/blob/main/docs/USER-MANUAL.md">USER-MANUAL.md</a> — plain-language walkthrough</li>
+    <li><a href="https://github.com/scottconverse/AgentSuite/blob/main/docs/README-FULL.pdf">README-FULL.pdf</a> — full reference with architecture diagrams</li>
+    <li><a href="https://github.com/scottconverse/AgentSuite/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a> — agent-implementation guide</li>
+    <li><a href="https://github.com/scottconverse/AgentSuite/blob/main/CHANGELOG.md">CHANGELOG.md</a></li>
+  </ul>
+
+  <h2>License</h2>
+  <p>MIT. Source on <a href="https://github.com/scottconverse/AgentSuite">GitHub</a>. Issues + discussion welcome.</p>
+
+  <footer>
+    <p>AgentSuite is built and maintained by <a href="https://github.com/scottconverse">Scott Converse</a>.</p>
+  </footer>
 </body>
 </html>
