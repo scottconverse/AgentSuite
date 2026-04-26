@@ -15,10 +15,12 @@ Modern AI tools generate fast. They do not generate *consistently*. Without a re
 ## Install
 
 ```bash
-pip install agentsuite
+pip install git+https://github.com/scottconverse/AgentSuite.git
 # or, no install:
-uvx agentsuite-mcp
+uvx --from git+https://github.com/scottconverse/AgentSuite.git agentsuite-mcp
 ```
+
+> AgentSuite is distributed from GitHub only — there is no PyPI publication.
 
 Requirements: Python 3.11+. One of `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or `GEMINI_API_KEY` (also accepts `GOOGLE_API_KEY`) set in your environment.
 

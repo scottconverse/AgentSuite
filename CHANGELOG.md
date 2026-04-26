@@ -30,7 +30,7 @@ Initial release.
 - **Documentation** — README.md, README-FULL.pdf with Mermaid architecture diagrams, USER-MANUAL.md, CONTRIBUTING.md, docs/index.html GitHub Pages landing.
 - **Skill wrappers** (Claude only) — `~/.claude/skills/founder-agent/SKILL.md` + `~/.claude/commands/founder-agent.md` installed via `scripts/install-skills.sh`.
 - **CI** — GitHub Actions for test (PR), lint (PR), release (tag).
-- **PyPI release** — `agentsuite` published to PyPI.
+- **Build artifacts** — wheel + sdist produced via `python -m build`; PyPI publishing intentionally not enabled (per maintainer decision).
 
 ### Locked architectural decisions for v0.1.0
 

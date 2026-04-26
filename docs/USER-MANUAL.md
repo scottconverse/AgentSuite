@@ -22,10 +22,12 @@ Open a terminal:
 Type:
 
 ```
-pip install agentsuite
+pip install git+https://github.com/scottconverse/AgentSuite.git
 ```
 
-Press Enter. You'll see a lot of text scroll by as Python downloads the package. When it finishes, you'll see your prompt return.
+Press Enter. You'll see a lot of text scroll by as Python downloads the code from GitHub and installs it. When it finishes, you'll see your prompt return.
+
+(AgentSuite is not published to PyPI — it installs directly from its GitHub repository. The command above tells `pip` to fetch the latest code from GitHub.)
 
 To verify the install:
 
