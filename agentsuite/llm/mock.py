@@ -35,3 +35,34 @@ class MockLLMProvider:
             f"No canned response for prompt: {request.prompt[:80]!r}. "
             f"Configured keywords: {list(self.responses.keys())}"
         )
+
+
+def _default_mock_for_cli() -> "MockLLMProvider":
+    """Default mock provider used by tests + CLI smoke-runs when no real provider is configured."""
+    import json as _json
+
+    from agentsuite.agents.founder.rubric import FOUNDER_RUBRIC
+    from agentsuite.agents.founder.stages.spec import SPEC_ARTIFACTS
+
+    extracted = {
+        "mission": "x",
+        "audience": {"primary_persona": "y", "secondary_personas": []},
+        "positioning": "z",
+        "tone_signals": ["practical"],
+        "visual_signals": [],
+        "recurring_claims": [],
+        "recurring_vocabulary": [],
+        "prohibited_language": [],
+        "gaps": [],
+    }
+    responses = {
+        "extracting": _json.dumps(extracted),
+        "checking 9 artifacts": _json.dumps({"mismatches": []}),
+        "scoring 9 founder": _json.dumps({
+            "scores": {d.name: 8.0 for d in FOUNDER_RUBRIC.dimensions},
+            "revision_instructions": [],
+        }),
+    }
+    for stem in SPEC_ARTIFACTS:
+        responses[f"writing {stem}.md"] = f"# {stem}\nMocked content."
+    return MockLLMProvider(responses=responses)
