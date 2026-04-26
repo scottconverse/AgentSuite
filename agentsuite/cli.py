@@ -5,7 +5,7 @@ import importlib
 import json
 import os
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import typer
 
@@ -22,7 +22,7 @@ def _output_root() -> Path:
     return Path(os.environ.get("AGENTSUITE_OUTPUT_DIR", ".agentsuite"))
 
 
-def _resolve_llm_for_cli():  # type: ignore[no-untyped-def]
+def _resolve_llm_for_cli() -> Any:
     """Resolve an LLMProvider for CLI use.
 
     Honors ``AGENTSUITE_LLM_PROVIDER_FACTORY`` env var (``"module:fn"``) for

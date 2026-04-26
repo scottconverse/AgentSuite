@@ -43,9 +43,11 @@ class OpenAIProvider:
             model=model,
             max_tokens=request.max_tokens,
             temperature=request.temperature,
-            messages=messages,
+            messages=messages,  # type: ignore[arg-type]
         )
         text = result.choices[0].message.content or ""
+        if result.usage is None:
+            raise RuntimeError("OpenAI returned no usage info")
         in_tokens = result.usage.prompt_tokens
         out_tokens = result.usage.completion_tokens
         return LLMResponse(

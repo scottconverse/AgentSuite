@@ -12,7 +12,7 @@ class NoProviderConfigured(RuntimeError):
     """Raised when no LLM provider can be resolved from explicit arg, env, or detection."""
 
 
-_PROVIDERS: dict[str, type] = {
+_PROVIDERS: dict[str, type[LLMProvider]] = {
     "anthropic": AnthropicProvider,
     "openai": OpenAIProvider,
 }

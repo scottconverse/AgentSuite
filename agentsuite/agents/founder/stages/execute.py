@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import json
-from typing import cast
+from typing import Any, cast
 
 from agentsuite.agents.founder.input_schema import FounderAgentInput
 from agentsuite.agents.founder.template_loader import TEMPLATE_NAMES, render_template
@@ -10,7 +10,7 @@ from agentsuite.kernel.base_agent import StageContext
 from agentsuite.kernel.schema import RunState
 
 
-def _values_from_extracted(inp: FounderAgentInput, extracted: dict) -> dict[str, str]:
+def _values_from_extracted(inp: FounderAgentInput, extracted: dict[str, Any]) -> dict[str, str]:
     """Map extracted_context.json fields into the brief-template variable namespace."""
     audience = extracted.get("audience", {})
     primary = audience.get("primary_persona", "the target audience")

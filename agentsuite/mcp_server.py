@@ -61,7 +61,7 @@ def build_server() -> _ServerWrapper:
 
             founder_mcp.register_tools(
                 server,
-                agent_class=lambda cls=agent_class: cls(output_root=_output_root()),
+                agent_class=lambda cls=agent_class: cls(output_root=_output_root()),  # type: ignore[misc]
                 output_root_fn=_output_root,
                 expose_stages=_expose_stages(),
             )

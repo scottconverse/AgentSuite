@@ -10,7 +10,7 @@ from agentsuite.agents.founder.stages.extract import extract_stage
 from agentsuite.agents.founder.stages.intake import intake_stage
 from agentsuite.agents.founder.stages.qa import qa_stage
 from agentsuite.agents.founder.stages.spec import spec_stage
-from agentsuite.kernel.base_agent import BaseAgent, StageHandler
+from agentsuite.kernel.base_agent import BaseAgent, StageContext, StageHandler
 from agentsuite.kernel.schema import RunState
 
 
@@ -42,8 +42,8 @@ class FounderAgent(BaseAgent):
         """
         from agentsuite.agents.founder.input_schema import FounderAgentInput
 
-        def _wrap(handler):  # type: ignore[no-untyped-def]
-            def runner(state: RunState, ctx) -> RunState:  # type: ignore[no-untyped-def]
+        def _wrap(handler: StageHandler) -> StageHandler:
+            def runner(state: RunState, ctx: StageContext) -> RunState:
                 ctx.edits.setdefault("llm", self.llm)
                 if not isinstance(state.inputs, FounderAgentInput):
                     state = state.model_copy(update={

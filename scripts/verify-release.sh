@@ -6,6 +6,17 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
+# Auto-activate the project venv if present so ruff/mypy/pytest/build are on PATH
+if [ -f ".venv/Scripts/activate" ]; then
+  # Windows / Git Bash layout
+  # shellcheck disable=SC1091
+  source ".venv/Scripts/activate"
+elif [ -f ".venv/bin/activate" ]; then
+  # POSIX layout
+  # shellcheck disable=SC1091
+  source ".venv/bin/activate"
+fi
+
 step() { printf "\n\033[1;34m==> %s\033[0m\n" "$*"; }
 fail() { printf "\033[1;31m[FAIL]\033[0m %s\n" "$*" >&2; exit 1; }
 ok()   { printf "\033[1;32m[OK]\033[0m %s\n" "$*"; }
