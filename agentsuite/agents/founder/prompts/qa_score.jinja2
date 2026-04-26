@@ -1,0 +1,30 @@
+You are scoring 9 founder-agent artifacts against the QA rubric.
+
+Business goal: {{ business_goal }}
+Voice samples available: {{ has_voice_samples }}
+
+Artifacts (markdown text):
+{% for name, body in artifacts.items() %}
+=== {{ name }} ===
+{{ body }}
+
+{% endfor %}
+
+Score each rubric dimension 0.0–10.0:
+- reusability
+- brand_consistency
+- claims_grounded
+- voice_fit (if no voice samples, use NA = 7.0)
+- template_specificity
+- goal_alignment
+- anti_genericity
+
+Return JSON:
+{
+  "scores": {"reusability": 8.0, ...},
+  "revision_instructions": ["specific actionable change"]
+}
+
+Be ruthless on anti_genericity — penalize "seamless", "revolutionize", "best-in-class", "world-class", "industry-leading", "next-generation", "cutting-edge", "synergy", "unlock potential".
+
+Return ONLY the JSON.

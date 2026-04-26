@@ -1,0 +1,24 @@
+You are checking 9 artifacts for cross-document consistency before they are committed.
+
+Artifacts (markdown text):
+{% for name, body in artifacts.items() %}
+=== {{ name }} ===
+{{ body }}
+
+{% endfor %}
+
+For each potential mismatch, return a JSON object:
+{
+  "mismatches": [
+    {
+      "field": "audience" | "tone" | "claim" | "vocabulary" | "visual",
+      "files": ["file_a.md", "file_b.md"],
+      "details": "...",
+      "severity": "critical" | "warning"
+    }
+  ]
+}
+
+"critical" mismatches fail the run. "warning" mismatches are logged but do not fail.
+
+Return ONLY the JSON.

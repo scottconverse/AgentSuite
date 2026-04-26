@@ -1,0 +1,1 @@
+"""Founder agent prompt templates."""

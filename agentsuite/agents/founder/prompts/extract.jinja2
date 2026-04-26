@@ -1,0 +1,20 @@
+You are extracting structured brand and product context from raw source materials for a founder/solo operator.
+
+Business goal: {{ business_goal }}
+Current state: {{ current_state | default("pre-launch") }}
+
+Source materials (summarized):
+{{ sources_summary }}
+
+Extract a JSON object with these keys:
+- mission (string, 1-2 sentences)
+- audience (object: primary_persona, secondary_personas[])
+- positioning (string, 2-3 sentences)
+- tone_signals (list of 3-7 single-word descriptors)
+- visual_signals (list of phrases describing observed visual identity)
+- recurring_claims (list of factual claims observed across sources)
+- recurring_vocabulary (list of distinctive terms used)
+- prohibited_language (list of phrases the founder avoids, if observable)
+- gaps (list of important things you cannot determine from the supplied materials — these become open_questions)
+
+Return ONLY the JSON. No prose, no code fences.
