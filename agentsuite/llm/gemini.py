@@ -4,14 +4,7 @@ from __future__ import annotations
 from typing import Any
 
 from agentsuite.llm.base import LLMRequest, LLMResponse
-
-
-# USD per million tokens — pinned at v0.x; update on bump
-_PRICING: dict[str, dict[str, float]] = {
-    "gemini-2.5-pro": {"in": 1.25, "out": 10.0},
-    "gemini-2.5-flash": {"in": 0.30, "out": 2.50},
-    "gemini-2.5-flash-lite": {"in": 0.10, "out": 0.40},
-}
+from agentsuite.llm.pricing import GEMINI_PRICING as _PRICING
 
 
 def _cost_usd(model: str, in_tokens: int, out_tokens: int) -> float:

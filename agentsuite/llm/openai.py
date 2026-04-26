@@ -4,14 +4,7 @@ from __future__ import annotations
 from typing import Any
 
 from agentsuite.llm.base import LLMRequest, LLMResponse
-
-
-# USD per million tokens (input / output) — pricing pinned at v0.1.0; update on bump.
-_PRICING: dict[str, dict[str, float]] = {
-    "gpt-5": {"in": 5.0, "out": 15.0},
-    "gpt-4.1": {"in": 2.5, "out": 10.0},
-    "gpt-4o-mini": {"in": 0.15, "out": 0.60},
-}
+from agentsuite.llm.pricing import OPENAI_PRICING as _PRICING
 
 
 def _cost_usd(model: str, in_tokens: int, out_tokens: int) -> float:

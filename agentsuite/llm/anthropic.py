@@ -4,14 +4,7 @@ from __future__ import annotations
 from typing import Any
 
 from agentsuite.llm.base import LLMRequest, LLMResponse
-
-
-# USD per million tokens (input / output) — pricing pinned at v0.1.0; update on bump.
-_PRICING: dict[str, dict[str, float]] = {
-    "claude-sonnet-4-6": {"in": 3.0, "out": 15.0},
-    "claude-opus-4-7": {"in": 15.0, "out": 75.0},
-    "claude-haiku-4-5-20251001": {"in": 0.25, "out": 1.25},
-}
+from agentsuite.llm.pricing import ANTHROPIC_PRICING as _PRICING
 
 
 def _cost_usd(model: str, in_tokens: int, out_tokens: int) -> float:
