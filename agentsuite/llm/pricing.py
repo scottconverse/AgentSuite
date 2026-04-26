@@ -3,6 +3,9 @@
 USD per million tokens (input / output). Pinned at v0.x; update on bump.
 Each provider imports its slice and uses it via the shared `_cost_usd` helper
 (which lives in each provider for now to avoid a circular shape change).
+
+Note: Ollama is intentionally absent from this module. The OllamaProvider
+runs a local daemon and always reports usd=0.0; no pricing table required.
 """
 from __future__ import annotations
 

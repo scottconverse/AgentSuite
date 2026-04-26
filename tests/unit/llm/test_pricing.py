@@ -31,3 +31,14 @@ def test_all_pricing_entries_have_in_and_out_keys():
             assert "out" in rates, f"{model} missing 'out' rate"
             assert isinstance(rates["in"], (int, float))
             assert isinstance(rates["out"], (int, float))
+
+
+def test_ollama_intentionally_absent_from_pricing():
+    """OllamaProvider always reports usd=0.0; no pricing entries required."""
+    import agentsuite.llm.pricing as pricing
+
+    public_tables = [
+        name for name in dir(pricing)
+        if name.endswith("_PRICING") and not name.startswith("_")
+    ]
+    assert "OLLAMA_PRICING" not in public_tables
