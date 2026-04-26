@@ -44,8 +44,36 @@ def test_resolver_raises_when_no_keys(monkeypatch):
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
+    monkeypatch.setattr("agentsuite.llm.resolver._ollama_daemon_running", lambda: False)
     with pytest.raises(NoProviderConfigured):
         resolve_provider()
+
+
+def test_resolver_falls_back_to_ollama_when_no_keys(monkeypatch):
+    from agentsuite.llm.ollama import OllamaProvider
+
+    monkeypatch.delenv("AGENTSUITE_LLM_PROVIDER", raising=False)
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
+    monkeypatch.setattr("agentsuite.llm.resolver._ollama_daemon_running", lambda: True)
+    p = resolve_provider()
+    assert isinstance(p, OllamaProvider)
+
+
+def test_resolver_named_ollama_works(monkeypatch):
+    from agentsuite.llm.ollama import OllamaProvider
+
+    monkeypatch.setattr("agentsuite.llm.resolver._ollama_daemon_running", lambda: True)
+    p = resolve_provider("ollama")
+    assert isinstance(p, OllamaProvider)
+
+
+def test_resolver_named_ollama_raises_when_daemon_down(monkeypatch):
+    monkeypatch.setattr("agentsuite.llm.resolver._ollama_daemon_running", lambda: False)
+    with pytest.raises(NoProviderConfigured):
+        resolve_provider("ollama")
 
 
 def test_resolver_raises_for_unknown_provider_name(monkeypatch):
