@@ -88,6 +88,17 @@ This script runs all 8 checks (doc artifacts, version sync, CHANGELOG entry, lin
 
 Per `feedback_pypi_push.md`: every GitHub push of an AgentSuite release is paired with a PyPI publish.
 
+### One-time PyPI Trusted Publishing setup
+
+1. Go to https://pypi.org/manage/account/publishing/
+2. Add a new pending publisher:
+   - PyPI Project Name: `agentsuite`
+   - Owner: `scottconverse`
+   - Repository: `AgentSuite`
+   - Workflow: `release.yml`
+   - Environment: (leave blank)
+3. After the first release, the publisher becomes active automatically.
+
 ## Code style
 
 - ruff for formatting and linting (`make lint`).
