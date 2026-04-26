@@ -83,6 +83,13 @@ def test_founder_agent_approve_promotes_to_kernel(tmp_path):
     assert (tmp_path / "_kernel" / "pfl" / "brief-template-library" / "landing-hero.md").exists()
 
 
+def test_founder_agent_resume_from_qa(tmp_path):
+    agent = FounderAgent(output_root=tmp_path, llm=MockLLMProvider(responses=_all_responses()))
+    agent.run(request=_request(), run_id="r1")
+    state = agent.resume(run_id="r1", stage="qa", edits={})
+    assert state.stage == "approval"
+
+
 def test_founder_agent_has_correct_class_attributes(tmp_path):
     """Verify FounderAgent exposes name and qa_rubric."""
     agent = FounderAgent(output_root=tmp_path, llm=MockLLMProvider(responses=_all_responses()))

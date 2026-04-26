@@ -54,7 +54,7 @@ class Constraints(BaseModel):
 
 class AgentRequest(BaseModel):
     """Inputs to a single agent invocation — the request the agent processes."""
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
     agent_name: str
     role_domain: str
     user_request: str

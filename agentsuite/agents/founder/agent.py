@@ -34,10 +34,21 @@ class FounderAgent(BaseAgent):
         self.llm = llm
 
     def stage_handlers(self) -> dict[str, StageHandler]:
-        """Return the 5 stage handlers wrapped to inject self.llm into ctx.edits."""
+        """Return the 5 stage handlers wrapped to inject LLM and re-cast inputs.
+
+        After JSON round-trip on resume, state.inputs may be an AgentRequest instance
+        lacking FounderAgentInput-specific fields. Re-validate from its dump so handlers
+        see the correct shape.
+        """
+        from agentsuite.agents.founder.input_schema import FounderAgentInput
+
         def _wrap(handler):  # type: ignore[no-untyped-def]
             def runner(state: RunState, ctx) -> RunState:  # type: ignore[no-untyped-def]
                 ctx.edits.setdefault("llm", self.llm)
+                if not isinstance(state.inputs, FounderAgentInput):
+                    state = state.model_copy(update={
+                        "inputs": FounderAgentInput.model_validate(state.inputs.model_dump())
+                    })
                 return handler(state, ctx)
 
             return runner
