@@ -35,3 +35,22 @@ class AgentRegistry:
         if name not in self._registered:
             raise UnknownAgent(f"Agent '{name}' is not registered")
         return self._registered[name]
+
+
+def _bootstrap_default_registry() -> AgentRegistry:
+    from agentsuite.agents.founder.agent import FounderAgent
+
+    reg = AgentRegistry()
+    reg.register("founder", FounderAgent)
+    return reg
+
+
+_DEFAULT_REGISTRY: AgentRegistry | None = None
+
+
+def default_registry() -> AgentRegistry:
+    """Return the singleton default registry with built-in agents pre-registered."""
+    global _DEFAULT_REGISTRY
+    if _DEFAULT_REGISTRY is None:
+        _DEFAULT_REGISTRY = _bootstrap_default_registry()
+    return _DEFAULT_REGISTRY
