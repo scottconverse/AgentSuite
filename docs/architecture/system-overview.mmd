@@ -1,0 +1,17 @@
+flowchart LR
+  Harness["Harness<br/>(Codex / Claude Code / Cowork)"]
+  MCP["agentsuite-mcp<br/>(stdio MCP server)"]
+  Kernel["Specification Kernel<br/>schema · qa · cost · artifacts · approval"]
+  Founder["Founder Agent<br/>5 stages, 26 artifacts"]
+  Design["Design Agent<br/>(v0.2)"]
+  Product["Product Agent<br/>(v0.3)"]
+  Output[".agentsuite/<br/>runs/ + _kernel/"]
+  LLM["LLM Provider<br/>Anthropic · OpenAI"]
+
+  Harness <-->|JSON-RPC| MCP
+  MCP --> Kernel
+  Kernel --> Founder
+  Kernel -.-> Design
+  Kernel -.-> Product
+  Founder --> LLM
+  Founder --> Output

@@ -1,0 +1,34 @@
+sequenceDiagram
+  participant H as Harness (Codex/Claude/Cowork)
+  participant M as agentsuite-mcp
+  participant A as FounderAgent
+  participant D as Disk (.agentsuite/)
+  participant L as LLM Provider
+
+  H->>M: founder_run(business_goal, inputs_dir)
+  M->>A: agent.run(request, run_id)
+  A->>D: write inputs_manifest.json
+  A->>L: extract prompt
+  L-->>A: JSON context
+  A->>D: write extracted_context.json
+  loop for each of 9 spec artifacts
+    A->>L: spec prompt
+    L-->>A: markdown
+    A->>D: write <artifact>.md
+  end
+  A->>L: consistency_check prompt
+  L-->>A: mismatches JSON
+  A->>D: write consistency_report.json
+  A->>D: render 11 brief templates
+  A->>L: qa_score prompt
+  L-->>A: scores JSON
+  A->>D: write qa_report.md
+  A-->>M: state(stage="approval")
+  M-->>H: RunResult(status="awaiting_approval", primary_path)
+
+  Note over H: human reviews brand-system.md
+  H->>M: founder_approve(run_id, approver, project_slug)
+  M->>A: agent.approve(...)
+  A->>D: copy artifacts to _kernel/<slug>/
+  A-->>M: state(stage="done")
+  M-->>H: ApprovalResult(promoted_paths)

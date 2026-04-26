@@ -1,0 +1,18 @@
+flowchart TD
+  Input["FounderAgentInput<br/>business_goal, inputs_dir, voice_samples"]
+  S1["Stage 1: intake<br/>(no LLM)<br/>walk files, classify"]
+  S2["Stage 2: extract<br/>(LLM)<br/>mission, audience, tone, claims"]
+  S3["Stage 3: spec<br/>(LLM × 9)<br/>9 markdown artifacts<br/>+ consistency check"]
+  S4["Stage 4: execute<br/>(no LLM)<br/>render 11 brief templates"]
+  S5["Stage 5: qa<br/>(LLM)<br/>FOUNDER_RUBRIC scoring"]
+  S6["Stage 6: approval<br/>(human)<br/>promote to _kernel/"]
+  Done["DONE<br/>26 artifacts in _kernel/<slug>/"]
+
+  Input --> S1
+  S1 --> S2
+  S2 --> S3
+  S3 -->|critical mismatch| Fail["fail run<br/>ConsistencyCheckFailed"]
+  S3 --> S4
+  S4 --> S5
+  S5 --> S6
+  S6 --> Done
