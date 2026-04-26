@@ -1,8 +1,6 @@
 """Unit tests for kernel.artifacts."""
 import json
-from pathlib import Path
 
-import pytest
 
 from agentsuite.kernel.artifacts import ArtifactWriter
 

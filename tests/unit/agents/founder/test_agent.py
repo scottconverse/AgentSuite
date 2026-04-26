@@ -1,9 +1,8 @@
 """Unit tests for FounderAgent end-to-end (mocked LLM)."""
 import json
-from pathlib import Path
 
 from agentsuite.agents.founder.agent import FounderAgent
-from agentsuite.agents.founder.input_schema import FounderAgentInput, derive_project_slug
+from agentsuite.agents.founder.input_schema import FounderAgentInput
 from agentsuite.agents.founder.rubric import FOUNDER_RUBRIC
 from agentsuite.agents.founder.stages.spec import SPEC_ARTIFACTS
 from agentsuite.agents.founder.template_loader import TEMPLATE_NAMES

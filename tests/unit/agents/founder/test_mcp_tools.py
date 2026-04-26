@@ -1,19 +1,15 @@
 """Unit tests for founder.mcp_tools."""
 import json
 from pathlib import Path
-from unittest.mock import MagicMock
 
-import pytest
 
 from agentsuite.agents.founder.agent import FounderAgent
-from agentsuite.agents.founder.input_schema import FounderAgentInput
 from agentsuite.agents.founder.mcp_tools import (
     FounderRunRequest,
     register_tools,
 )
 from agentsuite.agents.founder.rubric import FOUNDER_RUBRIC
 from agentsuite.agents.founder.stages.spec import SPEC_ARTIFACTS
-from agentsuite.kernel.schema import Constraints
 from agentsuite.llm.mock import MockLLMProvider
 
 

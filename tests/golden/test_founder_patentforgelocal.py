@@ -2,7 +2,6 @@
 import json
 from pathlib import Path
 
-import pytest
 
 from agentsuite.agents.founder.agent import FounderAgent
 from agentsuite.agents.founder.input_schema import FounderAgentInput

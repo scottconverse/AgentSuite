@@ -1,9 +1,8 @@
 """Unit tests for kernel.base_agent."""
-from typing import Any
 
 import pytest
 
-from agentsuite.kernel.base_agent import BaseAgent, Stage as StageDef, StageHandler
+from agentsuite.kernel.base_agent import BaseAgent, StageHandler
 from agentsuite.kernel.qa import QARubric, RubricDimension
 from agentsuite.kernel.schema import AgentRequest, Constraints
 

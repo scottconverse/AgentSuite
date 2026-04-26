@@ -7,7 +7,7 @@ from typing import Any, Callable
 
 from pydantic import Field
 
-from agentsuite.agents.founder.input_schema import FounderAgentInput, derive_project_slug
+from agentsuite.agents.founder.input_schema import FounderAgentInput
 from agentsuite.kernel.schema import Constraints, RunState, Stage
 from agentsuite.kernel.state_store import StateStore
 from agentsuite.mcp_models import ApprovalResult, RunResult, RunSummary
