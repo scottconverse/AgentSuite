@@ -1,0 +1,10 @@
+# Add to ~/.codex/mcp.toml
+
+[servers.agentsuite]
+command = "uvx"
+args = ["agentsuite-mcp"]
+
+[servers.agentsuite.env]
+AGENTSUITE_ENABLED_AGENTS = "founder"
+AGENTSUITE_OUTPUT_DIR = "${PWD}/.agentsuite"
+# Set ANTHROPIC_API_KEY or OPENAI_API_KEY in your shell, NOT in this file.
