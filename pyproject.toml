@@ -71,7 +71,9 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
+addopts = "-m 'not cleanroom and not live'"
 markers = [
     "live: requires live LLM API access (gated by RUN_LIVE_TESTS=1)",
     "slow: slow integration tests",
+    "cleanroom: full cleanroom E2E (gated; invoke with `pytest -m cleanroom`)",
 ]
