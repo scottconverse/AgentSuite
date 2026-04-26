@@ -8,6 +8,10 @@ from agentsuite.kernel.schema import RunState
 from agentsuite.kernel.state_store import StateStore
 
 
+class RunNotFound(RuntimeError):
+    """Raised when approve() is called but no state file exists for the run."""
+
+
 class NotAtApprovalStage(RuntimeError):
     """Raised when approve() is called but run is not at the approval stage."""
 
@@ -22,13 +26,16 @@ class ApprovalGate:
     def approve(self, *, approver: str, project_slug: str) -> RunState:
         """Promote artifacts to ``_kernel/<slug>/`` and mark the run done.
 
+        Raises ``RunNotFound`` if no state file exists yet.
         Raises ``NotAtApprovalStage`` if the run is not currently at the
-        ``approval`` stage (or if no state file exists yet).
+        ``approval`` stage.
         """
         state = self.state_store.load()
-        if state is None or state.stage != "approval":
+        if state is None:
+            raise RunNotFound(f"No state file at {self.state_store.path}")
+        if state.stage != "approval":
             raise NotAtApprovalStage(
-                f"Run is at stage {state.stage if state else 'none'}, not 'approval'"
+                f"Run is at stage '{state.stage}', not 'approval'"
             )
         self.writer.promote(project_slug=project_slug)
         state.stage = "done"

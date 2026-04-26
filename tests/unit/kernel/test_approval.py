@@ -1,7 +1,7 @@
 """Unit tests for kernel.approval."""
 import pytest
 
-from agentsuite.kernel.approval import ApprovalGate, NotAtApprovalStage
+from agentsuite.kernel.approval import ApprovalGate, NotAtApprovalStage, RunNotFound
 from agentsuite.kernel.artifacts import ArtifactWriter
 from agentsuite.kernel.schema import AgentRequest, Constraints, RunState
 from agentsuite.kernel.state_store import StateStore
@@ -37,4 +37,12 @@ def test_approve_outside_approval_stage_raises(tmp_path):
     store.save(state)
     gate = ApprovalGate(state_store=store, writer=writer)
     with pytest.raises(NotAtApprovalStage):
+        gate.approve(approver="scott", project_slug="testproj")
+
+
+def test_approve_with_no_state_file_raises_run_not_found(tmp_path):
+    writer = ArtifactWriter(output_root=tmp_path, run_id="r1")
+    store = StateStore(run_dir=writer.run_dir)
+    gate = ApprovalGate(state_store=store, writer=writer)
+    with pytest.raises(RunNotFound):
         gate.approve(approver="scott", project_slug="testproj")

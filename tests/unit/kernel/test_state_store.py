@@ -17,6 +17,7 @@ def test_state_store_writes_and_reads_state(tmp_path):
     state = RunState(run_id="r1", agent="founder", inputs=_request())
     store.save(state)
     loaded = store.load()
+    assert loaded is not None
     assert loaded.run_id == "r1"
     assert loaded.stage == "intake"
 
@@ -28,6 +29,7 @@ def test_state_store_overwrites_on_save(tmp_path):
     state.stage = "extract"
     store.save(state)
     loaded = store.load()
+    assert loaded is not None
     assert loaded.stage == "extract"
 
 
