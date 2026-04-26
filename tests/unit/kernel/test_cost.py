@@ -51,6 +51,17 @@ def test_cap_uses_default_when_env_missing(monkeypatch):
     assert cap.soft_warn_usd == pytest.approx(1.0)
 
 
+def test_tracker_handles_zero_cost_runs():
+    """Ollama (and other zero-cost providers) accumulate cleanly under cap logic."""
+    t = CostTracker(cap=CostCap(soft_warn_usd=1.0, hard_kill_usd=5.0))
+    for _ in range(100):
+        t.add(Cost(input_tokens=200, output_tokens=80, usd=0.0))
+    assert t.total.usd == 0.0
+    assert t.total.input_tokens == 200 * 100
+    assert t.total.output_tokens == 80 * 100
+    assert t.warned is False
+
+
 def test_hard_cap_does_not_mutate_total_on_overflow():
     """The total must NOT advance when a hard-cap-overflowing add() raises.
 
