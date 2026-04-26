@@ -29,7 +29,12 @@ class CostCap(BaseModel):
 
 
 class CostTracker:
-    """In-memory accumulator that enforces cost caps as costs are added."""
+    """In-memory accumulator that enforces cost caps as costs are added.
+
+    Boundary semantics: caps are exclusive — costs equal to ``hard_kill_usd``
+    are accepted, only costs strictly greater raise ``HardCapExceeded``.
+    Same for ``soft_warn_usd``: warning latches when total strictly exceeds.
+    """
 
     def __init__(self, cap: CostCap | None = None) -> None:
         self.cap = cap or CostCap.from_env()
