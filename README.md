@@ -22,7 +22,7 @@ uvx --from git+https://github.com/scottconverse/AgentSuite.git agentsuite-mcp
 
 > AgentSuite is distributed from GitHub only — there is no PyPI publication.
 
-Requirements: Python 3.11+. One of `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or `GEMINI_API_KEY` (also accepts `GOOGLE_API_KEY`) set in your environment.
+Requirements: Python 3.11+. Either an API key (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or `GEMINI_API_KEY` / `GOOGLE_API_KEY`) OR a local Ollama daemon running at `localhost:11434`.
 
 ## Quick start (CLI)
 
@@ -41,6 +41,30 @@ agentsuite founder approve --run-id <run-id> --approver you --project-slug pfl
 ```
 
 Approved artifacts get promoted to `.agentsuite/_kernel/pfl/` for downstream agents.
+
+## Quick start (Local LLM — Ollama)
+
+Run AgentSuite entirely offline against a local Gemma 4 model. Zero cost, no API keys required.
+
+```bash
+# Install Ollama (https://ollama.ai) if not already installed, then pull a Gemma 4 model:
+ollama pull gemma4:e4b      # recommended: ~5 GB, balanced quality
+
+# Optional alternatives:
+#   ollama pull gemma4:e2b    # ~3 GB, laptop-class (faster, less capable)
+#   ollama pull gemma4:26b-moe # ~15 GB, high-end workstation (slowest, best quality)
+
+# Make sure the daemon is running:
+ollama serve &
+
+# Then run AgentSuite as usual — the resolver auto-detects the daemon when no API keys are set:
+agentsuite founder run \
+  --business-goal "Launch My Product v1" \
+  --project-slug my-product \
+  --inputs-dir ./my-brand-inputs
+```
+
+You can also pin Ollama explicitly via `AGENTSUITE_LLM_PROVIDER=ollama` regardless of which API keys you have set.
 
 ## Quick start (MCP — Codex)
 
@@ -96,7 +120,7 @@ On `founder_approve`, the spec artifacts + brief-template-library are promoted t
 |---|---|---|
 | `AGENTSUITE_ENABLED_AGENTS` | `founder` | Comma-separated agent names to expose |
 | `AGENTSUITE_OUTPUT_DIR` | `.agentsuite` | Where artifacts are written |
-| `AGENTSUITE_LLM_PROVIDER` | (auto-detect) | Force `anthropic`, `openai`, or `gemini` |
+| `AGENTSUITE_LLM_PROVIDER` | (auto-detect) | Force `anthropic`, `openai`, `gemini`, or `ollama` |
 | `AGENTSUITE_COST_CAP_USD` | `5.0` | Hard kill cap per run |
 | `AGENTSUITE_EXPOSE_STAGES` | (off) | Set `true` to expose `founder_intake`/`extract`/`spec`/`execute`/`qa` as MCP tools |
 

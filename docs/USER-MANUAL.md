@@ -10,7 +10,9 @@ AgentSuite is a piece of software that takes loose ideas (like "I want a brand s
 
 1. **A computer running Windows, Mac, or Linux.**
 2. **Python 3.11 or 3.12 installed.** Get it at https://www.python.org/downloads/. During install, check "Add Python to PATH".
-3. **An AI API key.** From Anthropic (https://console.anthropic.com), OpenAI (https://platform.openai.com), or Google Gemini (https://aistudio.google.com/app/apikey). You'll be charged a few cents to a few dollars per run.
+3. **An AI brain.** Either:
+   - **Cloud API key** (faster, costs a few cents to a few dollars per run): Anthropic (https://console.anthropic.com), OpenAI (https://platform.openai.com), or Google Gemini (https://aistudio.google.com/app/apikey).
+   - **Local Ollama** (slower, free): install Ollama from https://ollama.ai and pull `gemma4:e4b`. See "Step 2b" below.
 
 ## Step 1 — install AgentSuite
 
@@ -69,6 +71,24 @@ export GEMINI_API_KEY=your-key-here   (Mac/Linux)
 (`GOOGLE_API_KEY` is also accepted as an alias.)
 
 The key only stays set for this terminal window. To make it permanent, add the line to your shell profile (`~/.bashrc`, `~/.zshrc`, or set as a User Environment Variable in Windows System Settings).
+
+## Step 2b (alternative) — run Ollama locally instead of using a cloud API key
+
+If you'd rather run AgentSuite entirely offline (and free), install Ollama and pull a Gemma 4 model. There's no API key step.
+
+1. Install Ollama from https://ollama.ai (one-time setup).
+2. Pull the recommended model:
+   ```
+   ollama pull gemma4:e4b
+   ```
+   (Alternatives: `gemma4:e2b` for laptops, `gemma4:26b-moe` for workstations.)
+3. Make sure the daemon is running:
+   ```
+   ollama serve
+   ```
+   (On most systems Ollama starts automatically after install.)
+
+That's it — AgentSuite will auto-detect the running daemon as long as no cloud API key is set in your environment.
 
 ## Step 3 — gather your inputs
 
@@ -130,7 +150,7 @@ You can do this as many times as you want. Each run costs cents to a few dollars
 
 | Error | What it means | What to do |
 |---|---|---|
-| `NoProviderConfigured` | AgentSuite couldn't find an API key | Set `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or `GEMINI_API_KEY` (Step 2) |
+| `NoProviderConfigured` | AgentSuite couldn't find an API key OR a running Ollama daemon | Set an API key (Step 2) or start Ollama (Step 2b) |
 | `HardCapExceeded: $5.00` | Your run cost more than the safety limit | Either reduce input size, or increase the cap: `set AGENTSUITE_COST_CAP_USD=10` |
 | `ConsistencyCheckFailed` | The agent generated artifacts that contradict each other | Look at `consistency_report.json` in your run folder, then re-run after editing inputs |
 | `extract stage produced invalid JSON` | The LLM returned malformed output | Re-run — usually transient |
