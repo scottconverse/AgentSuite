@@ -21,7 +21,15 @@ cd "$CLEANROOM_DIR/repo"
 rm -rf .venv build dist *.egg-info
 
 python -m venv .venv
-.venv/Scripts/pip install -e .[dev] >/dev/null
+
+# Cross-platform venv bin path: Windows uses Scripts/, POSIX uses bin/
+if [ -d ".venv/Scripts" ]; then
+  VENV_BIN=".venv/Scripts"
+else
+  VENV_BIN=".venv/bin"
+fi
+
+"$VENV_BIN/pip" install -e .[dev] >/dev/null
 
 OUTPUT_DIR="$CLEANROOM_DIR/output"
 mkdir -p "$OUTPUT_DIR"
@@ -36,7 +44,7 @@ else
   export AGENTSUITE_LLM_PROVIDER_FACTORY="agentsuite.llm.mock:_default_mock_for_cli"
 fi
 
-.venv/Scripts/agentsuite founder run \
+"$VENV_BIN/agentsuite" founder run \
   --business-goal "Launch PatentForgeLocal v1" \
   --project-slug "pfl-cleanroom" \
   --inputs-dir "$REPO_ROOT/examples/patentforgelocal" \
@@ -85,10 +93,10 @@ done
 [ "$MISSING" -eq 0 ] || { echo "==> CLEANROOM FAIL: $MISSING artifact(s) missing"; exit 1; }
 
 # MCP smoke
-.venv/Scripts/python -c "from agentsuite.mcp_server import build_server; s = build_server(); assert 'founder_run' in s.tool_names()"
+"$VENV_BIN/python" -c "from agentsuite.mcp_server import build_server; s = build_server(); assert 'founder_run' in s.tool_names()"
 
 # Approve to test promotion
-.venv/Scripts/agentsuite founder approve --run-id cleanroom-r1 --approver cleanroom --project-slug pfl-cleanroom
+"$VENV_BIN/agentsuite" founder approve --run-id cleanroom-r1 --approver cleanroom --project-slug pfl-cleanroom
 [ -f "$OUTPUT_DIR/_kernel/pfl-cleanroom/brand-system.md" ] || { echo "[MISS] _kernel promotion"; exit 1; }
 
 echo "==> CLEANROOM PASS — 26 artifacts + MCP smoke + approval promotion all OK"
