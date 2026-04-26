@@ -12,10 +12,18 @@ class MockLLMProvider:
     """Test stub that returns canned responses keyed by prompt substrings."""
     name = "mock"
 
-    def __init__(self, responses: dict[str, str], *, default_model: str = "mock-1") -> None:
+    def __init__(
+        self,
+        responses: dict[str, str],
+        *,
+        default_model: str = "mock-1",
+        name: str | None = None,
+    ) -> None:
         self.responses = responses
         self._default_model = default_model
         self.calls: list[LLMRequest] = []
+        if name is not None:
+            self.name = name  # instance attr shadows class attr
 
     def default_model(self) -> str:
         return self._default_model
@@ -37,8 +45,13 @@ class MockLLMProvider:
         )
 
 
-def _default_mock_for_cli() -> "MockLLMProvider":
-    """Default mock provider used by tests + CLI smoke-runs when no real provider is configured."""
+def _default_mock_for_cli(provider_name: str | None = None) -> "MockLLMProvider":
+    """Default mock provider used by tests + CLI smoke-runs when no real provider is configured.
+
+    ``provider_name`` lets a caller simulate any concrete provider's identity
+    (anthropic / openai / gemini / ollama) on the returned mock — useful for
+    tests that gate behavior on ``provider.name``.
+    """
     import json as _json
 
     from agentsuite.agents.founder.rubric import FOUNDER_RUBRIC
@@ -65,4 +78,4 @@ def _default_mock_for_cli() -> "MockLLMProvider":
     }
     for stem in SPEC_ARTIFACTS:
         responses[f"writing {stem}.md"] = f"# {stem}\nMocked content."
-    return MockLLMProvider(responses=responses)
+    return MockLLMProvider(responses=responses, name=provider_name or "mock")
