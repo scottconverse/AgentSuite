@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 SourceKind = Literal[
@@ -33,6 +33,8 @@ Stage = Literal[
 
 
 class SourceMaterial(BaseModel):
+    """A single source artifact (file, URL, screenshot) supplied to an agent."""
+    model_config = ConfigDict(extra="forbid")
     kind: SourceKind
     path: Path
     url: str | None = None
@@ -40,6 +42,8 @@ class SourceMaterial(BaseModel):
 
 
 class Constraints(BaseModel):
+    """Operational constraints that scope how an agent may act."""
+    model_config = ConfigDict(extra="forbid")
     brand: list[str] = Field(default_factory=list)
     legal: list[str] = Field(default_factory=list)
     technical: list[str] = Field(default_factory=list)
@@ -49,6 +53,8 @@ class Constraints(BaseModel):
 
 
 class AgentRequest(BaseModel):
+    """Inputs to a single agent invocation — the request the agent processes."""
+    model_config = ConfigDict(extra="forbid")
     agent_name: str
     role_domain: str
     user_request: str
@@ -61,6 +67,8 @@ class AgentRequest(BaseModel):
 
 
 class Cost(BaseModel):
+    """Aggregable token + dollar cost record for one or more LLM calls."""
+    model_config = ConfigDict(extra="forbid")
     input_tokens: int = 0
     output_tokens: int = 0
     usd: float = 0.0
@@ -74,9 +82,11 @@ class Cost(BaseModel):
 
 
 class ArtifactRef(BaseModel):
+    """Reference to a single artifact written during a run, with content hash."""
+    model_config = ConfigDict(extra="forbid")
     path: Path
     kind: ArtifactKind
-    stage: str
+    stage: Stage
     sha256: str = Field(min_length=64, max_length=64)
 
     @field_validator("sha256")
@@ -87,6 +97,8 @@ class ArtifactRef(BaseModel):
 
 
 class RunState(BaseModel):
+    """Persisted state for an in-flight or completed agent run."""
+    model_config = ConfigDict(extra="forbid")
     run_id: str
     agent: str
     stage: Stage = "intake"

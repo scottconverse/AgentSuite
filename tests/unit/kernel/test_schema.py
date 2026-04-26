@@ -71,6 +71,11 @@ def test_artifact_ref_rejects_short_sha():
         ArtifactRef(path=Path("x"), kind="spec", stage="spec", sha256="abc")
 
 
+def test_artifact_ref_rejects_non_hex_sha():
+    with pytest.raises(ValidationError):
+        ArtifactRef(path=Path("x"), kind="spec", stage="spec", sha256="g" * 64)
+
+
 def test_run_state_initial_stage_is_intake():
     req = AgentRequest(
         agent_name="founder",
