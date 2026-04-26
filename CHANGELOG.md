@@ -4,7 +4,15 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 ## [Unreleased]
 
-(Nothing yet — start of v0.2.0 cycle.)
+### Added
+
+- **Gemini provider** — `agentsuite/llm/gemini.py` exposes `GeminiProvider` conforming to `LLMProvider` Protocol. Supports `gemini-2.5-pro`, `gemini-2.5-flash` (default), and `gemini-2.5-flash-lite` with v0.x-pinned pricing. Auto-detected by resolver after Anthropic and OpenAI; accepts `GEMINI_API_KEY` or `GOOGLE_API_KEY`.
+- **Centralized pricing module** — `agentsuite/llm/pricing.py` consolidates `ANTHROPIC_PRICING`, `OPENAI_PRICING`, and `GEMINI_PRICING` so each provider imports its slice instead of holding a local table.
+
+### Changed
+
+- Resolver auto-detect order: anthropic → openai → gemini (was: anthropic → openai).
+- `pip install` now pulls `google-generativeai>=0.8` as a transitive dependency for Gemini support.
 
 ## [0.1.0] — 2026-04-26
 

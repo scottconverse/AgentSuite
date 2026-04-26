@@ -10,7 +10,7 @@ AgentSuite is a piece of software that takes loose ideas (like "I want a brand s
 
 1. **A computer running Windows, Mac, or Linux.**
 2. **Python 3.11 or 3.12 installed.** Get it at https://www.python.org/downloads/. During install, check "Add Python to PATH".
-3. **An AI API key.** Either from Anthropic (https://console.anthropic.com) or OpenAI (https://platform.openai.com). You'll be charged a few cents to a few dollars per run.
+3. **An AI API key.** From Anthropic (https://console.anthropic.com), OpenAI (https://platform.openai.com), or Google Gemini (https://aistudio.google.com/app/apikey). You'll be charged a few cents to a few dollars per run.
 
 ## Step 1 — install AgentSuite
 
@@ -57,6 +57,14 @@ export ANTHROPIC_API_KEY=sk-ant-your-key-here   (Mac/Linux)
 set OPENAI_API_KEY=sk-your-key-here    (Windows)
 export OPENAI_API_KEY=sk-your-key-here   (Mac/Linux)
 ```
+
+**Google Gemini:**
+```
+set GEMINI_API_KEY=your-key-here    (Windows)
+export GEMINI_API_KEY=your-key-here   (Mac/Linux)
+```
+
+(`GOOGLE_API_KEY` is also accepted as an alias.)
 
 The key only stays set for this terminal window. To make it permanent, add the line to your shell profile (`~/.bashrc`, `~/.zshrc`, or set as a User Environment Variable in Windows System Settings).
 
@@ -120,7 +128,7 @@ You can do this as many times as you want. Each run costs cents to a few dollars
 
 | Error | What it means | What to do |
 |---|---|---|
-| `NoProviderConfigured` | AgentSuite couldn't find an API key | Set `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` (Step 2) |
+| `NoProviderConfigured` | AgentSuite couldn't find an API key | Set `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or `GEMINI_API_KEY` (Step 2) |
 | `HardCapExceeded: $5.00` | Your run cost more than the safety limit | Either reduce input size, or increase the cap: `set AGENTSUITE_COST_CAP_USD=10` |
 | `ConsistencyCheckFailed` | The agent generated artifacts that contradict each other | Look at `consistency_report.json` in your run folder, then re-run after editing inputs |
 | `extract stage produced invalid JSON` | The LLM returned malformed output | Re-run — usually transient |

@@ -20,7 +20,7 @@ pip install agentsuite
 uvx agentsuite-mcp
 ```
 
-Requirements: Python 3.11+. Either `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` set in your environment.
+Requirements: Python 3.11+. One of `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or `GEMINI_API_KEY` (also accepts `GOOGLE_API_KEY`) set in your environment.
 
 ## Quick start (CLI)
 
@@ -94,7 +94,7 @@ On `founder_approve`, the spec artifacts + brief-template-library are promoted t
 |---|---|---|
 | `AGENTSUITE_ENABLED_AGENTS` | `founder` | Comma-separated agent names to expose |
 | `AGENTSUITE_OUTPUT_DIR` | `.agentsuite` | Where artifacts are written |
-| `AGENTSUITE_LLM_PROVIDER` | (auto-detect) | Force `anthropic` or `openai` |
+| `AGENTSUITE_LLM_PROVIDER` | (auto-detect) | Force `anthropic`, `openai`, or `gemini` |
 | `AGENTSUITE_COST_CAP_USD` | `5.0` | Hard kill cap per run |
 | `AGENTSUITE_EXPOSE_STAGES` | (off) | Set `true` to expose `founder_intake`/`extract`/`spec`/`execute`/`qa` as MCP tools |
 
