@@ -6,13 +6,6 @@ import os
 from pathlib import Path
 from typing import Any, Callable
 
-try:
-    from mcp.server.fastmcp import FastMCP
-except ImportError as _mcp_exc:
-    raise ImportError(
-        "MCP SDK not installed. Run: pip install \"agentsuite[mcp]\""
-    ) from _mcp_exc
-
 from agentsuite.agents.registry import default_registry
 from agentsuite.mcp_models import RunSummary
 
@@ -32,7 +25,7 @@ def _expose_stages() -> bool:
 class _ServerWrapper:
     """Thin wrapper around FastMCP exposing the registered tool list for tests."""
 
-    def __init__(self, mcp: FastMCP) -> None:
+    def __init__(self, mcp: Any) -> None:
         self.mcp = mcp
         self._tool_names: list[str] = []
 
@@ -52,6 +45,12 @@ class _ServerWrapper:
 
 def build_server() -> _ServerWrapper:
     """Build the AgentSuite MCP server with all enabled-agent tools registered."""
+    try:
+        from mcp.server.fastmcp import FastMCP
+    except ImportError as exc:
+        raise ImportError(
+            'MCP SDK not installed. Run: pip install "agentsuite[mcp]"'
+        ) from exc
     mcp = FastMCP("agentsuite")
     server = _ServerWrapper(mcp)
 

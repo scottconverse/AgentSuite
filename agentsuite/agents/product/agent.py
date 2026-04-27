@@ -10,7 +10,7 @@ from agentsuite.agents.product.stages.extract import extract_stage
 from agentsuite.agents.product.stages.intake import intake_stage
 from agentsuite.agents.product.stages.qa import qa_stage
 from agentsuite.agents.product.stages.spec import spec_stage
-from agentsuite.kernel.base_agent import BaseAgent, StageContext, StageHandler
+from agentsuite.kernel.base_agent import AgentCLISpec, BaseAgent, StageContext, StageHandler
 from agentsuite.kernel.schema import RunState
 
 
@@ -67,9 +67,8 @@ class ProductAgent(BaseAgent):
         }
 
 
-def build_cli_spec() -> "AgentCLISpec":  # noqa: F821
+def build_cli_spec() -> AgentCLISpec:
     """Return the CLI spec for the Product agent."""
-    from agentsuite.kernel.base_agent import AgentCLISpec
     import json
     import typer
 

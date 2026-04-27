@@ -10,7 +10,7 @@ from agentsuite.agents.engineering.stages.extract import extract_stage
 from agentsuite.agents.engineering.stages.intake import intake_stage
 from agentsuite.agents.engineering.stages.qa import qa_stage
 from agentsuite.agents.engineering.stages.spec import spec_stage
-from agentsuite.kernel.base_agent import BaseAgent, StageContext, StageHandler
+from agentsuite.kernel.base_agent import AgentCLISpec, BaseAgent, StageContext, StageHandler
 from agentsuite.kernel.schema import RunState
 
 
@@ -67,9 +67,8 @@ class EngineeringAgent(BaseAgent):
         }
 
 
-def build_cli_spec() -> "AgentCLISpec":  # noqa: F821
+def build_cli_spec() -> AgentCLISpec:
     """Return the CLI spec for the Engineering agent."""
-    from agentsuite.kernel.base_agent import AgentCLISpec
     import json
     import typer
 

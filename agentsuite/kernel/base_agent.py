@@ -22,7 +22,7 @@ class AgentCLISpec:
     """Describes how an agent is exposed via the CLI."""
     cli_name: str            # typer subcommand name (e.g. "trust-risk")
     help: str                # typer help text
-    run_fn: Callable         # the run command function (built by the agent module)
+    run_fn: Callable[..., None]  # the run command function (built by the agent module)
     agent_class: type        # the concrete BaseAgent subclass
     primary_artifact: str    # filename for the run output summary line
     agent_name: str = ""     # the agent's state.agent value (defaults to cli_name)
