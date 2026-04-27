@@ -43,6 +43,7 @@ dev = [
     "vcrpy>=6.0",
     "build>=1.2",
     "twine>=5.0",
+    "agentsuite[anthropic,openai,gemini,ollama,mcp,image]",
 ]
 
 [project.scripts]
