@@ -1,0 +1,49 @@
+You are a senior security architect writing a comprehensive threat model for {{ product_name }}.
+
+Risk domain: {{ risk_domain }}
+Stakeholder context: {{ stakeholder_context }}
+Regulatory context: {{ regulatory_context }}
+Threat model scope: {{ threat_model_scope }}
+Compliance frameworks in scope: {{ compliance_frameworks }}
+
+Extracted risk context:
+{{ extracted_context }}
+
+Write a professional threat-model.md document using the STRIDE methodology (Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege). The document must include:
+
+# Threat Model — {{ product_name }}
+
+## 1. Scope and Objectives
+Define what is in and out of scope, the assets being protected, and the security objectives.
+
+## 2. System Overview
+Describe the system architecture, trust boundaries, data flows, and entry points relevant to this threat model.
+
+## 3. Threat Actors
+Enumerate threat actors (internal, external, nation-state, opportunistic, etc.) with motivation, capability, and likelihood.
+
+## 4. STRIDE Threat Analysis
+For each STRIDE category, enumerate specific threats applicable to this product. For each threat include:
+- Threat ID (e.g., T-S-001 for Spoofing threat 1)
+- Description
+- Affected components
+- Attack vector
+- Likelihood (Low/Medium/High)
+- Impact (Low/Medium/High)
+- Risk rating (Likelihood × Impact)
+- Existing mitigations
+- Recommended mitigations
+
+## 5. Attack Trees
+Provide 2–3 attack trees for the highest-priority threats, showing attacker decision paths.
+
+## 6. Trust Boundaries
+Map all trust boundaries in the system and analyze what crosses each boundary.
+
+## 7. Assumptions and Exclusions
+Document assumptions made and threats explicitly excluded from scope with rationale.
+
+## 8. Threat Model Maintenance
+Define review cadence, triggers for re-evaluation, and ownership.
+
+Write for a technical audience. Be specific to {{ product_name }} — avoid generic boilerplate. Every threat listed must be plausible given the extracted context.

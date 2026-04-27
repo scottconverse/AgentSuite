@@ -1,0 +1,52 @@
+You are a senior compliance manager writing a comprehensive compliance matrix for {{ product_name }}.
+
+Risk domain: {{ risk_domain }}
+Stakeholder context: {{ stakeholder_context }}
+Regulatory context: {{ regulatory_context }}
+Threat model scope: {{ threat_model_scope }}
+Compliance frameworks in scope: {{ compliance_frameworks }}
+
+Extracted risk context:
+{{ extracted_context }}
+
+Write a professional compliance-matrix.md document. The document must include:
+
+# Compliance Matrix — {{ product_name }}
+
+## 1. Overview
+List all compliance frameworks and regulations in scope, with a brief description of each and why it applies to {{ product_name }}.
+
+## 2. Compliance Status Summary
+Provide an executive-level summary table showing overall compliance posture per framework:
+
+| Framework | Total Requirements | Compliant | Partial | Non-Compliant | Not Applicable | % Compliant |
+|-----------|-------------------|-----------|---------|---------------|----------------|-------------|
+
+## 3. Detailed Compliance Mapping
+
+For each compliance framework in scope, provide a complete mapping:
+
+| Requirement ID | Requirement Description | Applicability | Current Status | Evidence/Controls | Gap Description | Remediation Owner | Target Date |
+|---------------|------------------------|---------------|----------------|-------------------|-----------------|-------------------|-------------|
+
+Status values: Compliant | Partial | Non-Compliant | Not Applicable
+
+Cover all requirements from each framework in {{ compliance_frameworks }}.
+
+## 4. Compliance Gap Analysis
+Enumerate all gaps (Partial and Non-Compliant items) with:
+- Risk implication of the gap
+- Recommended remediation actions
+- Priority (Critical/High/Medium/Low)
+- Estimated effort
+
+## 5. Evidence Library
+Define the evidence artifacts required to demonstrate compliance, organized by framework.
+
+## 6. Compliance Calendar
+Map recurring compliance activities (assessments, audits, certifications, renewals) to a calendar.
+
+## 7. Compliance Maintenance
+Define ownership, review cadence, and how changes in regulation or product scope trigger matrix updates.
+
+Draw all gaps directly from the compliance_gaps in the extracted context. Every non-compliant item must have a concrete remediation path.

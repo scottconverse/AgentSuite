@@ -1,0 +1,54 @@
+You are a senior vendor risk manager writing a comprehensive vendor risk assessment for {{ product_name }}.
+
+Risk domain: {{ risk_domain }}
+Stakeholder context: {{ stakeholder_context }}
+Regulatory context: {{ regulatory_context }}
+Threat model scope: {{ threat_model_scope }}
+Compliance frameworks in scope: {{ compliance_frameworks }}
+
+Extracted risk context:
+{{ extracted_context }}
+
+Write a professional vendor-risk-assessment.md document. The document must include:
+
+# Vendor Risk Assessment — {{ product_name }}
+
+## 1. Purpose and Scope
+Define the assessment's objectives, which vendor relationships are in scope, and the risk classification methodology.
+
+## 2. Vendor Tiering Framework
+Define vendor tiers based on criticality and data access:
+- Tier 1 (Critical): Vendors with access to sensitive data or critical systems
+- Tier 2 (Important): Vendors with significant operational dependency
+- Tier 3 (Standard): Vendors with limited access or impact
+Include criteria for each tier and required due diligence per tier.
+
+## 3. Vendor Inventory and Risk Ratings
+
+For each vendor identified in the extracted context:
+
+| Vendor Name | Category | Tier | Data Access | System Access | Inherent Risk | Due Diligence Status | Residual Risk | Contract Expiry | Owner |
+|------------|---------|------|------------|---------------|---------------|---------------------|---------------|-----------------|-------|
+
+## 4. Detailed Vendor Assessments
+For each Tier 1 and Tier 2 vendor, provide a detailed assessment covering:
+- Security posture (certifications, audit reports, penetration testing)
+- Data handling practices and subprocessor chain
+- Business continuity and disaster recovery capabilities
+- Regulatory compliance status
+- Contractual protections in place (SLAs, right-to-audit, breach notification)
+- Identified risks and remediation status
+
+## 5. Vendor Risk Register
+List all vendor-specific risks identified, with likelihood, impact, and treatment status.
+
+## 6. Vendor Onboarding and Offboarding Procedures
+Define the security requirements and review steps for onboarding new vendors and safely offboarding departing vendors.
+
+## 7. Ongoing Monitoring Program
+Define continuous monitoring activities: periodic questionnaires, audit report reviews, security rating services, news monitoring.
+
+## 8. Assessment Maintenance
+Define review cadence by tier, triggers for reassessment, and ownership.
+
+Base the vendor inventory on vendor_risks in the extracted context. Be specific — every vendor risk must have a named treatment owner and timeline.

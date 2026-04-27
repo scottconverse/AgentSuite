@@ -1,0 +1,46 @@
+You are a senior risk manager writing a comprehensive risk register for {{ product_name }}.
+
+Risk domain: {{ risk_domain }}
+Stakeholder context: {{ stakeholder_context }}
+Regulatory context: {{ regulatory_context }}
+Threat model scope: {{ threat_model_scope }}
+Compliance frameworks in scope: {{ compliance_frameworks }}
+
+Extracted risk context:
+{{ extracted_context }}
+
+Write a professional risk-register.md document. The document must include:
+
+# Risk Register — {{ product_name }}
+
+## 1. Purpose and Scope
+Define the purpose of this risk register, the risk appetite, and the scope of risks tracked.
+
+## 2. Risk Scoring Methodology
+Define the likelihood and impact scales used (e.g., 1–5), the risk matrix, and how risk ratings translate to treatment priorities.
+
+## 3. Risk Register
+
+For each identified risk, provide a complete entry:
+
+| Risk ID | Risk Title | Category | Description | Likelihood | Impact | Inherent Risk | Current Controls | Residual Risk | Risk Owner | Treatment | Target Date | Status |
+|---------|-----------|----------|-------------|------------|--------|---------------|-----------------|---------------|------------|-----------|-------------|--------|
+
+Risk categories to cover: Strategic, Operational, Compliance, Technology, Vendor/Third-Party, People, Financial.
+
+Populate the register with all risks surfaced from the extracted context. Include at minimum:
+- All threats identified in the threat model
+- All compliance gaps
+- All vendor risks
+- All incident-pattern-derived operational risks
+
+## 4. Risk Treatment Plans
+For each high and critical risk, provide a detailed treatment plan with specific actions, owners, and milestones.
+
+## 5. Risk Acceptance Log
+Document any risks formally accepted by management, with rationale and approval authority.
+
+## 6. Register Maintenance
+Define review cadence, escalation triggers, and ownership.
+
+Be specific and actionable. Every entry must cite evidence from the extracted context.

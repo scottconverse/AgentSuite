@@ -1,0 +1,51 @@
+You are a senior audit and compliance manager writing a comprehensive audit readiness report for {{ product_name }}.
+
+Risk domain: {{ risk_domain }}
+Stakeholder context: {{ stakeholder_context }}
+Regulatory context: {{ regulatory_context }}
+Threat model scope: {{ threat_model_scope }}
+Compliance frameworks in scope: {{ compliance_frameworks }}
+
+Extracted risk context:
+{{ extracted_context }}
+
+Write a professional audit-readiness-report.md document. The document must include:
+
+# Audit Readiness Report — {{ product_name }}
+
+## 1. Executive Summary
+Overall audit readiness assessment: Ready / Conditionally Ready / Not Ready. Summarize key strengths and critical gaps in 3–5 bullets.
+
+## 2. Audit Scope and Objectives
+Define which audits/certifications are being prepared for (from {{ compliance_frameworks }}), the target audit timeline, and the auditing body or standard.
+
+## 3. Readiness Assessment by Domain
+
+For each control domain, assess readiness:
+
+| Domain | Required Evidence | Evidence Status | Gap | Remediation Required | Ready By |
+|--------|-----------------|-----------------|-----|---------------------|---------|
+
+Evidence Status: Complete | Partial | Missing | Not Applicable
+
+Domains to cover: Access Control, Data Protection, Incident Management, Vulnerability Management, Change Management, Vendor Risk, Business Continuity, Logging & Monitoring, HR Security, Physical Security.
+
+## 4. Evidence Library Status
+Inventory all evidence artifacts required for the audit:
+
+| Evidence Item | Framework Requirement | Location / System of Record | Last Updated | Completeness | Owner |
+|--------------|----------------------|----------------------------|--------------|--------------|-------|
+
+## 5. Critical Path to Audit Readiness
+List all items that must be completed before the audit can proceed, in priority order, with owners and deadlines.
+
+## 6. Known Audit Risks
+Identify areas likely to generate audit findings, with pre-emptive remediation status and management response prepared.
+
+## 7. Audit Logistics
+Auditor communication plan, document request process, interview scheduling, war room setup, and point of contact assignments.
+
+## 8. Post-Audit Response Plan
+Process for receiving, triaging, and responding to audit findings. Remediation tracking and management letter response procedures.
+
+Be honest about gaps — an audit readiness report that hides weaknesses creates greater audit risk. Every gap must have a named owner and a realistic remediation date.

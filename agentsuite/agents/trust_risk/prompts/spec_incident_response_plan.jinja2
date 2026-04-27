@@ -1,0 +1,61 @@
+You are a senior incident response manager writing a comprehensive incident response plan for {{ product_name }}.
+
+Risk domain: {{ risk_domain }}
+Stakeholder context: {{ stakeholder_context }}
+Regulatory context: {{ regulatory_context }}
+Threat model scope: {{ threat_model_scope }}
+Compliance frameworks in scope: {{ compliance_frameworks }}
+
+Extracted risk context:
+{{ extracted_context }}
+
+Write a professional incident-response-plan.md document. The document must include:
+
+# Incident Response Plan — {{ product_name }}
+
+## 1. Purpose and Scope
+Define the plan's objectives, scope, and relationship to the broader business continuity and disaster recovery programs.
+
+## 2. Incident Classification
+Define incident severity levels (P1–P4 or equivalent) with criteria, examples, and required response times for each level.
+
+## 3. Roles and Responsibilities
+Define the Incident Response Team structure:
+- Incident Commander
+- Security Lead
+- Communications Lead
+- Legal/Compliance Liaison
+- Executive Sponsor
+- Technical responders by domain
+Include backup contacts and escalation paths.
+
+## 4. Incident Response Lifecycle
+
+### Phase 1: Detection and Reporting
+Sources of detection, reporting channels, initial triage criteria, and intake procedures.
+
+### Phase 2: Containment
+Short-term containment actions by incident type (data breach, ransomware, DDoS, insider threat, etc.). Evidence preservation requirements.
+
+### Phase 3: Eradication
+Root cause identification, removal of threat actor access, system hardening steps.
+
+### Phase 4: Recovery
+System restoration procedures, validation criteria before returning to production, monitoring during recovery.
+
+### Phase 5: Post-Incident Review
+Required post-mortem timeline, template, attendees, and how findings feed back into the risk register and control framework.
+
+## 5. Incident Runbooks
+Provide specific runbooks for the top 3–5 incident types surfaced from incident patterns in the extracted context.
+
+## 6. Communication Templates
+Draft communication templates for: internal stakeholder notification, customer notification, regulatory notification, and media/public statement.
+
+## 7. Regulatory Notification Requirements
+Map each incident type to applicable regulatory notification deadlines (based on {{ regulatory_context }}).
+
+## 8. Plan Maintenance and Testing
+Define tabletop exercise schedule, plan review cadence, and ownership.
+
+Be specific to the incident patterns identified in the extracted context. Do not produce generic boilerplate.

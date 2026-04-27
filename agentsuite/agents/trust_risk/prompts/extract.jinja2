@@ -1,0 +1,32 @@
+You are a senior information security analyst extracting structured risk context for {{ product_name }}.
+
+Risk domain: {{ risk_domain }}
+Stakeholder context: {{ stakeholder_context }}
+Number of source materials: {{ source_count }}
+
+Existing policies on record:
+{{ existing_policies }}
+
+Incident reports on record:
+{{ incident_reports }}
+
+Analyze all source materials and extract a comprehensive risk context. Return your response as valid JSON with exactly these keys:
+
+{
+  "known_threats": [...],
+  "existing_controls": [...],
+  "compliance_gaps": [...],
+  "incident_patterns": [...],
+  "vendor_risks": [...],
+  "open_questions": [...]
+}
+
+Field definitions:
+- known_threats: list of identified threat actors, attack vectors, and threat scenarios relevant to this product and risk domain
+- existing_controls: list of security controls, policies, and safeguards currently in place (include control type and maturity level)
+- compliance_gaps: list of specific compliance requirements not yet met, with the applicable framework cited
+- incident_patterns: list of recurring incident types, root causes, or systemic weaknesses surfaced from incident reports
+- vendor_risks: list of third-party and supply chain risks identified from vendor agreements, assessments, or known exposure
+- open_questions: list of questions that must be answered before a complete risk assessment can be produced
+
+Be exhaustive — omissions here will propagate to all downstream artifacts. Return only valid JSON, no prose outside the JSON object.

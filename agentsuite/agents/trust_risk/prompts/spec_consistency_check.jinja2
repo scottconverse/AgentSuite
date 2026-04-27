@@ -1,0 +1,45 @@
+You are a senior information security auditor conducting a consistency review across all trust and risk artifacts for {{ product_name }}.
+
+Risk domain: {{ risk_domain }}
+
+Below are excerpts from each trust/risk artifact produced so far:
+
+{% for name, snippet in artifact_snippets.items() %}
+### {{ name }}
+{{ snippet }}
+
+{% endfor %}
+
+Review all artifacts for internal consistency. Check:
+1. Whether threats in the threat model are represented as risks in the risk register with appropriate ratings.
+2. Whether controls in the control framework address the risks in the risk register, and whether control gaps align with compliance gaps in the compliance matrix.
+3. Whether the incident response plan covers the incident types and threat actors described in the threat model.
+4. Whether vendor risks in the vendor risk assessment are reflected in the risk register and control framework.
+5. Whether the security policy is specific enough to mandate the controls described in the control framework.
+6. Whether the audit readiness report correctly reflects the compliance gaps in the compliance matrix.
+7. Whether accepted risks in the residual risk acceptance document are present in the risk register with consistent ratings.
+8. Whether any artifact contradicts another on a material point (e.g., different risk ratings for the same risk, a control claimed as implemented in one artifact but missing in another).
+
+Return your response as valid JSON with exactly this structure:
+
+{
+  "consistent": true or false,
+  "findings": [
+    {
+      "artifacts_involved": ["artifact-name-1", "artifact-name-2"],
+      "finding": "description of the inconsistency or conflict",
+      "severity": "critical" or "warning",
+      "recommendation": "specific action to resolve the inconsistency"
+    }
+  ],
+  "severity": "none" or "warning" or "critical"
+}
+
+Rules:
+- "consistent" is true only if findings is empty.
+- "severity" at the top level is "none" if no findings, "warning" if all findings are warnings, "critical" if any finding is critical.
+- A finding is "critical" if it represents a material gap that could lead to audit failure, regulatory breach, or unmitigated high-severity risk.
+- A finding is "warning" if it represents an inconsistency that should be corrected but does not represent an immediate material risk.
+- If no inconsistencies are found, return {"consistent": true, "findings": [], "severity": "none"}.
+
+Return only valid JSON. No prose outside the JSON object.

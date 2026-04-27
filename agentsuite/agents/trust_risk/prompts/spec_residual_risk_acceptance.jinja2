@@ -1,0 +1,58 @@
+You are a senior risk officer writing a comprehensive residual risk acceptance document for {{ product_name }}.
+
+Risk domain: {{ risk_domain }}
+Stakeholder context: {{ stakeholder_context }}
+Regulatory context: {{ regulatory_context }}
+Threat model scope: {{ threat_model_scope }}
+Compliance frameworks in scope: {{ compliance_frameworks }}
+
+Extracted risk context:
+{{ extracted_context }}
+
+Write a professional residual-risk-acceptance.md document. The document must include:
+
+# Residual Risk Acceptance — {{ product_name }}
+
+## 1. Purpose and Authority
+Define the purpose of this document, the risk acceptance framework, and who has authority to accept risks at each level (e.g., Risk Owner accepts Low, CISO accepts Medium, Executive accepts High, Board accepts Critical).
+
+## 2. Risk Acceptance Criteria
+Define the conditions under which a residual risk may be formally accepted:
+- Risk has been assessed with evidence
+- All reasonable mitigations have been considered and either implemented or rejected with rationale
+- The cost/effort of additional mitigation exceeds the expected risk reduction
+- The risk falls within the organization's stated risk appetite
+- The risk owner and appropriate authority have formally acknowledged the risk
+
+## 3. Residual Risk Register
+
+For each risk where residual risk acceptance is appropriate:
+
+| Risk ID | Risk Title | Inherent Risk | Controls Applied | Residual Risk Rating | Acceptance Rationale | Risk Owner | Accepting Authority | Acceptance Date | Review Date | Conditions / Compensating Controls |
+|---------|-----------|---------------|-----------------|---------------------|---------------------|------------|--------------------|-----------------|-----------|------------------------------------|
+
+## 4. Accepted Risk Justifications
+For each accepted risk, provide a detailed justification:
+- Why further mitigation is not being pursued at this time
+- What monitoring is in place to detect if the risk materializes
+- What triggers a re-evaluation of the acceptance decision
+- Any compensating controls that partially offset the risk
+
+## 5. Risk Appetite Statement
+Document the organization's formal risk appetite for {{ product_name }}, quantified where possible (e.g., maximum acceptable annual loss, maximum acceptable downtime, maximum acceptable data exposure).
+
+## 6. Conditions for Re-evaluation
+Define the events that require revisiting an accepted risk:
+- Significant changes to the threat landscape
+- New regulatory requirements
+- Product architecture changes
+- Actual materialization of the risk or a near-miss
+- Annual review cycle
+
+## 7. Signature and Approval
+Formal sign-off section for all risk acceptances requiring executive or board authority. Each acceptance must be individually approved.
+
+## 8. Document Maintenance
+Define review cadence (minimum annual), ownership, and how changes to the risk landscape trigger updates to accepted risks.
+
+Every accepted risk must have explicit, documented rationale. "We haven't gotten to it yet" is not an acceptable justification — that is an open risk, not an accepted one.
