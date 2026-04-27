@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "agentsuite": {
+      "command": "uvx",
+      "args": ["agentsuite-mcp"],
+      "env": {
+        "AGENTSUITE_ENABLED_AGENTS": "founder,design,product",
+        "AGENTSUITE_OUTPUT_DIR": "${PWD}/.agentsuite"
+      }
+    }
+  }
+}
