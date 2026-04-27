@@ -1,0 +1,30 @@
+{
+  "required_artifacts": [
+    "_state.json",
+    "inputs_manifest.json",
+    "extracted_context.json",
+    "consistency_report.json",
+    "export-manifest-template.json",
+    "qa_report.md",
+    "qa_scores.json",
+    "product-requirements-doc.md",
+    "user-story-map.md",
+    "feature-prioritization.md",
+    "success-metrics.md",
+    "competitive-analysis.md",
+    "user-persona-map.md",
+    "acceptance-criteria.md",
+    "product-roadmap.md",
+    "risk-register.md"
+  ],
+  "required_brief_templates": [
+    "sprint-planning-brief.md",
+    "stakeholder-update.md",
+    "launch-announcement.md",
+    "feature-spec.md",
+    "user-interview-guide.md",
+    "a-b-test-plan.md",
+    "demo-script.md",
+    "investor-update.md"
+  ]
+}
