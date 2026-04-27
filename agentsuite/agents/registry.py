@@ -38,6 +38,7 @@ class AgentRegistry:
 
 
 def _bootstrap_default_registry() -> AgentRegistry:
+    from agentsuite.agents.cio.agent import CIOAgent
     from agentsuite.agents.design.agent import DesignAgent
     from agentsuite.agents.engineering.agent import EngineeringAgent
     from agentsuite.agents.founder.agent import FounderAgent
@@ -52,6 +53,7 @@ def _bootstrap_default_registry() -> AgentRegistry:
     reg.register("engineering", EngineeringAgent)
     reg.register("marketing", MarketingAgent)
     reg.register("trust_risk", TrustRiskAgent)
+    reg.register("cio", CIOAgent)
     return reg
 
 
