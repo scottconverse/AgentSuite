@@ -173,6 +173,21 @@ Primary artifact: `it-strategy.md`. On `cio_approve`, all spec artifacts and bri
 
 ## Architecture
 
+AgentSuite runs every request through a five-stage pipeline:
+
+```mermaid
+flowchart LR
+    A[Intake] --> B[Extract]
+    B --> C[Spec]
+    C --> D[Execute]
+    D --> E[QA]
+    E -->|score ≥ 7.0| F[✅ Approved]
+    E -->|score < 7.0| G[🔄 Approval Gate]
+    G -->|human approves| F
+```
+
+Each stage is handled by the same kernel regardless of which agent is running. The QA stage scores output against a 9-dimension rubric; runs scoring below 7.0 enter an approval gate before artifacts are written.
+
 ```
                     ┌───────────────┐
                     │  Harness      │  (Codex / Claude Code / Cowork)

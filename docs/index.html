@@ -38,6 +38,8 @@
     .card h3 { margin: 0 0 0.5rem; font-size: 1rem; }
     .card p { margin: 0; color: var(--muted); font-size: 0.9rem; }
     footer { margin-top: 4rem; padding-top: 1rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85rem; }
+    .output-example { margin: 2rem 0; }
+    .output-example pre { border-left: 3px solid var(--accent); background: var(--code-bg); }
     @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
   </style>
 </head>
@@ -61,6 +63,24 @@ agentsuite founder run \
   --business-goal "Launch PatentForgeLocal v1" \
   --project-slug pfl \
   --inputs-dir ./examples/patentforgelocal</code></pre>
+
+  <section class="output-example">
+    <h2>Sample Output</h2>
+    <pre><code>$ agentsuite founder --company-name "Acme Corp" --industry "SaaS" --stage "seed"
+
+✔ Intake complete
+✔ Context extracted
+✔ Spec generated (9 artifacts)
+✔ Execute complete
+✔ QA passed — score 8.3/10
+
+Artifacts written to .agentsuite/founder-2026-04-27/
+  brand-voice.md          2.1 KB
+  positioning-statement.md  1.4 KB
+  icp-profile.md          1.8 KB
+  + 6 more artifacts
+</code></pre>
+  </section>
 
   <h2>Quick start (MCP)</h2>
   <p><strong>Codex</strong> — add to <code>~/.codex/mcp.toml</code>:</p>
