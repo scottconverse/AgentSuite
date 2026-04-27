@@ -49,7 +49,7 @@ User wants any of:
    ```
    Optionally append `--research-dir path/to/research` or `--competitor-dir path/to/competitors` if the user provided those files.
 
-5. **Artifacts appear in `.agentsuite/runs/{run_id}/`.** The primary output is `product-requirements-doc.md`. Additional artifacts: `user-story-map.md`, `feature-prioritization.md`, `success-metrics.md`, `competitive-analysis.md`, `user-personas.md`, `acceptance-criteria.md`, `product-roadmap.md`, `risk-register.md`.
+5. **Artifacts appear in `.agentsuite/runs/{run_id}/`.** The primary output is `product-requirements-doc.md`. Additional artifacts: `user-story-map.md`, `feature-prioritization.md`, `success-metrics.md`, `competitive-analysis.md`, `user-persona-map.md`, `acceptance-criteria.md`, `product-roadmap.md`, `risk-register.md`.
 
 6. **Review QA scores.** Open `qa_scores.json`. If any score is < 7.0, read `revision_instructions` in that file for specific guidance on what to improve. Address revisions before approving.
 
