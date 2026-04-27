@@ -1,0 +1,30 @@
+{
+  "required_artifacts": [
+    "_state.json",
+    "inputs_manifest.json",
+    "extracted_context.json",
+    "consistency_report.json",
+    "export-manifest-template.json",
+    "qa_report.md",
+    "qa_scores.json",
+    "campaign-brief.md",
+    "target-audience-profile.md",
+    "messaging-framework.md",
+    "content-calendar.md",
+    "channel-strategy.md",
+    "seo-keyword-plan.md",
+    "competitive-positioning.md",
+    "launch-plan.md",
+    "measurement-framework.md"
+  ],
+  "required_brief_templates": [
+    "ad-copy-brief.md",
+    "blog-post-brief.md",
+    "email-campaign.md",
+    "influencer-brief.md",
+    "landing-page-brief.md",
+    "press-release.md",
+    "quarterly-report.md",
+    "social-post-series.md"
+  ]
+}
