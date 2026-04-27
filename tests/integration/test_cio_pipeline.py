@@ -106,3 +106,8 @@ def test_cio_agent_via_registry(tmp_path: Path) -> None:
     it_strategy = run_dir / "it-strategy.md"
     assert it_strategy.exists(), "missing it-strategy.md"
     assert it_strategy.stat().st_size > 0, "it-strategy.md is empty"
+    # Content assertion: primary artifact must contain IT strategy keywords
+    it_strategy_text = it_strategy.read_text()
+    assert "strategy" in it_strategy_text.lower() or "it" in it_strategy_text.lower(), (
+        "it-strategy.md does not contain expected IT strategy content"
+    )

@@ -106,3 +106,8 @@ def test_trust_risk_agent_via_registry(tmp_path: Path) -> None:
     threat_model = run_dir / "threat-model.md"
     assert threat_model.exists(), "missing threat-model.md"
     assert threat_model.stat().st_size > 0, "threat-model.md is empty"
+    # Content assertion: primary artifact must contain threat/risk keywords
+    threat_model_text = threat_model.read_text()
+    assert "threat" in threat_model_text.lower() or "risk" in threat_model_text.lower(), (
+        "threat-model.md does not contain expected security/risk content"
+    )

@@ -45,6 +45,12 @@ def test_engineering_pipeline_full_run(tmp_path: Path) -> None:
         assert (run_dir / "brief-template-library" / f"{name}.md").exists(), (
             f"missing template brief-template-library/{name}.md"
         )
+    # Content assertion: primary artifact must contain engineering-domain keywords
+    adr = run_dir / "architecture-decision-record.md"
+    adr_text = adr.read_text()
+    assert "architecture" in adr_text.lower() or "decision" in adr_text.lower(), (
+        "architecture-decision-record.md does not contain expected engineering content"
+    )
 
 
 def test_engineering_pipeline_approval_promotion(tmp_path: Path) -> None:

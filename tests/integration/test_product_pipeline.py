@@ -44,6 +44,12 @@ def test_product_pipeline_full_run(tmp_path: Path) -> None:
         assert (run_dir / "brief-template-library" / f"{name}.md").exists(), (
             f"missing template brief-template-library/{name}.md"
         )
+    # Content assertion: primary artifact must contain product-domain keywords
+    prd = run_dir / "product-requirements-doc.md"
+    prd_text = prd.read_text()
+    assert "product" in prd_text.lower() or "requirements" in prd_text.lower(), (
+        "product-requirements-doc.md does not contain expected product content"
+    )
 
 
 def test_product_pipeline_approval_promotion(tmp_path: Path) -> None:
