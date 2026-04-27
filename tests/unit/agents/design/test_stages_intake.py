@@ -4,8 +4,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import pytest
-
 from agentsuite.agents.design.input_schema import DesignAgentInput
 from agentsuite.agents.design.stages.intake import _classify_path, _walk, intake_stage
 from agentsuite.kernel.artifacts import ArtifactWriter

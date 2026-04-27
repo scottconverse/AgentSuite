@@ -8,7 +8,6 @@ from agentsuite.agents.design.input_schema import DesignAgentInput
 from agentsuite.agents.design.rubric import DESIGN_RUBRIC
 from agentsuite.agents.design.stages.spec import SPEC_ARTIFACTS
 from agentsuite.agents.design.template_loader import TEMPLATE_NAMES
-from agentsuite.kernel.schema import RunState
 from agentsuite.llm.mock import MockLLMProvider
 
 
