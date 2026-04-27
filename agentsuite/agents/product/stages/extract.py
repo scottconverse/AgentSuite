@@ -11,7 +11,7 @@ from agentsuite.kernel.base_agent import StageContext
 from agentsuite.kernel.schema import Cost, RunState
 from agentsuite.llm.base import LLMProvider, LLMRequest
 
-_FALLBACK: dict = {
+_FALLBACK: dict[str, object] = {
     "user_pain_points": [],
     "competitor_gaps": [],
     "market_signals": [],
