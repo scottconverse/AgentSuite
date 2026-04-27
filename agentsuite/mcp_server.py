@@ -6,7 +6,12 @@ import os
 from pathlib import Path
 from typing import Any, Callable
 
-from mcp.server.fastmcp import FastMCP
+try:
+    from mcp.server.fastmcp import FastMCP
+except ImportError as _mcp_exc:
+    raise ImportError(
+        "MCP SDK not installed. Run: pip install \"agentsuite[mcp]\""
+    ) from _mcp_exc
 
 from agentsuite.agents.registry import default_registry
 from agentsuite.mcp_models import RunSummary

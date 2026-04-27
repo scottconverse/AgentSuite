@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from agentsuite.llm.base import LLMRequest, LLMResponse
+from agentsuite.llm.base import LLMRequest, LLMResponse, ProviderNotInstalled
 from agentsuite.llm.pricing import GEMINI_PRICING as _PRICING
 
 
@@ -20,9 +20,12 @@ class GeminiProvider:
     def __init__(self, client: Any | None = None) -> None:
         if client is None:
             import os
-
-            from google import genai
-
+            try:
+                from google import genai
+            except ImportError as exc:
+                raise ProviderNotInstalled(
+                    "Google Generative AI SDK not installed. Run: pip install \"agentsuite[gemini]\""
+                ) from exc
             client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY", ""))
         self.client = client
 

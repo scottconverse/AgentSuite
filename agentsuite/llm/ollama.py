@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from agentsuite.llm.base import LLMRequest, LLMResponse
+from agentsuite.llm.base import LLMRequest, LLMResponse, ProviderNotInstalled
 
 
 class OllamaProvider:
@@ -16,8 +16,8 @@ class OllamaProvider:
             try:
                 import ollama as _ollama
             except ImportError as exc:
-                raise ImportError(
-                    "ollama package is not installed. Install it with: pip install ollama"
+                raise ProviderNotInstalled(
+                    "Ollama SDK not installed. Run: pip install \"agentsuite[ollama]\""
                 ) from exc
             client = _ollama.Client()
         self.client = client

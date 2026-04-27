@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from agentsuite.llm.base import LLMRequest, LLMResponse
+from agentsuite.llm.base import LLMRequest, LLMResponse, ProviderNotInstalled
 from agentsuite.llm.pricing import OPENAI_PRICING as _PRICING
 
 
@@ -18,8 +18,12 @@ class OpenAIProvider:
 
     def __init__(self, client: Any | None = None) -> None:
         if client is None:
-            from openai import OpenAI
-
+            try:
+                from openai import OpenAI
+            except ImportError as exc:
+                raise ProviderNotInstalled(
+                    "OpenAI SDK not installed. Run: pip install \"agentsuite[openai]\""
+                ) from exc
             client = OpenAI()
         self.client = client
 

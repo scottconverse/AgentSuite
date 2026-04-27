@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from agentsuite.llm.base import LLMRequest, LLMResponse
+from agentsuite.llm.base import LLMRequest, LLMResponse, ProviderNotInstalled
 from agentsuite.llm.pricing import ANTHROPIC_PRICING as _PRICING
 
 
@@ -18,8 +18,12 @@ class AnthropicProvider:
 
     def __init__(self, client: Any | None = None) -> None:
         if client is None:
-            from anthropic import Anthropic
-
+            try:
+                from anthropic import Anthropic
+            except ImportError as exc:
+                raise ProviderNotInstalled(
+                    "Anthropic SDK not installed. Run: pip install \"agentsuite[anthropic]\""
+                ) from exc
             client = Anthropic()
         self.client = client
 

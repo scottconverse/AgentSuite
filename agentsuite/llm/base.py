@@ -6,6 +6,10 @@ from typing import Protocol
 from pydantic import BaseModel, ConfigDict
 
 
+class ProviderNotInstalled(ImportError):
+    """Raised when a provider's SDK extra is not installed."""
+
+
 class LLMRequest(BaseModel):
     """Request envelope for an LLM completion call."""
 
