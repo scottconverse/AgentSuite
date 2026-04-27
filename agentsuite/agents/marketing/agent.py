@@ -65,3 +65,57 @@ class MarketingAgent(BaseAgent):
             "execute": _wrap(execute_stage),
             "qa": _wrap(qa_stage),
         }
+
+
+def build_cli_spec() -> "AgentCLISpec":  # noqa: F821
+    """Return the CLI spec for the Marketing agent."""
+    from agentsuite.kernel.base_agent import AgentCLISpec
+    import json
+    from pathlib import Path
+    import typer
+
+    def run_cmd(
+        brand_name: str = typer.Option(..., help="Name of the brand or product being marketed"),
+        campaign_goal: str = typer.Option(..., help="What the campaign is trying to achieve"),
+        target_market: str = typer.Option(..., help="Who the campaign is targeting"),
+        project_slug: str | None = typer.Option(None, "--project-slug", help="Project slug for _kernel/ promotion"),
+        inputs_dir: Path | None = typer.Option(None, help="Dir with existing brand assets, briefs, research docs"),
+        budget_range: str = typer.Option("", help="e.g. '$50k–$100k over 3 months'"),
+        timeline: str = typer.Option("", help="e.g. 'Q3 2024, 12-week campaign'"),
+        channels: str = typer.Option("", help="e.g. 'paid social, email, content marketing'"),
+        run_id: str | None = typer.Option(None, help="Run ID (auto-generated if omitted)"),
+    ) -> None:
+        """Run the Marketing Agent pipeline."""
+        from agentsuite.agents.marketing.input_schema import MarketingAgentInput
+        from agentsuite.cli import _output_root, _resolve_llm_for_cli
+
+        inp = MarketingAgentInput(
+            agent_name="marketing",
+            role_domain="marketing-ops",
+            user_request=f"Generate marketing artifacts for {brand_name}",
+            brand_name=brand_name,
+            campaign_goal=campaign_goal,
+            target_market=target_market,
+            inputs_dir=inputs_dir,
+            budget_range=budget_range,
+            timeline=timeline,
+            channels=channels,
+        )
+        agent = MarketingAgent(output_root=_output_root(), llm=_resolve_llm_for_cli())
+        result = agent.run(request=inp, run_id=run_id or "run-cli")
+        typer.echo(json.dumps({
+            "run_id": result.run_id,
+            "status": "awaiting_approval" if result.stage == "approval" else result.stage,
+            "stage": result.stage,
+            "brand_name": brand_name,
+            "cost_usd": result.cost_so_far.usd,
+        }, indent=2, default=str))
+
+    return AgentCLISpec(
+        cli_name="marketing",
+        help="Marketing Agent — generates campaign brief, messaging framework, channel strategy, and related artifacts.",
+        run_fn=run_cmd,
+        agent_class=MarketingAgent,
+        primary_artifact="campaign-brief.md",
+        agent_name="marketing",
+    )

@@ -69,3 +69,58 @@ class CIOAgent(BaseAgent):
             "execute": _wrap(execute_stage),
             "qa": _wrap(qa_stage),
         }
+
+
+def build_cli_spec() -> "AgentCLISpec":  # noqa: F821
+    """Return the CLI spec for the CIO agent."""
+    from agentsuite.kernel.base_agent import AgentCLISpec
+    import json
+    from pathlib import Path
+    import typer
+
+    def run_cmd(
+        organization_name: str = typer.Option(..., help="Name of the organization being assessed"),
+        strategic_priorities: str = typer.Option(..., help="Top IT/digital strategic priorities"),
+        it_maturity_level: str = typer.Option(..., help="e.g. 'Level 1 – Ad hoc', 'Level 3 – Defined'"),
+        budget_context: str = typer.Option("", help="e.g. 'flat budget', '$5M annual IT capex'"),
+        digital_initiatives: str = typer.Option("", help="Active or planned digital transformation programs"),
+        regulatory_environment: str = typer.Option("", help="e.g. 'HIPAA, SOX, FedRAMP'"),
+        it_docs_dir: Path | None = typer.Option(None, help="Dir with existing IT strategy, roadmap, or architecture docs"),
+        run_id: str | None = typer.Option(None, help="Run ID (auto-generated if omitted)"),
+    ) -> None:
+        """Run the CIO Agent pipeline."""
+        from agentsuite.agents.cio.input_schema import CIOAgentInput
+        from agentsuite.cli import _output_root, _resolve_llm_for_cli
+
+        existing_it_docs: list[Path] = list(it_docs_dir.iterdir()) if it_docs_dir and it_docs_dir.is_dir() else []
+        inp = CIOAgentInput(
+            agent_name="cio",
+            role_domain="cio-ops",
+            user_request=f"Generate CIO strategy artifacts for {organization_name}",
+            organization_name=organization_name,
+            strategic_priorities=strategic_priorities,
+            it_maturity_level=it_maturity_level,
+            budget_context=budget_context,
+            digital_initiatives=digital_initiatives,
+            regulatory_environment=regulatory_environment,
+            existing_it_docs=existing_it_docs,
+        )
+        agent = CIOAgent(output_root=_output_root(), llm=_resolve_llm_for_cli())
+        result = agent.run(request=inp, run_id=run_id or "run-cli")
+        typer.echo(json.dumps({
+            "run_id": result.run_id,
+            "status": "awaiting_approval" if result.stage == "approval" else result.stage,
+            "stage": result.stage,
+            "organization_name": organization_name,
+            "cost_usd": result.cost_so_far.usd,
+        }, indent=2, default=str))
+
+    return AgentCLISpec(
+        cli_name="cio",
+        help="CIO Agent — generates IT strategy, technology roadmap, vendor portfolio, and related artifacts.",
+        run_fn=run_cmd,
+        agent_class=CIOAgent,
+        primary_artifact="it-strategy.md",
+        agent_name="cio",
+        has_list_runs=True,
+    )

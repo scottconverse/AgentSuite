@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field as dc_field
 from pathlib import Path
 from typing import Any, Callable
 
@@ -15,6 +15,18 @@ from agentsuite.kernel.state_store import StateStore
 
 
 PIPELINE_ORDER: list[Stage] = ["intake", "extract", "spec", "execute", "qa"]
+
+
+@dataclass
+class AgentCLISpec:
+    """Describes how an agent is exposed via the CLI."""
+    cli_name: str            # typer subcommand name (e.g. "trust-risk")
+    help: str                # typer help text
+    run_fn: Callable         # the run command function (built by the agent module)
+    agent_class: type        # the concrete BaseAgent subclass
+    primary_artifact: str    # filename for the run output summary line
+    agent_name: str = ""     # the agent's state.agent value (defaults to cli_name)
+    has_list_runs: bool = False  # whether to add a list-runs subcommand
 
 
 @dataclass

@@ -60,3 +60,52 @@ class FounderAgent(BaseAgent):
             "execute": _wrap(execute_stage),
             "qa": _wrap(qa_stage),
         }
+
+
+def build_cli_spec() -> "AgentCLISpec":  # noqa: F821
+    """Return the CLI spec for the Founder agent."""
+    from agentsuite.kernel.base_agent import AgentCLISpec
+    import json
+    from pathlib import Path
+    import typer
+
+    def run_cmd(
+        business_goal: str = typer.Option(..., help="Required business goal"),
+        project_slug: str | None = typer.Option(None, help="Stable slug for `_kernel/` promotion"),
+        inputs_dir: Path | None = typer.Option(None, help="Directory of source materials"),
+        run_id: str | None = typer.Option(None, help="Caller-provided run id"),
+    ) -> None:
+        """Run the Founder agent end-to-end up to the approval gate."""
+        from agentsuite.agents.founder.input_schema import FounderAgentInput
+        from agentsuite.kernel.schema import Constraints
+        from agentsuite.cli import _output_root, _resolve_llm_for_cli
+
+        agent = FounderAgent(output_root=_output_root(), llm=_resolve_llm_for_cli())
+        inp = FounderAgentInput(
+            agent_name="founder",
+            role_domain="creative-ops",
+            user_request=f"build creative ops for {business_goal}",
+            business_goal=business_goal,
+            project_slug=project_slug,
+            inputs_dir=inputs_dir,
+            constraints=Constraints(),
+        )
+        rid = run_id or "run-cli"
+        state = agent.run(request=inp, run_id=rid)
+        typer.echo(json.dumps({
+            "run_id": state.run_id,
+            "status": "awaiting_approval" if state.stage == "approval" else state.stage,
+            "stage": state.stage,
+            "primary_path": str(_output_root() / "runs" / state.run_id / "brand-system.md"),
+            "open_questions": state.open_questions,
+            "cost_usd": state.cost_so_far.usd,
+        }, indent=2))
+
+    return AgentCLISpec(
+        cli_name="founder",
+        help="Founder agent commands",
+        run_fn=run_cmd,
+        agent_class=FounderAgent,
+        primary_artifact="brand-system.md",
+        agent_name="founder",
+    )

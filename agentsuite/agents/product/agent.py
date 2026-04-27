@@ -65,3 +65,51 @@ class ProductAgent(BaseAgent):
             "execute": _wrap(execute_stage),
             "qa": _wrap(qa_stage),
         }
+
+
+def build_cli_spec() -> "AgentCLISpec":  # noqa: F821
+    """Return the CLI spec for the Product agent."""
+    from agentsuite.kernel.base_agent import AgentCLISpec
+    import json
+    from pathlib import Path
+    import typer
+
+    def run_cmd(
+        product_name: str = typer.Option(..., help="Product name"),
+        target_users: str = typer.Option(..., help="Who the product is for"),
+        core_problem: str = typer.Option(..., help="Core problem being solved"),
+        project_slug: str = typer.Option(..., help="Project slug for output dir"),
+        inputs_dir: Path | None = typer.Option(None, help="Dir with research/competitive docs"),
+        run_id: str | None = typer.Option(None, help="Run ID (auto-generated if omitted)"),
+    ) -> None:
+        """Run the Product Agent pipeline."""
+        from agentsuite.agents.product.input_schema import ProductAgentInput
+        from agentsuite.cli import _output_root, _resolve_llm_for_cli
+
+        inp = ProductAgentInput(
+            agent_name="product",
+            role_domain="product-ops",
+            user_request=f"Generate product spec for {product_name}",
+            product_name=product_name,
+            target_users=target_users,
+            core_problem=core_problem,
+            inputs_dir=inputs_dir,
+        )
+        agent = ProductAgent(output_root=_output_root(), llm=_resolve_llm_for_cli())
+        result = agent.run(request=inp, run_id=run_id or "run-cli")
+        typer.echo(json.dumps({
+            "run_id": result.run_id,
+            "status": "awaiting_approval" if result.stage == "approval" else result.stage,
+            "stage": result.stage,
+            "project_slug": project_slug,
+            "cost_usd": result.cost_so_far.usd,
+        }, indent=2, default=str))
+
+    return AgentCLISpec(
+        cli_name="product",
+        help="Product Agent — generates PRD, roadmap, and brief templates.",
+        run_fn=run_cmd,
+        agent_class=ProductAgent,
+        primary_artifact="product-requirements-doc.md",
+        agent_name="product",
+    )

@@ -65,3 +65,54 @@ class DesignAgent(BaseAgent):
             "execute": _wrap(execute_stage),
             "qa": _wrap(qa_stage),
         }
+
+
+def build_cli_spec() -> "AgentCLISpec":  # noqa: F821
+    """Return the CLI spec for the Design agent."""
+    from agentsuite.kernel.base_agent import AgentCLISpec
+    import json
+    from pathlib import Path
+    import typer
+
+    def run_cmd(
+        target_audience: str = typer.Option(..., help="Target audience for the campaign"),
+        campaign_goal: str = typer.Option(..., help="Campaign goal"),
+        channel: str = typer.Option("web", help="Output channel: web/social/email/print/video/deck/other"),
+        project_slug: str | None = typer.Option(None, help="Stable slug for `_kernel/` promotion"),
+        inputs_dir: Path | None = typer.Option(None, help="Directory of brand source materials"),
+        run_id: str | None = typer.Option(None, help="Caller-provided run id"),
+    ) -> None:
+        """Run the Design agent end-to-end up to the approval gate."""
+        from agentsuite.agents.design.input_schema import DesignAgentInput
+        from agentsuite.cli import _output_root, _resolve_llm_for_cli
+
+        agent = DesignAgent(output_root=_output_root(), llm=_resolve_llm_for_cli())
+        inp = DesignAgentInput(
+            agent_name="design",
+            role_domain="design-ops",
+            user_request=f"create design artifacts for {campaign_goal}",
+            target_audience=target_audience,
+            campaign_goal=campaign_goal,
+            channel=channel,  # type: ignore[arg-type]
+            project_slug=project_slug,
+            inputs_dir=inputs_dir,
+        )
+        rid = run_id or "run-cli"
+        state = agent.run(request=inp, run_id=rid)
+        typer.echo(json.dumps({
+            "run_id": state.run_id,
+            "status": "awaiting_approval" if state.stage == "approval" else state.stage,
+            "stage": state.stage,
+            "primary_path": str(_output_root() / "runs" / state.run_id / "visual-direction.md"),
+            "open_questions": state.open_questions,
+            "cost_usd": state.cost_so_far.usd,
+        }, indent=2))
+
+    return AgentCLISpec(
+        cli_name="design",
+        help="Design agent commands",
+        run_fn=run_cmd,
+        agent_class=DesignAgent,
+        primary_artifact="visual-direction.md",
+        agent_name="design",
+    )
