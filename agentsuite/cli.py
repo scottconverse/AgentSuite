@@ -16,6 +16,8 @@ from agentsuite.kernel.state_store import StateStore
 app = typer.Typer(help="AgentSuite — reasoning agents for vague intent → precise artifacts")
 founder_app = typer.Typer(help="Founder agent commands")
 app.add_typer(founder_app, name="founder")
+design_app = typer.Typer(help="Design agent commands")
+app.add_typer(design_app, name="design")
 
 
 def _output_root() -> Path:
@@ -81,6 +83,60 @@ def founder_approve_cmd(
     from agentsuite.agents.founder.agent import FounderAgent
 
     agent = FounderAgent(output_root=_output_root(), llm=_resolve_llm_for_cli())
+    state = agent.approve(run_id=run_id, approver=approver, project_slug=project_slug)
+    typer.echo(json.dumps({
+        "run_id": state.run_id,
+        "status": "done",
+        "approved_by": state.approved_by,
+    }, indent=2))
+
+
+@design_app.command("run")
+def design_run_cmd(
+    target_audience: str = typer.Option(..., help="Target audience for the campaign"),
+    campaign_goal: str = typer.Option(..., help="Campaign goal"),
+    channel: str = typer.Option("web", help="Output channel: web/social/email/print/video/deck/other"),
+    project_slug: Optional[str] = typer.Option(None, help="Stable slug for `_kernel/` promotion"),
+    inputs_dir: Optional[Path] = typer.Option(None, help="Directory of brand source materials"),
+    run_id: Optional[str] = typer.Option(None, help="Caller-provided run id"),
+) -> None:
+    """Run the Design agent end-to-end up to the approval gate."""
+    from agentsuite.agents.design.agent import DesignAgent
+    from agentsuite.agents.design.input_schema import DesignAgentInput
+
+    agent = DesignAgent(output_root=_output_root(), llm=_resolve_llm_for_cli())
+    inp = DesignAgentInput(
+        agent_name="design",
+        role_domain="design-ops",
+        user_request=f"create design artifacts for {campaign_goal}",
+        target_audience=target_audience,
+        campaign_goal=campaign_goal,
+        channel=channel,  # type: ignore[arg-type]
+        project_slug=project_slug,
+        inputs_dir=inputs_dir,
+    )
+    rid = run_id or "run-cli"
+    state = agent.run(request=inp, run_id=rid)
+    typer.echo(json.dumps({
+        "run_id": state.run_id,
+        "status": "awaiting_approval" if state.stage == "approval" else state.stage,
+        "stage": state.stage,
+        "primary_path": str(_output_root() / "runs" / state.run_id / "visual-direction.md"),
+        "open_questions": state.open_questions,
+        "cost_usd": state.cost_so_far.usd,
+    }, indent=2))
+
+
+@design_app.command("approve")
+def design_approve_cmd(
+    run_id: str = typer.Option(..., help="Run id to approve"),
+    approver: str = typer.Option(..., help="Approver identity"),
+    project_slug: str = typer.Option(..., help="Slug for `_kernel/<slug>/` promotion"),
+) -> None:
+    """Approve a completed Design run and promote artifacts to ``_kernel/``."""
+    from agentsuite.agents.design.agent import DesignAgent
+
+    agent = DesignAgent(output_root=_output_root(), llm=_resolve_llm_for_cli())
     state = agent.approve(run_id=run_id, approver=approver, project_slug=project_slug)
     typer.echo(json.dumps({
         "run_id": state.run_id,

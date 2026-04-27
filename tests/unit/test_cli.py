@@ -61,3 +61,42 @@ def test_cli_approve_promotes(tmp_path, monkeypatch):
     ])
     assert result.exit_code == 0
     assert (tmp_path / "_kernel" / "pfl" / "brand-system.md").exists()
+
+
+def test_cli_help_lists_design_subcommand():
+    result = _runner().invoke(app, ["--help"])
+    assert result.exit_code == 0
+    assert "design" in result.stdout
+
+
+def test_cli_design_run_with_mock(tmp_path, monkeypatch):
+    monkeypatch.setenv("AGENTSUITE_OUTPUT_DIR", str(tmp_path))
+    monkeypatch.setenv("AGENTSUITE_LLM_PROVIDER_FACTORY", "agentsuite.llm.mock:_default_mock_for_cli")
+    result = _runner().invoke(app, [
+        "design", "run",
+        "--target-audience", "developers",
+        "--campaign-goal", "drive signups",
+        "--run-id", "d1",
+    ])
+    assert result.exit_code == 0, result.stdout
+    assert "awaiting_approval" in result.stdout
+    assert (tmp_path / "runs" / "d1" / "visual-direction.md").exists()
+
+
+def test_cli_design_approve_promotes(tmp_path, monkeypatch):
+    monkeypatch.setenv("AGENTSUITE_OUTPUT_DIR", str(tmp_path))
+    monkeypatch.setenv("AGENTSUITE_LLM_PROVIDER_FACTORY", "agentsuite.llm.mock:_default_mock_for_cli")
+    _runner().invoke(app, [
+        "design", "run",
+        "--target-audience", "developers",
+        "--campaign-goal", "drive signups",
+        "--run-id", "d1",
+    ])
+    result = _runner().invoke(app, [
+        "design", "approve",
+        "--run-id", "d1",
+        "--approver", "scott",
+        "--project-slug", "acme",
+    ])
+    assert result.exit_code == 0, result.stdout
+    assert (tmp_path / "_kernel" / "acme" / "visual-direction.md").exists()

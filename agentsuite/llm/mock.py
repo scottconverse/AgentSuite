@@ -56,8 +56,11 @@ def _default_mock_for_cli(provider_name: str | None = None) -> "MockLLMProvider"
 
     from agentsuite.agents.founder.rubric import FOUNDER_RUBRIC
     from agentsuite.agents.founder.stages.spec import SPEC_ARTIFACTS
+    from agentsuite.agents.design.rubric import DESIGN_RUBRIC
+    from agentsuite.agents.design.stages.spec import SPEC_ARTIFACTS as _DESIGN_SPEC_ARTIFACTS
 
     extracted = {
+        # Founder extract fields
         "mission": "x",
         "audience": {"primary_persona": "y", "secondary_personas": []},
         "positioning": "z",
@@ -67,6 +70,12 @@ def _default_mock_for_cli(provider_name: str | None = None) -> "MockLLMProvider"
         "recurring_vocabulary": [],
         "prohibited_language": [],
         "gaps": [],
+        # Design extract fields (extra keys silently ignored by Founder parser)
+        "audience_profile": {"primary_persona": "target user"},
+        "brand_voice": {"tone_words": ["confident"], "writing_style": "terse", "forbidden_tones": []},
+        "typography_signals": {"heading_style": "sans-serif"},
+        "color_palette_observed": [],
+        "craft_anti_patterns": [],
     }
     responses = {
         "extracting": _json.dumps(extracted),
@@ -75,7 +84,15 @@ def _default_mock_for_cli(provider_name: str | None = None) -> "MockLLMProvider"
             "scores": {d.name: 8.0 for d in FOUNDER_RUBRIC.dimensions},
             "revision_instructions": [],
         }),
+        "scoring 9 design-agent": _json.dumps({
+            "scores": {d.name: 8.0 for d in DESIGN_RUBRIC.dimensions},
+            "revision_instructions": [],
+        }),
     }
     for stem in SPEC_ARTIFACTS:
         responses[f"writing {stem}.md"] = f"# {stem}\nMocked content."
+    for stem in _DESIGN_SPEC_ARTIFACTS:
+        key = f"writing {stem}.md"
+        if key not in responses:
+            responses[key] = f"# {stem}\n\nContent."
     return MockLLMProvider(responses=responses, name=provider_name or "mock")
