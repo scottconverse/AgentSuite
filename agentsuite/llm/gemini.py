@@ -43,10 +43,10 @@ class GeminiProvider:
             contents=request.prompt,
             config=config,
         )
-        text = result.text
+        text: str = result.text or ""
         usage = result.usage_metadata
-        in_tokens = usage.prompt_token_count
-        out_tokens = usage.candidates_token_count
+        in_tokens: int = (usage.prompt_token_count or 0) if usage else 0
+        out_tokens: int = (usage.candidates_token_count or 0) if usage else 0
         return LLMResponse(
             text=text,
             model=model,
