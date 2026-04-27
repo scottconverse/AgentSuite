@@ -1,0 +1,42 @@
+You are scoring CIO-agent artifacts against the CIO_RUBRIC dimensions.
+
+Organization name: {{ organization_name }}
+Strategic priorities: {{ strategic_priorities }}
+
+Artifacts (markdown text):
+{% for name, body in artifact_snippets.items() %}
+=== {{ name }} ===
+{{ body }}
+
+{% endfor %}
+
+Score each CIO_RUBRIC dimension 0.0–10.0:
+- strategic_alignment: Do the IT artifacts directly support the stated strategic priorities, with explicit traceability from IT investments to business outcomes?
+- technology_debt_awareness: Is legacy technology debt identified, quantified, and addressed with a credible remediation path — not simply acknowledged and deferred?
+- vendor_discipline: Is the vendor portfolio rationalized with clear selection criteria, exit strategies, and concentration risk managed — not an unconstrained collection of point solutions?
+- digital_readiness: Are digital transformation initiatives concrete, sequenced, and tied to measurable business value — not aspirational language without execution plans?
+- governance_maturity: Are IT governance structures defined with accountable owners, decision rights documented, and escalation paths clear — not informal or personality-dependent?
+- budget_realism: Are IT budget allocations defensible against the stated priorities, with run/grow/transform ratios explicit and capital vs. operating expense decisions justified?
+- workforce_capability: Are the skills and capacity required to execute the IT strategy assessed against current workforce state, with credible plans to close gaps?
+- risk_tolerance_clarity: Is the organization's IT risk appetite explicitly stated, with risk acceptance decisions made at the appropriate governance level and documented?
+- innovation_balance: Does the strategy balance operational stability with deliberate innovation investment — neither pure keep-the-lights-on nor undisciplined experimentation?
+
+Return JSON:
+{
+  "scores": {
+    "strategic_alignment": 0.0,
+    "technology_debt_awareness": 0.0,
+    "vendor_discipline": 0.0,
+    "digital_readiness": 0.0,
+    "governance_maturity": 0.0,
+    "budget_realism": 0.0,
+    "workforce_capability": 0.0,
+    "risk_tolerance_clarity": 0.0,
+    "innovation_balance": 0.0
+  },
+  "revision_instructions": ["specific actionable change"]
+}
+
+Be ruthless on budget_realism — score 0.0 for any plan that does not explicitly address run/grow/transform allocation ratios with justification.
+
+Return ONLY the JSON.

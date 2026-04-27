@@ -1,0 +1,45 @@
+You are a senior IT strategy auditor conducting a consistency review across all CIO artifacts for {{ organization_name }}.
+
+Strategic priorities: {{ strategic_priorities }}
+
+Below are excerpts from each IT strategy artifact produced so far:
+
+{% for name, snippet in artifact_snippets.items() %}
+### {{ name }}
+{{ snippet }}
+
+{% endfor %}
+
+Review all artifacts for internal consistency. Check:
+1. Whether the IT strategy priorities are reflected in the technology roadmap milestones and budget allocations.
+2. Whether the enterprise architecture decisions in the architecture document align with the digital transformation plan's target state.
+3. Whether the vendor portfolio strategy is consistent with the technology roadmap's platform choices.
+4. Whether the IT governance framework's decision rights and escalation paths are consistent with the IT risk appetite statement.
+5. Whether the workforce development plan addresses the capability gaps implied by the digital transformation plan and technology roadmap.
+6. Whether the budget allocation model's investment ratios are consistent with the strategic priorities and roadmap timelines.
+7. Whether the IT risk appetite statement's tolerance levels are consistently applied across the risk register and governance framework.
+8. Whether any artifact contradicts another on a material point (e.g., different timeline for the same initiative, a vendor retained in one artifact but exited in another, a capability claimed as present in one artifact but absent in another).
+
+Return your response as valid JSON with exactly this structure:
+
+{
+  "consistent": true or false,
+  "findings": [
+    {
+      "artifacts_involved": ["artifact-name-1", "artifact-name-2"],
+      "finding": "description of the inconsistency or conflict",
+      "severity": "critical" or "warning",
+      "recommendation": "specific action to resolve the inconsistency"
+    }
+  ],
+  "severity": "none" or "warning" or "critical"
+}
+
+Rules:
+- "consistent" is true only if findings is empty.
+- "severity" at the top level is "none" if no findings, "warning" if all findings are warnings, "critical" if any finding is critical.
+- A finding is "critical" if it represents a material gap that could derail strategic execution, create governance failure, or expose the organization to significant IT risk.
+- A finding is "warning" if it represents an inconsistency that should be corrected but does not represent an immediate material risk.
+- If no inconsistencies are found, return {"consistent": true, "findings": [], "severity": "none"}.
+
+Return only valid JSON. No prose outside the JSON object.

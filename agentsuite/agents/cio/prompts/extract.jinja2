@@ -1,0 +1,29 @@
+You are a senior IT strategy consultant extracting structured context for {{ organization_name }}.
+
+Strategic priorities: {{ strategic_priorities }}
+IT maturity level: {{ it_maturity_level }}
+Number of source materials: {{ source_count }}
+
+IT documentation on record:
+{{ it_docs }}
+
+Analyze all source materials and extract a comprehensive IT strategy context. Return your response as valid JSON with exactly these keys:
+
+{
+  "technology_pain_points": [...],
+  "strategic_gaps": [...],
+  "vendor_landscape": [...],
+  "digital_maturity_signals": [...],
+  "budget_signals": [...],
+  "open_questions": [...]
+}
+
+Field definitions:
+- technology_pain_points: list of identified technology problems, legacy constraints, and operational friction points affecting the organization
+- strategic_gaps: list of misalignments between current IT capabilities and the stated strategic priorities
+- vendor_landscape: list of key vendors, platforms, and technology partners in use — include maturity, risk, and strategic fit signals
+- digital_maturity_signals: list of indicators of digital transformation progress — what exists, what is planned, and what is absent
+- budget_signals: list of budget patterns, constraints, investment priorities, and financial pressures relevant to IT decision-making
+- open_questions: list of questions that must be answered before a complete IT strategy assessment can be produced
+
+Be exhaustive — omissions here will propagate to all downstream artifacts. Return only valid JSON, no prose outside the JSON object.
