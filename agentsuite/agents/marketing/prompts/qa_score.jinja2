@@ -1,0 +1,43 @@
+You are scoring marketing agent artifacts against the MARKETING_RUBRIC dimensions.
+
+Brand name: {{ brand_name }}
+Campaign goal: {{ campaign_goal }}
+Existing brand docs available: {{ has_source_docs }}
+
+Artifacts (markdown text):
+{% for name, body in artifacts.items() %}
+=== {{ name }} ===
+{{ body }}
+
+{% endfor %}
+
+Score each MARKETING_RUBRIC dimension 0.0–10.0:
+- audience_clarity: Is the target audience defined with precision and specificity — demographics, psychographics, behaviors, and pain points — rather than broad generalities?
+- message_resonance: Is the value proposition compelling, differentiated from competitors, and directly relevant to the target audience's needs and motivations?
+- channel_fit: Does the channel mix match the audience's actual media behavior and the campaign goals? Are channel choices justified with rationale?
+- metric_specificity: Are KPIs concrete, measurable, and directly tied to campaign goals? Do they include baselines, targets, and measurement methods?
+- budget_realism: Are budget allocations realistic for the stated goals and channels? Are cost assumptions explicit and justified?
+- anti_vanity_metrics: Does the plan avoid unmeasurable or vanity metrics (raw impressions, likes) without attribution? Are all metrics tied to business outcomes?
+- content_depth: Does the content strategy have editorial substance — themes, formats, cadence, and creative direction — rather than generic content buckets?
+- competitive_awareness: Does the plan reflect the competitive landscape and clearly differentiate the brand from key competitors in messaging and positioning?
+- launch_sequencing: Are go-to-market activities ordered logically with dependencies identified? Is there a clear pre-launch, launch, and post-launch structure?
+
+Return JSON:
+{
+  "scores": {
+    "audience_clarity": 0.0,
+    "message_resonance": 0.0,
+    "channel_fit": 0.0,
+    "metric_specificity": 0.0,
+    "budget_realism": 0.0,
+    "anti_vanity_metrics": 0.0,
+    "content_depth": 0.0,
+    "competitive_awareness": 0.0,
+    "launch_sequencing": 0.0
+  },
+  "revision_instructions": ["specific actionable change"]
+}
+
+Be ruthless on anti_vanity_metrics — score 0.0 for any plan that relies on impressions, follower counts, or likes without tying them to conversion events or revenue outcomes.
+
+Return ONLY the JSON.
