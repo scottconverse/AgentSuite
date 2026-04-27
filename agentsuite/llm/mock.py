@@ -59,6 +59,8 @@ def _default_mock_for_cli(provider_name: str | None = None) -> "MockLLMProvider"
     from agentsuite.agents.design.rubric import DESIGN_RUBRIC
     from agentsuite.agents.design.stages.spec import SPEC_ARTIFACTS as _DESIGN_SPEC_ARTIFACTS
     from agentsuite.agents.product.stages.spec import SPEC_ARTIFACTS as _PRODUCT_SPEC_ARTIFACTS
+    from agentsuite.agents.engineering.rubric import ENGINEERING_RUBRIC
+    from agentsuite.agents.engineering.stages.spec import SPEC_ARTIFACTS as _ENGINEERING_SPEC_ARTIFACTS
 
     extracted = {
         # Founder extract fields
@@ -118,6 +120,24 @@ def _default_mock_for_cli(provider_name: str | None = None) -> "MockLLMProvider"
             },
             "revision_instructions": ["Clarify the success metrics timeframe"],
         }),
+        # Engineering pipeline responses
+        "extracting structured engineering context": _json.dumps({
+            "existing_patterns": ["Repository pattern for data access", "Event-driven messaging via queues"],
+            "known_bottlenecks": ["Database connection pool exhaustion under peak load"],
+            "security_risks": ["Unvalidated input in public API endpoints"],
+            "tech_debt_items": ["Legacy synchronous HTTP client blocking async event loop"],
+            "integration_points": ["Payment gateway", "Identity provider (OIDC)"],
+            "open_questions": ["What is the target SLA for batch jobs?", "Is multi-region deployment required?"],
+        }),
+        "checking 9 engineering-agent artifacts": _json.dumps({
+            "consistent": True,
+            "findings": [],
+            "severity": "none",
+        }),
+        "scoring 9 engineering-agent": _json.dumps({
+            "scores": {d.name: 8.0 for d in ENGINEERING_RUBRIC.dimensions},
+            "revision_instructions": [],
+        }),
     }
     for stem in SPEC_ARTIFACTS:
         responses[f"writing {stem}.md"] = f"# {stem}\nMocked content."
@@ -129,4 +149,8 @@ def _default_mock_for_cli(provider_name: str | None = None) -> "MockLLMProvider"
         key = f"writing {stem}.md for a product manager"
         if key not in responses:
             responses[key] = f"# {stem.replace('-', ' ').title()}\n\nThis is the {stem} artifact for the product."
+    for stem in _ENGINEERING_SPEC_ARTIFACTS:
+        key = f"writing {stem}.md for an engineering team"
+        if key not in responses:
+            responses[key] = f"# {stem}\n\nMock engineering content."
     return MockLLMProvider(responses=responses, name=provider_name or "mock")

@@ -20,6 +20,8 @@ design_app = typer.Typer(help="Design agent commands")
 app.add_typer(design_app, name="design")
 product_app = typer.Typer(name="product", help="Product Agent — generates PRD, roadmap, and brief templates.")
 app.add_typer(product_app, name="product")
+engineering_app = typer.Typer(name="engineering", help="Engineering Agent — generates architecture, API spec, runbook, and related artifacts.")
+app.add_typer(engineering_app, name="engineering")
 
 
 def _output_root() -> Path:
@@ -190,6 +192,39 @@ def product_approve_cmd(
     agent = ProductAgent(output_root=_output_root(), llm=_resolve_llm_for_cli())
     agent.approve(run_id=run_id, approver=approver, project_slug=project_slug)
     typer.echo(f"Approved {run_id} by {approver}")
+
+
+@engineering_app.command("run")
+def engineering_run_cmd(
+    system_name: str = typer.Option(..., help="Name of the system being designed/documented"),
+    problem_domain: str = typer.Option(..., help="What problem does this system solve"),
+    tech_stack: str = typer.Option(..., help="e.g. 'Python + FastAPI + PostgreSQL + Redis'"),
+    scale_requirements: str = typer.Option(..., help="e.g. '10k RPM, 99.9% uptime, <200ms p99'"),
+    inputs_dir: Optional[Path] = typer.Option(None, help="Dir with existing docs, ADRs, runbooks"),
+    run_id: Optional[str] = typer.Option(None, help="Run ID (auto-generated if omitted)"),
+) -> None:
+    """Run the Engineering Agent pipeline."""
+    from agentsuite.agents.engineering.agent import EngineeringAgent
+    from agentsuite.agents.engineering.input_schema import EngineeringAgentInput
+    inp = EngineeringAgentInput(
+        agent_name="engineering",
+        role_domain="engineering-ops",
+        user_request=f"Generate engineering specs for {system_name}",
+        system_name=system_name,
+        problem_domain=problem_domain,
+        tech_stack=tech_stack,
+        scale_requirements=scale_requirements,
+        inputs_dir=inputs_dir,
+    )
+    agent = EngineeringAgent(output_root=_output_root(), llm=_resolve_llm_for_cli())
+    result = agent.run(request=inp, run_id=run_id or "run-cli")
+    typer.echo(json.dumps({
+        "run_id": result.run_id,
+        "status": "awaiting_approval" if result.stage == "approval" else result.stage,
+        "stage": result.stage,
+        "system_name": system_name,
+        "cost_usd": result.cost_so_far.usd,
+    }, indent=2, default=str))
 
 
 @app.command("list-runs")
