@@ -38,10 +38,12 @@ class AgentRegistry:
 
 
 def _bootstrap_default_registry() -> AgentRegistry:
+    from agentsuite.agents.design.agent import DesignAgent
     from agentsuite.agents.founder.agent import FounderAgent
 
     reg = AgentRegistry()
     reg.register("founder", FounderAgent)
+    reg.register("design", DesignAgent)
     return reg
 
 

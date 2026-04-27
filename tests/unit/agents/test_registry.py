@@ -43,3 +43,23 @@ def test_get_agent_class_raises_for_disabled(monkeypatch):
     reg._registered["design"] = object  # type: ignore[assignment]
     with pytest.raises(UnknownAgent):
         reg.get_class("design")
+
+
+def test_default_registry_has_design_registered(monkeypatch):
+    """DesignAgent is registered in bootstrap registry (accessible when enabled)."""
+    from agentsuite.agents.registry import default_registry
+    import agentsuite.agents.registry as reg_mod
+    reg_mod._DEFAULT_REGISTRY = None  # reset singleton
+    reg = default_registry()
+    monkeypatch.setenv("AGENTSUITE_ENABLED_AGENTS", "founder,design")
+    assert "design" in reg._registered
+
+
+def test_design_agent_class_accessible_via_registry(monkeypatch):
+    from agentsuite.agents.design.agent import DesignAgent
+    from agentsuite.agents.registry import AgentRegistry
+    monkeypatch.setenv("AGENTSUITE_ENABLED_AGENTS", "founder,design")
+    reg = AgentRegistry()
+    reg.register("design", DesignAgent)
+    cls = reg.get_class("design")
+    assert cls is DesignAgent
