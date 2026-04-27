@@ -456,6 +456,101 @@ Inside `.agentsuite/runs/run-cli/brief-template-library/` you'll find eight fill
 - **Go-to-market (GTM):** The plan for how a product, feature, or campaign reaches its audience. A GTM plan covers positioning, messaging, channels, launch sequence, and the roles responsible for each step.
 - **Psychographic:** Details about an audience's attitudes, values, interests, and lifestyle — as opposed to demographics (age, job title, company size), which describe who they are. Psychographics describe why they make decisions.
 
+## Using the Trust/Risk Agent
+
+The Trust/Risk Agent takes a product name, risk domain, and stakeholder context and produces a complete set of trust, security, and risk planning documents — everything a security team, compliance officer, or risk manager needs to assess, document, and communicate organizational risk.
+
+### What it does
+
+In one sentence: you tell it the product name, the risk domain you care about, and who the stakeholders are, and it writes nine security and risk documents and eight ready-to-fill brief templates in 30–120 seconds.
+
+### What you need to have ready
+
+**Required:**
+- **Product name** — the name of your product, system, or organization being assessed (e.g. "PaymentVault API")
+- **Risk domain** — the area of risk you want to focus on (e.g. "cloud infrastructure security", "third-party vendor risk", "regulatory compliance — SOC 2 Type II")
+- **Stakeholder context** — who needs to see and act on these documents (e.g. "CISO, VP Engineering, and external auditors")
+
+**Optional (but helpful if you have them):**
+- Regulatory context — the specific regulations or standards that apply (e.g. "SOC 2, HIPAA, PCI-DSS")
+- Threat model scope — boundaries for the threat model (e.g. "web application and API layer only; excludes physical security")
+- Compliance frameworks — frameworks you are working toward (e.g. "NIST CSF, ISO 27001")
+
+None of the optional inputs are required. The agent produces useful output from the three required fields alone.
+
+### Step 1 — run the Trust/Risk Agent
+
+```
+agentsuite trust-risk run --product-name "PaymentVault API" --risk-domain "cloud infrastructure security" --stakeholder-context "CISO, VP Engineering, and external auditors"
+```
+
+The terminal prints a status block when it's done. It will say `"awaiting_approval"`.
+
+### Step 2 — review the nine output documents
+
+Open `.agentsuite/runs/run-cli/` in your file explorer. You'll see nine documents:
+
+| File | What it is |
+|---|---|
+| `threat-model.md` | The primary security document — assets, threat actors, attack vectors, and mitigations. Start here. |
+| `risk-register.md` | A prioritized list of identified risks with likelihood, impact rating, owner, and current status |
+| `control-framework.md` | The security and compliance controls in place or needed, mapped to specific threats and regulatory requirements |
+| `incident-response-plan.md` | Step-by-step playbook for detecting, containing, communicating, and recovering from a security incident |
+| `compliance-matrix.md` | A traceability table showing which requirements from applicable regulations are met, partially met, or not yet addressed |
+| `vendor-risk-assessment.md` | A structured evaluation of the security posture of third-party vendors and suppliers |
+| `security-policy.md` | Organizational security policy covering access control, data handling, acceptable use, and enforcement |
+| `audit-readiness-report.md` | An evidence summary and gap analysis preparing the organization for an upcoming audit |
+| `residual-risk-acceptance.md` | Formal documentation of risks that have been reviewed and accepted rather than fully mitigated |
+
+Read `threat-model.md` first. If it correctly identifies the key assets, threats, and mitigations for your risk domain, proceed to Step 3.
+
+### Step 3 — check your QA scores
+
+Open `qa_scores.json` in the same folder. Each document gets a score from 0 to 10. The pass threshold is 7.0. If any score is below 7.0, look for the `revision_instructions` field next to the low score — it tells you exactly what to change. You can edit the document by hand and re-run the QA step, or adjust your inputs and re-run the full agent.
+
+### Step 4 — approve
+
+```
+agentsuite trust-risk approve --run-id run-cli --approver yourname --project-slug payment-vault
+```
+
+This copies the approved documents to `.agentsuite/_kernel/payment-vault/` where they live permanently and can be used in future sessions.
+
+### The eight brief templates
+
+Inside `.agentsuite/runs/run-cli/brief-template-library/` you'll find eight fill-in-the-blank templates for common trust and risk tasks:
+
+| Template | When to use it |
+|---|---|
+| `breach-notification.md` | Notify affected customers, regulators, or partners following a confirmed data breach |
+| `executive-risk-summary.md` | Board or C-suite summary of the current risk posture and the most critical open items |
+| `penetration-test-brief.md` | Brief for an internal or external penetration testing engagement |
+| `remediation-tracker.md` | Track open vulnerabilities and security findings through to resolution |
+| `risk-acceptance-form.md` | Formal sign-off document for a risk that leadership has decided to accept |
+| `security-awareness-brief.md` | Brief for a security awareness training session or communication |
+| `tabletop-exercise-scenario.md` | Scenario script for a security incident tabletop exercise with the response team |
+| `vendor-security-questionnaire.md` | Security questionnaire to send to a new or renewing vendor for due diligence |
+
+### Common errors and what they mean
+
+| Error | What it means | What to do |
+|---|---|---|
+| `ConsistencyCheckFailed` | Two of the nine documents contradict each other (e.g. the threat model lists a control that the control framework does not include) | Make your `--risk-domain` and `--stakeholder-context` descriptions more specific, then re-run |
+| Low QA scores (below 7.0) | A document is missing important detail or is too vague | Open `qa_scores.json`, read `revision_instructions`, edit the flagged document by hand or add more input context and re-run |
+| `NoProviderConfigured` | No API key found and Ollama isn't running | Set an API key (Step 2 above) or start Ollama (Step 2b above) |
+| `HardCapExceeded: $5.00` | The run cost more than the safety limit | Reduce the size of your input files, or raise the cap: `set AGENTSUITE_COST_CAP_USD=10` |
+| `extract stage produced invalid JSON` | The AI returned a formatting error | Re-run — this resolves itself almost every time |
+
+### Glossary additions
+
+- **Threat model:** A structured analysis of what could go wrong, who might cause it, and how likely and damaging each scenario is. A threat model lists assets worth protecting, the threat actors who might target them, the attack paths they might use, and the controls that reduce the risk.
+- **Risk register:** A living document that lists every known risk to the organization, rated by likelihood and impact, with an owner and a current mitigation status. The register is reviewed regularly and updated as risks change.
+- **Control framework:** The set of security controls — technical, procedural, and organizational — that protect assets and satisfy compliance requirements. A control is anything that reduces the likelihood or impact of a threat (e.g. multi-factor authentication, encryption at rest, a patch management process).
+- **Residual risk:** The risk that remains after all controls have been applied. No system is perfectly secure — residual risk is what you accept when you decide the cost of further mitigation exceeds the benefit. Documenting this acceptance formally is a sign of a mature risk program.
+- **Compliance matrix:** A table that maps each requirement from a standard or regulation (e.g. SOC 2, HIPAA, PCI-DSS) to the controls, policies, or evidence that satisfy it. Auditors use this table to verify that nothing has been missed.
+- **Tabletop exercise:** A discussion-based simulation in which the security response team walks through a hypothetical incident scenario together. No systems are touched — the goal is to identify gaps in the incident response plan before a real event forces them to the surface.
+- **Penetration test (pen test):** A controlled, authorized attempt to breach a system's defenses. A pen test brief specifies the scope (which systems), the rules of engagement (what's allowed), and what the tester should report.
+
 ## Where to get help
 
 - Open an issue: https://github.com/scottconverse/AgentSuite/issues

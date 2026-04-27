@@ -2,9 +2,9 @@
 
 > Seven role-specific reasoning agents that turn vague intent into precise operating artifacts.
 >
-> **v0.4.0** — Specification Kernel + Founder · Design · Product · Engineering Agents
+> **v0.6.0** — Specification Kernel + Founder · Design · Product · Engineering · Marketing · Trust/Risk Agents
 
-AgentSuite is a Python package and MCP server. It exposes role-specific agents (Founder, Design, Product, and Engineering shipped; Marketing, Trust/Risk, and CIO in subsequent releases) that take loose human intent and produce structured, reusable artifacts: brand systems, brief libraries, voice guides, prompt templates, engineering specs, and more.
+AgentSuite is a Python package and MCP server. It exposes role-specific agents (Founder, Design, Product, Engineering, Marketing, and Trust/Risk shipped; CIO in a subsequent release) that take loose human intent and produce structured, reusable artifacts: brand systems, brief libraries, voice guides, prompt templates, engineering specs, and more.
 
 The agents are reasoning agents, not content generators. Output is a reusable system, not a one-off asset.
 
@@ -76,7 +76,7 @@ command = "uvx"
 args = ["agentsuite-mcp"]
 
 [servers.agentsuite.env]
-AGENTSUITE_ENABLED_AGENTS = "founder,design,product,engineering"
+AGENTSUITE_ENABLED_AGENTS = "founder,design,product,engineering,marketing,trust-risk"
 ```
 
 Restart Codex. Tools `founder_run`, `founder_approve`, `founder_get_status`, `founder_list_runs`, `founder_resume`, plus the cross-agent `agentsuite_list_agents`, `agentsuite_kernel_artifacts`, `agentsuite_cost_report` are now callable.
@@ -91,7 +91,7 @@ Add to project-root `.mcp.json`:
     "agentsuite": {
       "command": "uvx",
       "args": ["agentsuite-mcp"],
-      "env": {"AGENTSUITE_ENABLED_AGENTS": "founder,design,product,engineering"}
+      "env": {"AGENTSUITE_ENABLED_AGENTS": "founder,design,product,engineering,marketing,trust-risk"}
     }
   }
 }
@@ -126,6 +126,19 @@ On `founder_approve`, the spec artifacts + brief-template-library are promoted t
 | 4 execute | `brief-template-library/` (8 brief templates: sprint ticket, code review checklist, incident report, capacity plan, on-call handoff, release checklist, postmortem, vendor evaluation) |
 | 5 qa | `qa_report.md`, `qa_scores.json` |
 | state | `_state.json`, `_meta.json` |
+
+### Trust/Risk agent (v0.6.0) — 17 artifacts per run:
+
+Input: `product_name`, `risk_domain`, `stakeholder_context` (plus optional `regulatory_context`, `threat_model_scope`, `compliance_frameworks`).
+
+| Stage | Artifacts |
+|---|---|
+| 3 spec | `threat-model.md`, `risk-register.md`, `control-framework.md`, `incident-response-plan.md`, `compliance-matrix.md`, `vendor-risk-assessment.md`, `security-policy.md`, `audit-readiness-report.md`, `residual-risk-acceptance.md`, `consistency_report.json` |
+| 4 execute | `brief-template-library/` (8 brief templates: breach-notification, executive-risk-summary, penetration-test-brief, remediation-tracker, risk-acceptance-form, security-awareness-brief, tabletop-exercise-scenario, vendor-security-questionnaire) + `export-manifest-template.json` |
+| 5 qa | `qa_report.md`, `qa_scores.json` |
+| state | `_state.json`, `_meta.json` |
+
+Primary artifact: `threat-model.md`. On `trust_risk_approve`, all spec artifacts and brief templates are promoted to `.agentsuite/_kernel/<project_slug>/`.
 
 ## Configuration
 
@@ -171,10 +184,10 @@ Full architecture diagram with all agents: see `docs/README-FULL.pdf`.
 - v0.2.0 — Design Agent (brief generation, brand QA scoring)
 - v0.3.0 — Product Agent (PM intent → UI spec → coding handoff)
 - v0.4.0 — Engineering Agent (architecture decisions, system design, API specs, security review, deployment, runbook, tech-debt register, performance requirements)
+- v0.5.0 — Marketing Agent (campaign brief, audience profile, messaging framework, content calendar, channel strategy, SEO keyword plan, competitive positioning, launch plan, measurement framework)
+- v0.6.0 — Trust/Risk Agent (threat model, risk register, control framework, incident response plan, compliance matrix, vendor risk assessment, security policy, audit readiness report, residual risk acceptance)
 
 **Roadmap:**
-- v0.5.0 — Marketing Agent (multilingual localization briefs)
-- v0.6.0 — Trust/Risk Agent (synthetic-evidence red team)
 - v0.7.0 — CIO Agent (vendor capability decomposition)
 
 ## Documentation

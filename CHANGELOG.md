@@ -4,6 +4,24 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-04-27
+
+### Added
+- **Trust/Risk Agent** — 5-stage pipeline (intake → extract → spec → execute → qa) producing 9 trust and risk spec artifacts:
+  - `threat-model.md` — structured threat model mapping assets, threat actors, attack vectors, and mitigations
+  - `risk-register.md` — prioritized registry of identified risks with likelihood, impact, and owner
+  - `control-framework.md` — security and compliance controls mapped to threats and regulatory requirements
+  - `incident-response-plan.md` — step-by-step playbook for detecting, containing, and recovering from incidents
+  - `compliance-matrix.md` — requirements traceability across applicable regulatory frameworks
+  - `vendor-risk-assessment.md` — structured evaluation of third-party vendor security posture
+  - `security-policy.md` — organizational security policy covering access, data handling, and acceptable use
+  - `audit-readiness-report.md` — evidence summary and gap analysis for upcoming audits
+  - `residual-risk-acceptance.md` — formal acceptance documentation for risks not fully mitigated
+- **Trust/Risk brief templates** — 8 ready-to-fill templates: breach-notification, executive-risk-summary, penetration-test-brief, remediation-tracker, risk-acceptance-form, security-awareness-brief, tabletop-exercise-scenario, and vendor-security-questionnaire.
+- **MCP tools** — 10 tools for the Trust/Risk agent (`agentsuite_trust_risk_run`, `agentsuite_trust_risk_approve`, `agentsuite_trust_risk_list_runs`, `agentsuite_trust_risk_get_artifact`, `agentsuite_trust_risk_get_qa_scores`, plus 5 stage-level tools).
+- **CLI subcommand** — `agentsuite trust-risk run` and `agentsuite trust-risk approve`.
+- **Skill manifest** — `claude/skills/trust-risk-agent/SKILL.md` with MCP snippet and install-skills.sh integration.
+
 ## [0.5.0] - 2026-04-26
 
 ### Added
@@ -91,7 +109,8 @@ Initial release.
 - Per-run cost cap only; per-day cap deferred.
 - Single MCP server with env-gated agent enablement (no per-agent server topology).
 
-[Unreleased]: https://github.com/scottconverse/AgentSuite/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/scottconverse/AgentSuite/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/scottconverse/AgentSuite/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/scottconverse/AgentSuite/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/scottconverse/AgentSuite/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/scottconverse/AgentSuite/compare/v0.2.0...v0.3.0
