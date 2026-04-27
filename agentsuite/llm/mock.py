@@ -135,9 +135,7 @@ def _default_mock_for_cli(provider_name: str | None = None) -> "MockLLMProvider"
             "open_questions": ["What is the target SLA for batch jobs?", "Is multi-region deployment required?"],
         }),
         "checking 9 engineering-agent artifacts": _json.dumps({
-            "consistent": True,
-            "findings": [],
-            "severity": "none",
+            "mismatches": [],
         }),
         "scoring 9 engineering-agent": _json.dumps({
             "scores": {d.name: 8.0 for d in ENGINEERING_RUBRIC.dimensions},
@@ -153,9 +151,7 @@ def _default_mock_for_cli(provider_name: str | None = None) -> "MockLLMProvider"
             "open_questions": [],
         }),
         "You are checking 9 marketing-agent artifacts for consistency. Return ONLY JSON.": _json.dumps({
-            "consistent": True,
-            "findings": [],
-            "severity": "none",
+            "mismatches": [],
         }),
         "You are scoring 9 marketing-agent artifacts. Return ONLY JSON.": _json.dumps({
             "scores": {
@@ -182,8 +178,7 @@ def _default_mock_for_cli(provider_name: str | None = None) -> "MockLLMProvider"
             "open_questions": ["Is cloud migration a board priority?", "Who owns the data strategy?"],
         }),
         "You are checking 9 CIO artifacts for consistency. Return ONLY JSON.": _json.dumps({
-            "passed": True,
-            "issues": [],
+            "mismatches": [],
         }),
         "You are scoring 9 CIO artifacts. Return ONLY JSON.": _json.dumps({
             "scores": {d.name: 8.0 for d in CIO_RUBRIC.dimensions},
@@ -199,8 +194,7 @@ def _default_mock_for_cli(provider_name: str | None = None) -> "MockLLMProvider"
             "open_questions": ["Is penetration testing scheduled?", "Who owns vendor risk reviews?"],
         }),
         "You are checking 9 trust-risk-agent artifacts for consistency. Return ONLY JSON.": _json.dumps({
-            "passed": True,
-            "issues": [],
+            "mismatches": [],
         }),
         "You are scoring 9 trust-risk-agent artifacts. Return ONLY JSON.": _json.dumps({
             "scores": {d.name: 8.0 for d in TRUST_RISK_RUBRIC.dimensions},

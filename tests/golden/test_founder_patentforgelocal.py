@@ -63,3 +63,23 @@ def test_golden_critical_phrase_blocklist_in_brief_templates(tmp_path):
     for tmpl_path in templates:
         body = tmpl_path.read_text(encoding="utf-8")
         assert len(body) > 0, f"{tmpl_path.name} is empty"
+
+
+def test_golden_founder_json_artifact_structure(tmp_path):
+    """JSON artifacts contain expected top-level keys."""
+    _, run_dir = _run_founder(tmp_path)
+
+    # qa_scores.json structure
+    qa = json.loads((run_dir / "qa_scores.json").read_text(encoding="utf-8"))
+    assert "scores" in qa, "qa_scores.json missing 'scores' key"
+    assert "average" in qa, "qa_scores.json missing 'average' key"
+    assert "passed" in qa, "qa_scores.json missing 'passed' key"
+    assert "requires_revision" in qa, "qa_scores.json missing 'requires_revision' key"
+
+    # consistency_report.json structure
+    cr = json.loads((run_dir / "consistency_report.json").read_text(encoding="utf-8"))
+    assert "mismatches" in cr, "consistency_report.json missing 'mismatches' key"
+
+    # extracted_context.json is valid JSON with at least one key
+    ec = json.loads((run_dir / "extracted_context.json").read_text(encoding="utf-8"))
+    assert isinstance(ec, dict) and len(ec) > 0, "extracted_context.json is empty or not a dict"
