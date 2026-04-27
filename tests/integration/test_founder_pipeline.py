@@ -93,3 +93,31 @@ def test_founder_consistency_check_failure_raises(tmp_path: Path) -> None:
     )
     with pytest.raises(ConsistencyCheckFailed):
         agent.run(request=inp, run_id="founder-consistency-fail")
+
+
+def test_pipeline_hard_cap_exceeded_propagates(tmp_path):
+    """HardCapExceeded propagates cleanly through BaseAgent._drive() and is not swallowed."""
+    from unittest.mock import patch
+    from agentsuite.kernel.cost import CostTracker, HardCapExceeded, Cost
+
+    original_add = CostTracker.add
+    call_count = {"n": 0}
+
+    def _raise_on_second(self, cost: Cost) -> Cost:
+        call_count["n"] += 1
+        if call_count["n"] >= 2:
+            raise HardCapExceeded("test cap exceeded")
+        return original_add(self, cost)
+
+    with patch.object(CostTracker, "add", _raise_on_second):
+        agent = FounderAgent(output_root=tmp_path, llm=_default_mock_for_cli())
+        inp = FounderAgentInput(
+            agent_name="founder",
+            role_domain="creative-ops",
+            user_request="cap test",
+            business_goal="Test cap",
+            project_slug="cap-test",
+            constraints=Constraints(),
+        )
+        with pytest.raises(HardCapExceeded):
+            agent.run(request=inp, run_id="cap-test-run")

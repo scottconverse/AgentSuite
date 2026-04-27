@@ -92,10 +92,15 @@ class BaseAgent(ABC):
         for stage in PIPELINE_ORDER[start_idx:]:
             if stage not in handlers:
                 raise NotImplementedError(f"Agent {self.name} missing handler for stage '{stage}'")
-            state = handlers[stage](state, ctx)
-            state.artifacts = writer.refs()
-            state.cost_so_far = cost_tracker.total
-            store.save(state)
+            try:
+                state = handlers[stage](state, ctx)
+                state.artifacts = writer.refs()
+                state.cost_so_far = cost_tracker.total
+                store.save(state)
+            except Exception:
+                state.cost_so_far = cost_tracker.total
+                store.save(state)
+                raise
             if state.stage == "approval":
                 break
         return state
