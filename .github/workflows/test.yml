@@ -33,3 +33,26 @@ jobs:
           python-version: "3.12"
       - name: Run cleanroom (mocked LLM)
         run: bash scripts/run-cleanroom.sh
+
+  wheel-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install build
+        run: pip install build
+      - name: Build wheel
+        run: python -m build
+      - name: Install wheel in fresh venv
+        run: |
+          python -m venv .venv-smoke
+          .venv-smoke/bin/pip install dist/*.whl
+      - name: Import check
+        run: |
+          .venv-smoke/bin/python -c "import importlib; [importlib.import_module(m) for m in ['agentsuite.agents.founder.prompt_loader','agentsuite.agents.design.prompt_loader','agentsuite.agents.product.prompt_loader','agentsuite.agents.engineering.prompt_loader','agentsuite.agents.marketing.prompt_loader','agentsuite.agents.trust_risk.prompt_loader','agentsuite.agents.cio.prompt_loader']]"
+      - name: Console script — agentsuite --help
+        run: .venv-smoke/bin/agentsuite --help
+      - name: Console script — agentsuite-mcp --help
+        run: .venv-smoke/bin/agentsuite-mcp --help
