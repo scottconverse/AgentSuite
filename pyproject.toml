@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agentsuite"
-version = "0.3.0"
+version = "0.4.0"
 description = "Seven role-specific reasoning agents that turn vague intent into precise operating artifacts"
 authors = [{name = "Scott Converse"}]
 license = {text = "MIT"}
@@ -60,6 +60,7 @@ include = ["agentsuite*"]
 [tool.setuptools.package-data]
 "agentsuite.agents.founder" = ["templates/*.md", "prompts/*.jinja2"]
 "agentsuite.agents.design" = ["prompts/*.jinja2", "templates/*.md"]
+"agentsuite.agents.engineering" = ["prompts/*.jinja2", "templates/*.md"]
 "agentsuite.kernel" = ["prompts/*.jinja2"]
 
 [tool.ruff]

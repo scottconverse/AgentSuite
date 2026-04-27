@@ -4,6 +4,16 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-04-26
+
+### Added
+- **Engineering Agent** — 5-stage pipeline (intake → extract → spec → execute → qa) producing 9 engineering spec artifacts: Architecture Decision Record, System Design, API Spec, Data Model, Security Review, Deployment Plan, Runbook, Tech Debt Register, and Performance Requirements.
+- **Engineering brief templates** — 8 ready-to-fill templates: sprint ticket, code review checklist, incident report, capacity plan, on-call handoff, release checklist, postmortem, and vendor evaluation.
+- **Engineering rubric** — 9-dimension QA rubric (implementation_specificity, testability, security_posture, scalability_awareness, dependency_hygiene, anti_overengineering, operational_completeness, decision_traceability, api_contract_clarity) with pass threshold 7.0/10.
+- **MCP tools** — 10 tools for the Engineering agent (`engineering_run`, `engineering_approve`, `engineering_list_runs`, `engineering_get_artifact`, `engineering_get_qa_scores`, plus 5 stage-level tools).
+- **CLI subcommand** — `agentsuite engineering run` and `agentsuite engineering approve`.
+- **Skill manifest** — `claude/skills/engineering-agent/SKILL.md` with MCP snippet and install-skills.sh integration.
+
 ## [0.3.0] — 2026-04-26
 
 ### Added
@@ -71,7 +81,8 @@ Initial release.
 - Per-run cost cap only; per-day cap deferred.
 - Single MCP server with env-gated agent enablement (no per-agent server topology).
 
-[Unreleased]: https://github.com/scottconverse/AgentSuite/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/scottconverse/AgentSuite/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/scottconverse/AgentSuite/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/scottconverse/AgentSuite/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/scottconverse/AgentSuite/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/scottconverse/AgentSuite/releases/tag/v0.1.0
