@@ -12,6 +12,7 @@ from agentsuite.agents.marketing.prompt_loader import (
 _EXPECTED_PROMPTS = [
     "extract",
     "intake",
+    "qa_score",
     "spec_campaign_brief",
     "spec_channel_strategy",
     "spec_competitive_positioning",
@@ -25,14 +26,14 @@ _EXPECTED_PROMPTS = [
 ]
 
 
-def test_list_prompts_returns_12() -> None:
-    """list_prompts() must return exactly 12 templates."""
+def test_list_prompts_returns_13() -> None:
+    """list_prompts() must return exactly 13 templates (12 spec/extract + qa_score)."""
     prompts = list_prompts()
-    assert len(prompts) == 12, f"Expected 12 prompts, got {len(prompts)}: {prompts}"
+    assert len(prompts) == 13, f"Expected 13 prompts, got {len(prompts)}: {prompts}"
 
 
 def test_list_prompts_all_names_present() -> None:
-    """All 12 required template names must be present."""
+    """All 13 required template names must be present."""
     prompts = list_prompts()
     for name in _EXPECTED_PROMPTS:
         assert name in prompts, f"Missing expected prompt: {name!r}"
