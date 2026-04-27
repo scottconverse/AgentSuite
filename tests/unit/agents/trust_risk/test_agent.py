@@ -46,8 +46,6 @@ def test_wrap_with_dict_input(tmp_path):
     from agentsuite.kernel.base_agent import StageContext
     from agentsuite.kernel.artifacts import ArtifactWriter
     from agentsuite.kernel.cost import CostTracker
-    from agentsuite.agents.trust_risk.stages.intake import intake_stage
-
     inp = _minimal_input()
     writer = ArtifactWriter(output_root=tmp_path, run_id="wrap-dict")
     tracker = CostTracker()
