@@ -1,0 +1,108 @@
+You are a senior DevOps / SRE engineer writing a complete deployment plan.
+
+## Context
+**System:** {{ system_name }}
+**Tech Stack:** {{ tech_stack }}
+**Scale Requirements:** {{ scale_requirements }}
+**Team Size:** {{ team_size }}
+**Security Requirements:** {{ security_requirements }}
+
+## Your Task
+
+Write a complete deployment plan for {{ system_name }}. Return ONLY markdown.
+
+---
+
+# Deployment Plan: {{ system_name }}
+
+## Infrastructure
+
+[Describe the target infrastructure: cloud provider, compute type (containers, VMs, serverless), orchestration (Kubernetes, ECS, etc.), networking (VPC, subnets, load balancers), and storage (managed DB, object storage, cache). Justify choices against the scale requirements: {{ scale_requirements }}.]
+
+### Infrastructure as Code
+[State the IaC tool (Terraform, Pulumi, CDK), module structure, and state backend.]
+
+## CI/CD Pipeline
+
+```
+[ASCII pipeline diagram showing stages from commit to production]
+```
+
+### Stage Definitions
+
+| Stage | Trigger | Actions | Pass Criteria | On Failure |
+|-------|---------|---------|---------------|-----------|
+| Build | Push to any branch | [actions] | [criteria] | [action] |
+| Test | Build passes | [actions] | [criteria] | [action] |
+| Security scan | Test passes | [actions] | [criteria] | [action] |
+| Staging deploy | Merge to main | [actions] | [criteria] | [action] |
+| Production deploy | Manual approval | [actions] | [criteria] | [action] |
+
+### Deployment Tooling
+[CI platform, container registry, secrets injection method, artifact versioning scheme.]
+
+## Rollout Strategy
+
+[Choose blue/green OR canary and justify based on team size ({{ team_size }}) and scale requirements.]
+
+### Blue/Green Deployment
+[OR Canary — delete whichever is not chosen]
+
+**Traffic Shift Schedule:**
+1. [Step 1: e.g., Deploy green, run smoke tests]
+2. [Step 2: e.g., Shift 5% traffic to green]
+3. [Step 3: e.g., Monitor for 10 minutes]
+4. [Step 4: e.g., Shift 100% or rollback]
+
+**Go/No-go Criteria:**
+- Error rate < [threshold]%
+- p99 latency < [threshold]ms
+- [Other metric]: [threshold]
+
+## Rollback Plan
+
+[Step-by-step rollback procedure. Include: trigger conditions, who can initiate, exact commands or button clicks, estimated time to complete, communication protocol during rollback.]
+
+**Rollback Decision Tree:**
+```
+Error rate > X% → automatic rollback (no approval needed)
+p99 > Yms for > 5 min → on-call engineer decides
+Data migration involved → follow migration rollback runbook
+```
+
+## Environment Matrix
+
+| Environment | Purpose | Infra tier | Data | Access | Deploy trigger |
+|------------|---------|-----------|------|--------|----------------|
+| Development | Local dev | [spec] | Synthetic | Devs | Manual |
+| Staging | Integration testing | [spec] | Anonymized prod copy | Team | Auto on main |
+| Production | Live traffic | [spec] | Live | On-call + approvers | Manual gate |
+
+[Add any additional environments (QA, load-test, canary) relevant to this system.]
+
+## Health Checks
+
+### Readiness Probe
+```
+GET /health/ready
+Expected: 200 {"status": "ready"}
+Timeout: 5s, Failure threshold: 3
+```
+
+### Liveness Probe
+```
+GET /health/live
+Expected: 200 {"status": "ok"}
+Timeout: 3s, Failure threshold: 5
+```
+
+### Smoke Tests
+[List 3–5 smoke tests run automatically after every deployment before traffic shifts.]
+
+1. [Test: e.g., POST /auth/token returns 200]
+2. [Test]
+3. [Test]
+
+---
+
+Do not include any text outside the markdown document above.

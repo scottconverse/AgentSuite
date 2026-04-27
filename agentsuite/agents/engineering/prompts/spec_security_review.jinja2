@@ -1,0 +1,86 @@
+You are a senior security engineer performing a comprehensive security review.
+
+## Context
+**System:** {{ system_name }}
+**Tech Stack:** {{ tech_stack }}
+**Security Requirements:** {{ security_requirements }}
+
+**Identified Security Risks:**
+{% for risk in security_risks %}
+- {{ risk }}
+{% endfor %}
+
+**Integration Points:**
+{% for point in integration_points %}
+- {{ point }}
+{% endfor %}
+
+## Your Task
+
+Write a complete security review for {{ system_name }}. Return ONLY markdown.
+
+---
+
+# Security Review: {{ system_name }}
+
+## Threat Model
+
+### Assets
+[List the valuable assets this system holds or processes: PII, credentials, financial data, proprietary data, etc.]
+
+### Threat Actors
+| Actor | Motivation | Capability | Likelihood |
+|-------|-----------|------------|------------|
+| External attacker | [motivation] | [Low/Medium/High] | [Low/Medium/High] |
+| Insider threat | [motivation] | [Low/Medium/High] | [Low/Medium/High] |
+| Compromised dependency | [motivation] | [Low/Medium/High] | [Low/Medium/High] |
+
+### Attack Surface
+[Enumerate the attack surface: public endpoints, internal APIs, admin interfaces, third-party integrations, CI/CD pipeline, developer machines.]
+
+## OWASP Top 10 Coverage
+
+| # | Category | Status | Implementation |
+|---|---------|--------|----------------|
+| A01 | Broken Access Control | [Covered/Partial/Gap] | [What controls are in place] |
+| A02 | Cryptographic Failures | [Covered/Partial/Gap] | [What controls are in place] |
+| A03 | Injection | [Covered/Partial/Gap] | [What controls are in place] |
+| A04 | Insecure Design | [Covered/Partial/Gap] | [What controls are in place] |
+| A05 | Security Misconfiguration | [Covered/Partial/Gap] | [What controls are in place] |
+| A06 | Vulnerable Components | [Covered/Partial/Gap] | [What controls are in place] |
+| A07 | Auth & Session Failures | [Covered/Partial/Gap] | [What controls are in place] |
+| A08 | Software Integrity Failures | [Covered/Partial/Gap] | [What controls are in place] |
+| A09 | Logging & Monitoring Failures | [Covered/Partial/Gap] | [What controls are in place] |
+| A10 | SSRF | [Covered/Partial/Gap] | [What controls are in place] |
+
+## Authentication & Authorization Design
+
+[Describe: identity provider, token format and lifetime, refresh strategy, session management, MFA requirements, service-to-service auth, and role/permission model. Address the security requirements: {{ security_requirements }}.]
+
+## Data Encryption
+
+### At Rest
+[What data is encrypted, with what algorithm, key management approach, key rotation policy.]
+
+### In Transit
+[TLS version requirements, certificate management, mutual TLS for internal services, secrets in transit.]
+
+## Secrets Management
+
+[How are secrets (API keys, DB credentials, signing keys) stored, rotated, and accessed at runtime? State the specific tool or service and the injection mechanism.]
+
+## Audit Logging
+
+[What events are logged: auth attempts, permission changes, data access, admin actions. Log format, retention period, tamper protection, and who has access to logs.]
+
+## Security Gaps and Recommendations
+
+| Gap | Severity | Recommendation | Effort |
+|-----|----------|---------------|--------|
+| [Gap from risks above] | [Critical/High/Medium/Low] | [Specific fix] | [Hours/Days/Weeks] |
+
+[Minimum 3 rows. Address all identified security risks.]
+
+---
+
+Do not include any text outside the markdown document above.

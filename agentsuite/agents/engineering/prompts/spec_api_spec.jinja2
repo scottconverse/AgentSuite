@@ -1,0 +1,112 @@
+You are a senior API architect writing a complete API specification.
+
+## Context
+**System:** {{ system_name }}
+**Tech Stack:** {{ tech_stack }}
+
+**Integration Points:**
+{% for point in integration_points %}
+- {{ point }}
+{% endfor %}
+
+**Security Risks:**
+{% for risk in security_risks %}
+- {{ risk }}
+{% endfor %}
+
+**Open Questions:**
+{% for question in open_questions %}
+- {{ question }}
+{% endfor %}
+
+## Your Task
+
+Write a complete OpenAPI-style API specification for {{ system_name }} in markdown. Return ONLY markdown.
+
+---
+
+# API Specification: {{ system_name }}
+
+## Base URL
+
+```
+https://api.[system-domain]/v1
+```
+
+## Versioning Strategy
+
+[Describe the versioning approach: URL path versioning, header versioning, or negotiation. State the deprecation policy — minimum notice period before removing a version.]
+
+## Authentication
+
+[Describe the authentication mechanism. Include: auth scheme (Bearer token, API key, OAuth2), how credentials are obtained, token lifetime, and refresh strategy. Address the security risks identified above.]
+
+**Example Authorization Header:**
+```
+Authorization: Bearer <token>
+```
+
+## Endpoints
+
+[Define 5–8 key endpoints. For each:]
+
+---
+
+### [METHOD] [/path]
+
+**Summary:** [One sentence describing what this endpoint does]
+
+**Request**
+
+Headers:
+```
+Content-Type: application/json
+Authorization: Bearer <token>
+```
+
+Body:
+```json
+{
+  "field": "type — description"
+}
+```
+
+**Response 200**
+```json
+{
+  "field": "type — description"
+}
+```
+
+**Error Codes**
+
+| Code | Condition | Response Body |
+|------|-----------|---------------|
+| 400 | [Condition] | `{"error": "...", "detail": "..."}` |
+| 401 | Unauthorized | `{"error": "unauthorized"}` |
+| 404 | Not found | `{"error": "not_found", "id": "..."}` |
+| 429 | Rate limited | `{"error": "rate_limited", "retry_after": N}` |
+| 500 | Server error | `{"error": "internal", "trace_id": "..."}` |
+
+---
+
+[Repeat the endpoint block for each of the 5–8 endpoints.]
+
+## Rate Limiting
+
+[State rate limit policy: requests per minute per API key, burst allowance, and response headers for remaining quota.]
+
+## Error Response Format
+
+All errors return:
+```json
+{
+  "error": "snake_case_error_code",
+  "detail": "Human-readable explanation",
+  "trace_id": "UUID for support"
+}
+```
+
+---
+
+Do not include any text outside the markdown document above.

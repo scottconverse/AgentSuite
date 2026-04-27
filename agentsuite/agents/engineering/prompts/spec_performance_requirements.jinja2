@@ -1,0 +1,113 @@
+You are a senior performance engineer writing formal performance requirements and SLOs.
+
+## Context
+**System:** {{ system_name }}
+**Tech Stack:** {{ tech_stack }}
+**Scale Requirements:** {{ scale_requirements }}
+
+**Known Bottlenecks:**
+{% for bottleneck in known_bottlenecks %}
+- {{ bottleneck }}
+{% endfor %}
+
+## Your Task
+
+Write a complete performance requirements document for {{ system_name }}. Derive concrete numbers from the scale requirements ({{ scale_requirements }}) — do not use placeholders. Return ONLY markdown.
+
+---
+
+# Performance Requirements: {{ system_name }}
+
+## Service Level Objectives (SLOs)
+
+### Latency
+
+| Endpoint / Operation | p50 | p95 | p99 | p99.9 |
+|---------------------|-----|-----|-----|-------|
+| [Primary read path] | [N]ms | [N]ms | [N]ms | [N]ms |
+| [Primary write path] | [N]ms | [N]ms | [N]ms | [N]ms |
+| [Auth / session] | [N]ms | [N]ms | [N]ms | [N]ms |
+| [Background job] | [N]s | [N]s | [N]s | [N]s |
+
+[Derive these from {{ scale_requirements }}. If the requirement states p99 <200ms, work backward to reasonable p50/p95 values.]
+
+### Throughput
+
+| Metric | Sustained | Peak (10x burst) | Measurement window |
+|--------|-----------|-------------------|--------------------|
+| Requests per second | [N] RPS | [N] RPS | 1 minute |
+| Writes per second | [N] WPS | [N] WPS | 1 minute |
+| Concurrent connections | [N] | [N] | Point in time |
+
+### Availability
+
+| SLO | Target | Error budget (30-day) |
+|-----|--------|-----------------------|
+| Availability | [99.N]% | [N] minutes downtime |
+| Successful request rate | [99.N]% | — |
+
+## Load Test Scenarios
+
+[Define test scenarios that validate the SLOs above. Each scenario must be runnable with a standard load testing tool (k6, Locust, Artillery).]
+
+### Scenario 1: Steady-State Load
+
+**Goal:** Confirm SLOs hold at sustained production traffic
+**Load profile:** [N] RPS for 10 minutes, ramp-up over first 2 minutes
+**Pass criteria:**
+- p99 latency < [N]ms
+- Error rate < [N]%
+- No memory leaks (RSS stable over test duration)
+
+### Scenario 2: Peak Burst
+
+**Goal:** Validate the system survives 10x traffic spike
+**Load profile:** [N] RPS baseline → [10x N] RPS for 2 minutes → return to baseline
+**Pass criteria:**
+- System recovers to baseline latency within 60 seconds of spike end
+- No cascading failures
+- Error rate during burst < [N]%
+
+### Scenario 3: [Bottleneck-Specific Test]
+
+**Goal:** Stress-test the known bottleneck: [reference specific bottleneck from above]
+**Load profile:** [Describe the specific pattern that exercises this bottleneck]
+**Pass criteria:** [Specific observable outcome that proves the bottleneck is handled]
+
+### Scenario 4: Database Saturation
+
+**Goal:** Confirm graceful degradation when DB connection pool exhausts
+**Load profile:** [N] concurrent users all performing write-heavy operations
+**Pass criteria:**
+- Requests queue rather than fail
+- Queue drains when load reduces
+- No data corruption
+
+## Performance Budget by Component
+
+| Component | CPU budget | Memory budget | Latency contribution budget |
+|-----------|-----------|--------------|----------------------------|
+| API gateway / load balancer | [N]% | [N]MB | [N]ms |
+| Application server | [N]% | [N]MB | [N]ms |
+| Database (per query) | — | [N]MB working set | [N]ms |
+| Cache layer | [N]% | [N]GB | [N]ms |
+| External API calls | — | — | [N]ms (timeout) |
+
+**Total p99 budget:** [Sum]ms ≤ [SLO p99]ms ✓
+
+## Monitoring & Alerting Thresholds
+
+| Metric | Warning | Critical | Alert destination |
+|--------|---------|----------|-------------------|
+| p99 latency | >[N]ms for 5m | >[N]ms for 2m | PagerDuty |
+| Error rate | >[N]% for 5m | >[N]% for 1m | PagerDuty |
+| CPU utilization | >[N]% for 10m | >[N]% for 5m | Slack #alerts |
+| Memory utilization | >[N]% | >[N]% for 5m | PagerDuty |
+| DB connection pool | >[N]% used | >[N]% used for 2m | PagerDuty |
+| Cache hit rate | <[N]% | <[N]% for 10m | Slack #alerts |
+
+[Set thresholds so Warning fires at ~70% of the critical threshold, giving time to investigate before SLO breach.]
+
+---
+
+Do not include any text outside the markdown document above.

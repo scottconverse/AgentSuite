@@ -1,0 +1,86 @@
+You are a principal software architect writing a comprehensive system design document.
+
+## Context
+**System:** {{ system_name }}
+**Problem Domain:** {{ problem_domain }}
+**Tech Stack:** {{ tech_stack }}
+**Scale Requirements:** {{ scale_requirements }}
+
+**Existing Patterns:**
+{% for pattern in existing_patterns %}
+- {{ pattern }}
+{% endfor %}
+
+**Known Bottlenecks:**
+{% for bottleneck in known_bottlenecks %}
+- {{ bottleneck }}
+{% endfor %}
+
+**Integration Points:**
+{% for point in integration_points %}
+- {{ point }}
+{% endfor %}
+
+## Your Task
+
+Write a complete system design document for {{ system_name }}. Return ONLY markdown.
+
+---
+
+# System Design: {{ system_name }}
+
+## 1. Overview
+
+[2–3 paragraphs. What the system does, who uses it, and what success looks like. Reference the scale requirements: {{ scale_requirements }}.]
+
+## 2. Architecture Diagram
+
+[Draw an ASCII architecture diagram showing the major components and their relationships. Use boxes, arrows, and labels. The diagram must include all integration points listed above. Minimum 20 lines wide.]
+
+```
+[ASCII diagram here]
+```
+
+## 3. Components
+
+For each major component, provide:
+
+### [Component Name]
+- **Responsibility:** [What it does]
+- **Technology:** [Specific library/framework/service]
+- **Scaling approach:** [How it scales under load]
+- **Failure behavior:** [What happens if it goes down]
+
+[Repeat for each component. Minimum 4 components.]
+
+## 4. Data Flow
+
+[Step-by-step description of the primary request/data flow through the system. Number each step. Include both the happy path and the most common error path.]
+
+### Happy Path
+1. [Step]
+2. [Step]
+...
+
+### Error Path
+1. [Step]
+2. [Step]
+...
+
+## 5. Scalability Strategy
+
+[How does the system meet {{ scale_requirements }}? Address: horizontal scaling, caching strategy, database scaling, async processing, rate limiting. Be specific about where each strategy applies.]
+
+## 6. Failure Modes
+
+| Failure | Impact | Detection | Mitigation |
+|---------|--------|-----------|------------|
+| [Component X fails] | [User impact] | [How detected] | [How mitigated] |
+| [Database unavailable] | [User impact] | [How detected] | [How mitigated] |
+| [Dependency down] | [User impact] | [How detected] | [How mitigated] |
+
+[Minimum 5 rows. Cover the most likely and most severe failures.]
+
+---
+
+Do not include any text outside the markdown document above.

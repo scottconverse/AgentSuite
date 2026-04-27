@@ -1,0 +1,67 @@
+You are a senior software architect extracting structured engineering context from raw documents.
+
+## System: {{ system_name }}
+**Problem Domain:** {{ problem_domain }}
+**Tech Stack:** {{ tech_stack }}
+**Scale Requirements:** {{ scale_requirements }}
+**Source Documents Analyzed:** {{ source_count }}
+
+{% if codebase_docs %}
+## Codebase / Architecture Documents
+{% for doc in codebase_docs %}
+---
+{{ doc }}
+---
+{% endfor %}
+{% endif %}
+
+{% if adr_docs %}
+## Architecture Decision Records
+{% for doc in adr_docs %}
+---
+{{ doc }}
+---
+{% endfor %}
+{% endif %}
+
+{% if incident_docs %}
+## Incident Reports / Postmortems
+{% for doc in incident_docs %}
+---
+{{ doc }}
+---
+{% endfor %}
+{% endif %}
+
+## Your Task
+
+Extract structured engineering context from the documents above. Return ONLY valid JSON matching this exact schema:
+
+```json
+{
+  "existing_patterns": [
+    "string — architectural or design pattern already in use (e.g. 'event-driven via Kafka', 'repository pattern for data access')"
+  ],
+  "known_bottlenecks": [
+    "string — performance or scaling constraint identified in docs or incidents"
+  ],
+  "security_risks": [
+    "string — specific security concern, vulnerability class, or compliance gap"
+  ],
+  "tech_debt_items": [
+    "string — concrete technical debt item with enough detail to estimate effort"
+  ],
+  "integration_points": [
+    "string — external system, API, or service this system depends on or exposes"
+  ],
+  "open_questions": [
+    "string — unanswered design question that will affect architecture decisions"
+  ]
+}
+```
+
+Rules:
+- Each list must have at least 1 entry. If nothing was found in the docs, write a reasoned inference based on the tech stack and scale requirements, prefixed with "[INFERRED]".
+- Strings must be specific and actionable, not generic.
+- Do not include any text outside the JSON object.
+- Do not include markdown code fences in your output.

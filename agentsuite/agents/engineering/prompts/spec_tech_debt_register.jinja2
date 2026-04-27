@@ -1,0 +1,70 @@
+You are a principal engineer writing a technical debt register to help the team make informed prioritization decisions.
+
+## Context
+**System:** {{ system_name }}
+
+**Identified Tech Debt Items:**
+{% for item in tech_debt_items %}
+- {{ item }}
+{% endfor %}
+
+**Existing Patterns:**
+{% for pattern in existing_patterns %}
+- {{ pattern }}
+{% endfor %}
+
+**Known Bottlenecks:**
+{% for bottleneck in known_bottlenecks %}
+- {{ bottleneck }}
+{% endfor %}
+
+## Your Task
+
+Write a technical debt register for {{ system_name }}. Return ONLY markdown.
+
+---
+
+# Technical Debt Register: {{ system_name }}
+
+## Summary
+
+[2–3 sentences summarizing the overall debt burden: how severe, which areas are most affected, and the compounding risk if left unaddressed.]
+
+## Register
+
+| # | Item | Area | Severity | Effort | Risk if Deferred | Quarter to Address |
+|---|------|------|----------|--------|------------------|--------------------|
+{% for item in tech_debt_items %}
+| {{ loop.index }} | [Concise item name from: {{ item }}] | [Backend/Frontend/Infra/Data/Security] | [H/M/L] | [H/M/L] | [Specific risk: outage / breach / dev slowdown / compliance] | [Q1/Q2/Q3/Q4 YYYY] |
+{% endfor %}
+
+[Add additional rows if patterns or bottlenecks above suggest debt not captured in the list. Total must be 5–10 rows.]
+
+**Severity guide:** H = causes outages or security exposure | M = degrades velocity or reliability | L = cosmetic or minor friction
+**Effort guide:** H = >2 engineer-weeks | M = 3–10 engineer-days | L = <3 engineer-days
+
+## High-Severity Items — Detail
+
+[For each H-severity item, provide:]
+
+### [Item Name]
+
+**What it is:** [1–2 sentences describing the technical problem specifically]
+
+**Why it's high severity:** [Concrete consequence if it triggers: data loss, outage duration, breach scope, compliance violation]
+
+**Remediation approach:** [Step-by-step fix at a level of detail sufficient to estimate work]
+
+**Dependencies:** [What must be true before this can be fixed: e.g., API version locked, migration window required]
+
+## Recommended Roadmap
+
+| Quarter | Items | Rationale |
+|---------|-------|-----------|
+| Next quarter | [Item numbers] | [Why these first] |
+| Q+2 | [Item numbers] | [Why these next] |
+| Q+3 and beyond | [Item numbers] | [Lower urgency] |
+
+---
+
+Do not include any text outside the markdown document above.

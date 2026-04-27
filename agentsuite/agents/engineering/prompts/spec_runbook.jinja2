@@ -1,0 +1,133 @@
+You are a senior SRE writing an operational runbook for an on-call engineer.
+
+## Context
+**System:** {{ system_name }}
+**Team Size:** {{ team_size }}
+
+**Known Bottlenecks:**
+{% for bottleneck in known_bottlenecks %}
+- {{ bottleneck }}
+{% endfor %}
+
+**Integration Points:**
+{% for point in integration_points %}
+- {{ point }}
+{% endfor %}
+
+## Your Task
+
+Write a complete operational runbook for {{ system_name }}. Assume the reader is an on-call engineer who may be woken at 3am and has never seen this system before. Return ONLY markdown.
+
+---
+
+# Runbook: {{ system_name }}
+
+## Service Overview
+
+[2–3 sentences: what the service does, why it matters, and what breaks if it goes down. Include the user or business impact of an outage.]
+
+**Stack summary:** [One-line tech stack description]
+**SLO:** [Uptime target and latency target]
+**Data criticality:** [What data is at risk if the service fails]
+
+## On-Call Contacts
+
+| Role | Name / Handle | Contact method | Hours |
+|------|--------------|----------------|-------|
+| Primary on-call | [Rotation] | PagerDuty | 24/7 |
+| Secondary on-call | [Rotation] | PagerDuty | 24/7 |
+| Service owner | [Handle] | Slack #[channel] | Business hours |
+| Escalation: Infra | [Handle] | Slack #infra-oncall | 24/7 |
+| Escalation: Security | [Handle] | Slack #security-oncall | 24/7 |
+
+## Common Operations
+
+### Restart the Service
+
+```bash
+# Kubernetes
+kubectl rollout restart deployment/{{ system_name | lower | replace(' ', '-') }} -n production
+
+# Docker Compose
+docker compose restart {{ system_name | lower | replace(' ', '-') }}
+```
+
+**When to do this:** [Specific symptoms that warrant a restart]
+**Expected outcome:** Service recovers within [N] seconds. Check [metric] in [dashboard].
+
+### Scale Up
+
+```bash
+# Kubernetes — increase replica count
+kubectl scale deployment/{{ system_name | lower | replace(' ', '-') }} --replicas=N -n production
+```
+
+**When to do this:** [Symptom: e.g., p99 latency sustained above 500ms for >5 minutes]
+**Expected outcome:** [What improves and on what timescale]
+
+### Flush Cache
+
+```bash
+# Redis flush (CAUTION: clears all keys — confirm with team lead first)
+redis-cli -h [redis-host] FLUSHDB
+```
+
+**When to do this:** [Specific stale-cache symptom]
+**Impact:** [Performance hit immediately after flush, expected recovery time]
+
+### Check Dependency Health
+
+```bash
+# Verify each integration point
+{% for point in integration_points %}
+curl -sf https://[{{ loop.index }}]/health || echo "{{ point }} is DOWN"
+{% endfor %}
+```
+
+## Alert Response Procedures
+
+[Write procedures for 5–7 specific alerts. Base them on the known bottlenecks and integration points above. For each:]
+
+---
+
+### Alert: [AlertName]
+
+**Trigger condition:** [Exact metric and threshold that fires this alert]
+**Severity:** [P1 / P2 / P3]
+**User impact:** [What the user experiences when this fires]
+
+**Diagnosis steps:**
+1. Check [dashboard / log query]: `[exact command or URL]`
+2. Look for [specific log pattern]: `[grep command or log query]`
+3. Verify [dependency] is healthy: `[command]`
+
+**Resolution:**
+- If [condition A]: [exact fix steps]
+- If [condition B]: [exact fix steps]
+- If unresolved after 15 minutes: escalate to [role]
+
+**False positive check:** [How to confirm this is a real incident vs. noise]
+
+---
+
+[Repeat for each of the 5–7 alerts.]
+
+## Escalation Path
+
+```
+On-call engineer
+    → (15 min, no resolution) → Service Owner
+        → (30 min, no resolution) → Engineering Lead
+            → (60 min, data loss risk) → CTO / Incident Commander
+```
+
+**Declare a P1 incident when:**
+- [Condition 1]
+- [Condition 2]
+
+**Incident communication channel:** Slack #incidents
+**Status page:** [URL]
+
+---
+
+Do not include any text outside the markdown document above.

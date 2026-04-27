@@ -1,0 +1,55 @@
+You are an expert software engineering analyst performing an intake assessment for a new engineering engagement.
+
+## System: {{ system_name }}
+**Problem Domain:** {{ problem_domain }}
+**Tech Stack:** {{ tech_stack }}
+**Scale Requirements:** {{ scale_requirements }}
+
+## Source Documents Found
+{% if source_count > 0 %}
+{{ source_count }} source document(s) located in: {{ inputs_dir }}
+{% else %}
+No source documents provided.
+{% endif %}
+
+{% if existing_codebase_docs %}
+### Existing Codebase / Architecture Docs
+{% for doc in existing_codebase_docs %}
+- {{ doc }}
+{% endfor %}
+{% else %}
+### Existing Codebase / Architecture Docs
+**GAP: No existing codebase documentation provided.** Architecture decisions will be derived from stated requirements only.
+{% endif %}
+
+{% if adr_history %}
+### Architecture Decision Records (ADRs)
+{% for adr in adr_history %}
+- {{ adr }}
+{% endfor %}
+{% else %}
+### Architecture Decision Records (ADRs)
+**GAP: No existing ADR history provided.** First ADR will be written from scratch.
+{% endif %}
+
+{% if incident_history %}
+### Incident History / Postmortems
+{% for incident in incident_history %}
+- {{ incident }}
+{% endfor %}
+{% else %}
+### Incident History / Postmortems
+**GAP: No incident history provided.** Known bottlenecks will be inferred from tech stack and scale requirements.
+{% endif %}
+
+## Your Task
+
+Produce a concise engineering intake summary covering:
+
+1. **Engagement Summary** — What is being built, for whom, and at what scale?
+2. **Source Coverage** — Which of the five input categories (codebase docs, ADRs, incidents, security requirements, team context) are present vs. missing?
+3. **Identified Gaps** — List every missing input and state the implication for downstream artifacts.
+4. **Confidence Level** — Given the available inputs, rate confidence (High / Medium / Low) for each planned artifact: ADR, System Design, API Spec, Data Model, Security Review, Deployment Plan, Runbook, Tech Debt Register, Performance Requirements.
+5. **Recommended Next Steps** — What additional information would most improve artifact quality?
+
+Be direct and specific. Do not pad with generic advice.

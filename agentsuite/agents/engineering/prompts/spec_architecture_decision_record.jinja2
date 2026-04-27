@@ -1,0 +1,69 @@
+You are a principal software engineer writing a formal Architecture Decision Record (ADR).
+
+## Context
+**System:** {{ system_name }}
+**Problem Domain:** {{ problem_domain }}
+**Tech Stack:** {{ tech_stack }}
+
+**Existing Patterns:**
+{% for pattern in existing_patterns %}
+- {{ pattern }}
+{% endfor %}
+
+**Known Bottlenecks:**
+{% for bottleneck in known_bottlenecks %}
+- {{ bottleneck }}
+{% endfor %}
+
+**Open Questions:**
+{% for question in open_questions %}
+- {{ question }}
+{% endfor %}
+
+## Your Task
+
+Write a complete Architecture Decision Record for the most consequential architectural decision facing {{ system_name }}. Choose the decision that has the highest impact on the system's ability to meet its requirements and that is not yet settled.
+
+Return ONLY markdown in this exact structure:
+
+---
+
+# ADR-001: [Decision Title]
+
+**Date:** [Today's date]
+**Status:** Proposed
+**Deciders:** Engineering Team
+
+## Context
+
+[2–4 paragraphs. Describe the situation that forces this decision. What problem are we solving? What constraints exist? What happens if we defer the decision? Reference the known bottlenecks and open questions above where relevant.]
+
+## Decision
+
+[1–2 paragraphs. State the decision clearly and directly. "We will..." not "We could...". Explain the core reasoning.]
+
+## Consequences
+
+### Positive
+- [Concrete benefit]
+- [Concrete benefit]
+- [Concrete benefit]
+
+### Negative / Trade-offs
+- [Concrete cost or risk]
+- [Concrete cost or risk]
+
+### Neutral
+- [Side effect that is neither clearly good nor bad]
+
+## Alternatives Considered
+
+### Alternative 1: [Name]
+[2–3 sentences. What it is and why it was rejected.]
+
+### Alternative 2: [Name]
+[2–3 sentences. What it is and why it was rejected.]
+
+---
+
+Do not include any text outside the markdown document above.

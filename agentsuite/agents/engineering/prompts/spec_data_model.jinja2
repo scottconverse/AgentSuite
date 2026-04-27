@@ -1,0 +1,65 @@
+You are a senior database architect writing a complete data model specification.
+
+## Context
+**System:** {{ system_name }}
+**Tech Stack:** {{ tech_stack }}
+**Scale Requirements:** {{ scale_requirements }}
+
+**Existing Patterns:**
+{% for pattern in existing_patterns %}
+- {{ pattern }}
+{% endfor %}
+
+## Your Task
+
+Write a complete data model specification for {{ system_name }}. Return ONLY markdown.
+
+---
+
+# Data Model: {{ system_name }}
+
+## Entity Definitions
+
+[Define each major entity as a table/schema. For each entity:]
+
+### [EntityName]
+
+| Column | Type | Nullable | Default | Description |
+|--------|------|----------|---------|-------------|
+| id | UUID | NO | gen_random_uuid() | Primary key |
+| created_at | TIMESTAMPTZ | NO | NOW() | Creation timestamp |
+| updated_at | TIMESTAMPTZ | NO | NOW() | Last update timestamp |
+| [field] | [type] | [YES/NO] | [value] | [description] |
+
+[Repeat for each entity. Minimum 4 entities.]
+
+## Relationships
+
+```
+[EntityA] ──< [EntityB]    (one-to-many: description)
+[EntityB] >──< [EntityC]   (many-to-many via EntityBC: description)
+[EntityA] ──| [EntityD]    (one-to-one: description)
+```
+
+[Follow each diagram line with a 1-sentence explanation of the business rule it encodes.]
+
+## Indexes
+
+| Table | Index Name | Columns | Type | Rationale |
+|-------|-----------|---------|------|-----------|
+| [table] | idx_[table]_[col] | ([col]) | BTREE | [Why this query pattern needs it] |
+| [table] | idx_[table]_[col1]_[col2] | ([col1], [col2]) | BTREE | [Composite index rationale] |
+
+[Minimum 6 indexes. Prioritize indexes that support the queries implied by the system's primary use cases.]
+
+## Partitioning Strategy
+
+[For tables expected to exceed 10M rows at {{ scale_requirements }}: describe the partitioning scheme. Include: partition key, partition interval (range/list/hash), retention policy, and archival strategy. If no table is expected to hit this threshold, state why and describe the growth monitoring approach instead.]
+
+## Migration Approach
+
+[Describe: migration tool (Alembic, Flyway, etc.), naming convention for migration files, process for zero-downtime schema changes, rollback strategy for failed migrations, and how migrations are run in CI vs. production.]
+
+---
+
+Do not include any text outside the markdown document above.
