@@ -1,0 +1,43 @@
+You are scoring engineering agent artifacts against the ENGINEERING_RUBRIC dimensions.
+
+Problem domain: {{ problem_domain }}
+Tech stack: {{ tech_stack }}
+Existing codebase docs available: {{ has_source_docs }}
+
+Artifacts (markdown text):
+{% for name, body in artifacts.items() %}
+=== {{ name }} ===
+{{ body }}
+
+{% endfor %}
+
+Score each ENGINEERING_RUBRIC dimension 0.0–10.0:
+- implementation_specificity: Are implementation details specific enough for an engineer to act without asking follow-up questions? Penalize hand-wavy architecture.
+- testability: Are components designed with testability in mind? Are test strategies and coverage expectations explicit?
+- security_posture: Are security requirements explicitly addressed — authentication, authorization, data encryption, input validation, OWASP concerns?
+- scalability_awareness: Does the design address the stated scale requirements? Are bottlenecks identified and mitigation strategies specified?
+- dependency_hygiene: Are all external dependencies explicitly named, versioned, and justified? Are transitive risks acknowledged?
+- anti_overengineering: Is the design appropriately simple for the stated scale? Penalize premature optimization and unnecessary abstraction layers.
+- operational_completeness: Are deployment, monitoring, alerting, runbook, and incident response procedures explicitly documented?
+- decision_traceability: Are architectural decisions documented with rationale and alternatives considered? Can future engineers understand WHY, not just WHAT?
+- api_contract_clarity: Are API contracts (endpoints, request/response schemas, error codes, versioning strategy) explicit and complete?
+
+Return JSON:
+{
+  "scores": {
+    "implementation_specificity": 0.0,
+    "testability": 0.0,
+    "security_posture": 0.0,
+    "scalability_awareness": 0.0,
+    "dependency_hygiene": 0.0,
+    "anti_overengineering": 0.0,
+    "operational_completeness": 0.0,
+    "decision_traceability": 0.0,
+    "api_contract_clarity": 0.0
+  },
+  "revision_instructions": ["specific actionable change"]
+}
+
+Be ruthless on anti_overengineering — score 0.0 for any artifact that includes premature optimization, unnecessary abstraction layers, or over-engineered solutions not tied to the stated scale requirements.
+
+Return ONLY the JSON.
