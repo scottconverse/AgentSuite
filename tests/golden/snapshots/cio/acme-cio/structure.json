@@ -1,0 +1,23 @@
+{
+  "required_artifacts": [
+    "budget-allocation-model.md",
+    "digital-transformation-plan.md",
+    "enterprise-architecture.md",
+    "it-governance-framework.md",
+    "it-risk-appetite-statement.md",
+    "it-strategy.md",
+    "technology-roadmap.md",
+    "vendor-portfolio.md",
+    "workforce-development-plan.md"
+  ],
+  "required_brief_templates": [
+    "board-technology-briefing.md",
+    "digital-initiative-proposal.md",
+    "it-investment-case.md",
+    "it-steering-committee-agenda.md",
+    "project-portfolio-status.md",
+    "quarterly-it-review.md",
+    "technology-modernization-pitch.md",
+    "vendor-review-summary.md"
+  ]
+}
