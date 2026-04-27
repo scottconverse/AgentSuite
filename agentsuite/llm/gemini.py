@@ -19,26 +19,29 @@ class GeminiProvider:
 
     def __init__(self, client: Any | None = None) -> None:
         if client is None:
-            import google.generativeai as genai
+            import os
 
-            client = genai
+            from google import genai
+
+            client = genai.Client(api_key=os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY", ""))
         self.client = client
 
     def default_model(self) -> str:
         return "gemini-2.5-flash"
 
     def complete(self, request: LLMRequest) -> LLMResponse:
+        from google.genai import types as genai_types
+
         model = request.model or self.default_model()
-        gen_model = self.client.GenerativeModel(
-            model_name=model,
+        config = genai_types.GenerateContentConfig(
+            max_output_tokens=request.max_tokens,
+            temperature=request.temperature,
             system_instruction=request.system or None,
         )
-        result = gen_model.generate_content(
-            request.prompt,
-            generation_config={
-                "max_output_tokens": request.max_tokens,
-                "temperature": request.temperature,
-            },
+        result = self.client.models.generate_content(
+            model=model,
+            contents=request.prompt,
+            config=config,
         )
         text = result.text
         usage = result.usage_metadata
