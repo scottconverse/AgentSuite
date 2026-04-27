@@ -4,6 +4,16 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-04-26
+
+### Added
+- **Marketing Agent** — 5-stage pipeline (intake → extract → spec → execute → qa) producing 9 marketing spec artifacts: Campaign Brief, Target Audience Profile, Messaging Framework, Content Calendar, Channel Strategy, SEO Keyword Plan, Competitive Positioning, Launch Plan, and Measurement Framework.
+- **Marketing brief templates** — 8 ready-to-fill templates: ad copy brief, blog post brief, email campaign, influencer brief, landing page brief, press release, quarterly report, and social post series.
+- **Marketing rubric** — 9-dimension QA rubric (audience_clarity, message_resonance, channel_fit, metric_specificity, budget_realism, anti_vanity_metrics, content_depth, competitive_awareness, launch_sequencing) with pass threshold 7.0/10.
+- **MCP tools** — 10 tools for the Marketing agent (`marketing_run`, `marketing_approve`, `marketing_list_runs`, `marketing_get_artifact`, `marketing_get_qa_scores`, plus 5 stage-level tools).
+- **CLI subcommand** — `agentsuite marketing run` and `agentsuite marketing approve`.
+- **Skill manifest** — `claude/skills/marketing-agent/SKILL.md` with MCP snippet and install-skills.sh integration.
+
 ## [0.4.0] - 2026-04-26
 
 ### Added
@@ -81,7 +91,8 @@ Initial release.
 - Per-run cost cap only; per-day cap deferred.
 - Single MCP server with env-gated agent enablement (no per-agent server topology).
 
-[Unreleased]: https://github.com/scottconverse/AgentSuite/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/scottconverse/AgentSuite/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/scottconverse/AgentSuite/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/scottconverse/AgentSuite/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/scottconverse/AgentSuite/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/scottconverse/AgentSuite/compare/v0.1.0...v0.2.0
