@@ -71,7 +71,6 @@ def build_cli_spec() -> "AgentCLISpec":  # noqa: F821
     """Return the CLI spec for the Product agent."""
     from agentsuite.kernel.base_agent import AgentCLISpec
     import json
-    from pathlib import Path
     import typer
 
     def run_cmd(

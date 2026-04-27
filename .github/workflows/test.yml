@@ -54,5 +54,7 @@ jobs:
           .venv-smoke/bin/python -c "import importlib; [importlib.import_module(m) for m in ['agentsuite.agents.founder.prompt_loader','agentsuite.agents.design.prompt_loader','agentsuite.agents.product.prompt_loader','agentsuite.agents.engineering.prompt_loader','agentsuite.agents.marketing.prompt_loader','agentsuite.agents.trust_risk.prompt_loader','agentsuite.agents.cio.prompt_loader']]"
       - name: Console script — agentsuite --help
         run: .venv-smoke/bin/agentsuite --help
+      - name: Install mcp extra for agentsuite-mcp smoke test
+        run: .venv-smoke/bin/pip install mcp>=1.0
       - name: Console script — agentsuite-mcp --help
         run: .venv-smoke/bin/agentsuite-mcp --help
