@@ -1,4 +1,4 @@
-"""Abstract base agent with persisted six-stage pipeline."""
+"""Abstract base agent with persisted five-stage pipeline (intake, extract, spec, execute, qa) with a separate approval gate."""
 from __future__ import annotations
 
 from abc import ABC, abstractmethod

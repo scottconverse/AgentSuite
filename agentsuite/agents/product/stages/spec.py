@@ -112,7 +112,7 @@ def spec_stage(state: RunState, ctx: StageContext) -> RunState:
 
     ctx.writer.write_json("consistency_report.json", report, kind="data", stage="spec")
 
-    critical = [c for c in report.get("checks", []) if c.get("severity") == "critical"]
+    critical = [c for c in report.get("mismatches", []) if c.get("severity") == "critical"]
     if critical:
         raise ConsistencyCheckFailed(
             f"{len(critical)} critical consistency failure(s): "

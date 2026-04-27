@@ -1,6 +1,7 @@
 """AgentSuite MCP server entry point."""
 from __future__ import annotations
 
+import logging
 import os
 from pathlib import Path
 from typing import Any, Callable
@@ -9,6 +10,8 @@ from mcp.server.fastmcp import FastMCP
 
 from agentsuite.agents.registry import default_registry
 from agentsuite.mcp_models import RunSummary
+
+_log = logging.getLogger(__name__)
 
 
 def _output_root() -> Path:
@@ -54,7 +57,8 @@ def build_server() -> _ServerWrapper:
     for name in enabled:
         try:
             agent_class = registry.get_class(name)
-        except Exception:
+        except Exception as e:
+            _log.warning("Skipping agent %s: failed to load — %r", name, e)
             continue
         if name == "founder":
             from agentsuite.agents.founder import mcp_tools as founder_mcp

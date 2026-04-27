@@ -1,6 +1,7 @@
 """End-to-end Engineering pipeline integration test (mock LLM)."""
 from __future__ import annotations
 
+import json
 import os
 from pathlib import Path
 
@@ -8,9 +9,9 @@ import pytest
 
 from agentsuite.agents.engineering.agent import EngineeringAgent
 from agentsuite.agents.engineering.input_schema import EngineeringAgentInput
-from agentsuite.agents.engineering.stages.spec import SPEC_ARTIFACTS
+from agentsuite.agents.engineering.stages.spec import SPEC_ARTIFACTS, ConsistencyCheckFailed
 from agentsuite.agents.engineering.template_loader import TEMPLATE_NAMES
-from agentsuite.llm.mock import _default_mock_for_cli
+from agentsuite.llm.mock import MockLLMProvider, _default_mock_for_cli
 
 
 @pytest.mark.skipif(
@@ -71,6 +72,42 @@ def test_engineering_pipeline_approval_promotion(tmp_path: Path) -> None:
     assert (kernel / "architecture-decision-record.md").exists(), (
         "missing promoted artifact _kernel/testsystem/architecture-decision-record.md"
     )
+
+
+def test_engineering_consistency_check_failure_raises(tmp_path: Path) -> None:
+    """When consistency check returns a critical finding, ConsistencyCheckFailed is raised."""
+    base = _default_mock_for_cli()
+    # Remove the existing key that would match engineering consistency check.
+    # Engineering spec.py system prompt: "You are checking 9 engineering-agent artifacts for consistency."
+    # Default mock key: "checking 9 engineering-agent artifacts"
+    patched_responses = {
+        k: v for k, v in base.responses.items()
+        if k != "checking 9 engineering-agent artifacts"
+    }
+    critical_response = json.dumps({
+        "mismatches": [
+            {
+                "dimension": "tech_stack_consistency",
+                "severity": "critical",
+                "detail": "API spec uses REST but architecture-decision-record mandates GraphQL",
+            }
+        ]
+    })
+    patched_responses["checking 9 engineering-agent artifacts for consistency"] = critical_response
+    llm = MockLLMProvider(responses=patched_responses)
+
+    agent = EngineeringAgent(output_root=tmp_path, llm=llm)
+    inp = EngineeringAgentInput(
+        user_request="test consistency failure",
+        agent_name="engineering",
+        role_domain="engineering-ops",
+        system_name="TestSystem",
+        problem_domain="Web API",
+        tech_stack="Python FastAPI",
+        scale_requirements="1k RPS",
+    )
+    with pytest.raises(ConsistencyCheckFailed):
+        agent.run(request=inp, run_id="engineering-consistency-fail")
 
 
 def test_engineering_pipeline_resume_from_spec(tmp_path: Path) -> None:

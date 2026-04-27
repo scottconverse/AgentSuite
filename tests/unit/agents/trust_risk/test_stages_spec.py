@@ -28,7 +28,7 @@ _EXTRACTED = {
 }
 
 _CONSISTENCY_OK = json.dumps({
-    "checks": [
+    "mismatches": [
         {
             "dimension": "control coverage",
             "status": "ok",
@@ -39,7 +39,7 @@ _CONSISTENCY_OK = json.dumps({
 })
 
 _CONSISTENCY_CRITICAL = json.dumps({
-    "checks": [
+    "mismatches": [
         {
             "dimension": "compliance scope",
             "status": "mismatch",
@@ -50,7 +50,7 @@ _CONSISTENCY_CRITICAL = json.dumps({
 })
 
 _CONSISTENCY_WARNING = json.dumps({
-    "checks": [
+    "mismatches": [
         {
             "dimension": "residual risk",
             "status": "mismatch",
@@ -117,7 +117,7 @@ def test_spec_runs_consistency_check(tmp_path: Path) -> None:
     report_path = writer.run_dir / "consistency_report.json"
     assert report_path.exists()
     report = json.loads(report_path.read_text(encoding="utf-8"))
-    assert "checks" in report
+    assert "mismatches" in report
 
 
 def test_spec_llm_call_count(tmp_path: Path) -> None:

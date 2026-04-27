@@ -14,5 +14,6 @@ class CIOAgentInput(AgentRequest):
     budget_context: str = ""                        # e.g. "flat budget", "$5M annual IT capex"
     digital_initiatives: str = ""                   # active or planned digital transformation programs
     regulatory_environment: str = ""               # e.g. "HIPAA, SOX, FedRAMP"
+    cio_name: str = "CIO"                              # Name used as author/signatory in generated documents
     agent_name: str = "cio"
     role_domain: str = "cio-ops"

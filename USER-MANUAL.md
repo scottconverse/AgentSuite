@@ -253,23 +253,23 @@ Use the Founder agent at the very beginning of a project, when you are establish
 
 **What you need to provide**
 
-- `--company-name` — the name of your company or project (required)
-- `--mission` — one or two sentences describing what you do and why it matters (required)
-- `--core-values` — two to four values that guide how you work and communicate (required)
+- `--business-goal` — what you are trying to achieve with this run, in plain language (required)
+- `--project-slug` — a short lowercase label for the project, used to name the output folder (optional)
+- `--inputs-dir` — path to a folder of source materials such as brand docs or research files (optional)
 
 **CLI command**
 
 ```
 agentsuite founder run \
-  --company-name "Acme" \
-  --mission "We make it simple for small businesses to manage their invoices." \
-  --core-values "Simplicity, transparency, reliability"
+  --business-goal "Launch Acme invoicing for small businesses" \
+  --project-slug acme \
+  --inputs-dir ./my-brand-inputs
 ```
 
 On Windows, replace the backslash line breaks with a single long line:
 
 ```
-agentsuite founder run --company-name "Acme" --mission "We make it simple for small businesses to manage their invoices." --core-values "Simplicity, transparency, reliability"
+agentsuite founder run --business-goal "Launch Acme invoicing for small businesses" --project-slug acme --inputs-dir ./my-brand-inputs
 ```
 
 **How to approve**
@@ -287,7 +287,7 @@ Replace `"Your Name"` with your actual name and `acme` with a short lowercase la
 | Error | What it means | What to do |
 |---|---|---|
 | `NoProviderConfigured` | No API key found and Ollama is not running | Set your API key (Section 4) or start Ollama (Section 4b) |
-| `ConsistencyCheckFailed` | Two documents contradict each other | Make your `--mission` and `--core-values` more specific, then re-run |
+| `ConsistencyCheckFailed` | Two documents contradict each other | Make your `--business-goal` more specific, then re-run |
 | `HardCapExceeded: $5.00` | The run exceeded the cost safety limit | Raise the cap: `set AGENTSUITE_COST_CAP_USD=10` |
 | `extract stage produced invalid JSON` | The AI returned malformed output | Re-run — this is almost always transient |
 

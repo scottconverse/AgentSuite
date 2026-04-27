@@ -2,19 +2,50 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime
 from typing import Any, cast
 
 from agentsuite.agents.cio.input_schema import CIOAgentInput
-from agentsuite.agents.cio.template_loader import TEMPLATE_NAMES, render_template
 from agentsuite.agents.cio.stages.spec import SPEC_ARTIFACTS
+from agentsuite.agents.cio.template_loader import TEMPLATE_NAMES, render_template
 from agentsuite.kernel.base_agent import StageContext
 from agentsuite.kernel.schema import RunState
+
+
+def _current_quarter() -> str:
+    now = datetime.now()
+    q = (now.month - 1) // 3 + 1
+    return f"Q{q} {now.year}"
+
+
+def _next_quarter() -> str:
+    now = datetime.now()
+    q = (now.month - 1) // 3 + 1
+    year = now.year
+    if q == 4:
+        q, year = 1, year + 1
+    else:
+        q += 1
+    return f"Q{q} {year}"
+
+
+def _current_fiscal_year() -> str:
+    return f"FY{datetime.now().year}"
+
+
+def _fiscal_year_range() -> str:
+    year = datetime.now().year
+    return f"FY{year}–FY{year + 2}"
 
 
 def _values_from_input(inp: CIOAgentInput, extracted: dict[str, Any]) -> dict[str, object]:
     vendor_landscape = extracted.get("vendor_landscape", [])
     vendor_name = vendor_landscape[0] if vendor_landscape else "Primary Vendor"
-    cio_name = inp.strategic_priorities.split()[0] if inp.strategic_priorities else "CIO"
+    cio_name = inp.cio_name
+    current_q = _current_quarter()
+    next_q = _next_quarter()
+    fy = _current_fiscal_year()
+    fy_range = _fiscal_year_range()
     return {
         "organization_name": inp.organization_name,
         "strategic_priorities": inp.strategic_priorities,
@@ -23,27 +54,27 @@ def _values_from_input(inp: CIOAgentInput, extracted: dict[str, Any]) -> dict[st
         "digital_initiatives": inp.digital_initiatives,
         "regulatory_environment": inp.regulatory_environment,
         "cio_name": cio_name,
-        "briefing_date": "Q2 2026",
-        "meeting_date": "Q2 2026",
+        "briefing_date": current_q,
+        "meeting_date": current_q,
         "meeting_time": "10:00 AM",
         "meeting_location": "Board Room / Video Conference",
         "committee_chair": cio_name,
         "audience": "Board of Directors",
         "target_audience": "IT Steering Committee",
-        "reporting_period": "Q2 2026",
-        "review_quarter": "Q2 2026",
-        "review_period": "Q2 2026",
-        "review_date": "Q2 2026",
-        "report_date": "Q2 2026",
-        "fiscal_year": "FY2026",
-        "fiscal_years": "FY2026–FY2027",
+        "reporting_period": current_q,
+        "review_quarter": current_q,
+        "review_period": current_q,
+        "review_date": current_q,
+        "report_date": current_q,
+        "fiscal_year": fy,
+        "fiscal_years": fy_range,
         "total_it_budget": inp.budget_context or "TBD",
         "total_portfolio_budget": inp.budget_context or "TBD",
         "total_active_projects": str(len(extracted.get("technology_pain_points", [])) or 5),
         "initiative_name": inp.digital_initiatives.split("\n")[0] if inp.digital_initiatives else "Digital Transformation Initiative",
         "proposed_by": cio_name,
-        "submission_date": "Q2 2026",
-        "proposed_start_date": "Q3 2026",
+        "submission_date": current_q,
+        "proposed_start_date": next_q,
         "estimated_duration": "12 months",
         "estimated_timeline": "12 months",
         "executive_sponsor": cio_name,
@@ -53,16 +84,16 @@ def _values_from_input(inp: CIOAgentInput, extracted: dict[str, Any]) -> dict[st
         "total_investment": inp.budget_context or "TBD",
         "npv": "TBD",
         "discount_rate": "8",
-        "case_date": "Q2 2026",
+        "case_date": current_q,
         "vendor_name": vendor_name,
         "contract_value": "TBD",
-        "contract_expiry": "Q4 2026",
+        "contract_expiry": next_q,
         "relationship_owner": cio_name,
         "recommendation": "Continue with performance review",
         "legacy_system_name": extracted.get("technology_pain_points", ["Legacy System"])[0] if extracted.get("technology_pain_points") else "Legacy System",
         "system_age": "7+ years",
         "modernization_approach": "Cloud-native migration",
-        "pitch_date": "Q2 2026",
+        "pitch_date": current_q,
         "priority_1_title": inp.strategic_priorities.split("\n")[0] if inp.strategic_priorities else "Priority 1",
         "priority_2_title": inp.strategic_priorities.split("\n")[1] if len(inp.strategic_priorities.split("\n")) > 1 else "Priority 2",
         "priority_3_title": inp.strategic_priorities.split("\n")[2] if len(inp.strategic_priorities.split("\n")) > 2 else "Priority 3",

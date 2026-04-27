@@ -356,7 +356,8 @@ AGENTS = [
         "name": "Founder Agent",
         "version": "v0.1.0",
         "cmd": "agentsuite founder run",
-        "inputs": ["company_name", "mission", "core_values"],
+        "cli_flags": ["business-goal", "project-slug", "inputs-dir"],
+        "inputs": ["business_goal", "project_slug", "inputs_dir"],
         "spec_artifacts": [
             "brand-system.md", "founder-voice-guide.md",
             "product-positioning.md", "audience-map.md",
@@ -384,47 +385,50 @@ AGENTS = [
         "name": "Design Agent",
         "version": "v0.2.0",
         "cmd": "agentsuite design run",
-        "inputs": ["brand_name", "design_brief", "target_audience"],
+        "cli_flags": ["target-audience", "campaign-goal", "channel"],
+        "inputs": ["target_audience", "campaign_goal", "channel"],
         "spec_artifacts": [
-            "design-system.md", "component-library.md",
-            "typography-guide.md", "color-palette.md",
-            "iconography-guide.md", "motion-principles.md",
-            "accessibility-checklist.md", "design-tokens.json",
-            "brand-qa-scorecard.md",
+            "visual-direction.md", "design-brief.md",
+            "mood-board-spec.md", "brand-rules-extracted.md",
+            "image-generation-prompt.md", "revision-instructions.md",
+            "design-qa-report.md", "accessibility-audit-template.md",
+            "final-asset-acceptance-checklist.md",
         ],
         "brief_templates": [
-            "ui-component-brief", "brand-refresh-brief", "campaign-visual-brief",
-            "design-review-checklist", "accessibility-audit", "design-handoff",
-            "motion-spec", "icon-request",
+            "banner-ad", "email-header", "social-graphic",
+            "landing-hero", "deck-slide", "print-flyer",
+            "video-thumbnail", "icon-set",
         ],
-        "primary_artifact": "design-system.md",
+        "primary_artifact": "visual-direction.md",
         "description": (
-            "Transforms brand identity into a complete, codified design system. "
-            "Produces token-based design specifications, component library guidelines, "
-            "and accessibility requirements that engineering teams can implement directly."
+            "Transforms brand identity into a complete set of visual direction and design spec artifacts. "
+            "Produces a visual direction brief, mood-board spec, brand-rules extraction, "
+            "image generation prompts, revision instructions, and a final asset acceptance checklist "
+            "that creative and engineering teams can act on directly."
         ),
         "rubric": [
-            "Token completeness", "Component coverage", "Accessibility compliance",
-            "Brand alignment", "Typography hierarchy", "Color contrast ratios",
-            "Motion appropriateness", "Handoff clarity", "Engineering readiness",
+            "Visual direction clarity", "Brand rule fidelity", "Mood-board specificity",
+            "Prompt reusability", "Revision instruction actionability", "Accessibility coverage",
+            "Channel appropriateness", "Handoff clarity", "QA completeness",
         ],
     },
     {
         "name": "Product Agent",
         "version": "v0.3.0",
         "cmd": "agentsuite product run",
+        "cli_flags": ["product-name", "target-users", "core-problem", "project-slug"],
         "inputs": ["product_name", "target_users", "core_problem"],
         "spec_artifacts": [
-            "product-requirements-doc.md", "user-journey-map.md",
+            "product-requirements-doc.md", "user-story-map.md",
             "feature-prioritization.md", "success-metrics.md",
-            "competitive-analysis.md", "technical-constraints.md",
-            "release-criteria.md", "stakeholder-map.md",
-            "risk-assumptions-log.md",
+            "competitive-analysis.md", "user-persona-map.md",
+            "acceptance-criteria.md", "product-roadmap.md",
+            "risk-register.md",
         ],
         "brief_templates": [
-            "feature-spec", "sprint-planning", "user-research-brief",
-            "go-to-market", "beta-launch-brief", "stakeholder-update",
-            "product-review", "escalation-brief",
+            "sprint-planning-brief", "stakeholder-update", "launch-announcement",
+            "feature-spec", "user-interview-guide", "a-b-test-plan",
+            "demo-script", "investor-update",
         ],
         "primary_artifact": "product-requirements-doc.md",
         "description": (
@@ -442,6 +446,7 @@ AGENTS = [
         "name": "Engineering Agent",
         "version": "v0.4.0",
         "cmd": "agentsuite engineering run",
+        "cli_flags": ["system-name", "problem-domain", "tech-stack", "scale-requirements"],
         "inputs": ["system_name", "problem_domain", "tech_stack"],
         "spec_artifacts": [
             "architecture-decision-record.md", "system-design.md",
@@ -470,6 +475,7 @@ AGENTS = [
         "name": "Marketing Agent",
         "version": "v0.5.0",
         "cmd": "agentsuite marketing run",
+        "cli_flags": ["brand-name", "campaign-goal", "target-market"],
         "inputs": ["brand_name", "campaign_goal", "target_market"],
         "spec_artifacts": [
             "campaign-brief.md", "audience-profile.md",
@@ -499,6 +505,7 @@ AGENTS = [
         "name": "Trust/Risk Agent",
         "version": "v0.6.0",
         "cmd": "agentsuite trust-risk run",
+        "cli_flags": ["product-name", "risk-domain", "stakeholder-context"],
         "inputs": ["product_name", "risk_domain", "stakeholder_context"],
         "spec_artifacts": [
             "threat-model.md", "risk-register.md",
@@ -530,6 +537,7 @@ AGENTS = [
         "name": "CIO Agent",
         "version": "v0.7.0",
         "cmd": "agentsuite cio run",
+        "cli_flags": ["organization-name", "strategic-priorities", "it-maturity-level"],
         "inputs": ["organization_name", "strategic_priorities", "it_maturity_level"],
         "spec_artifacts": [
             "it-strategy.md", "technology-roadmap.md",
@@ -850,9 +858,11 @@ def build_pdf():
 
         # CLI command
         story.append(Paragraph("<b>CLI command</b>", H3))
+        flags = ag.get("cli_flags", ["business-goal", "project-slug", "inputs-dir"])
+        flag_lines = " \\\n  --".join(flags)
         story.append(code_block(
             f"agentsuite {ag['cmd'].split('agentsuite ')[1]} \\\n"
-            f"  --{'  --'.join(f'{k}' for k in ['business-goal', 'project-slug', 'inputs-dir'])}"
+            f"  --{flag_lines}"
         ))
         story.append(Spacer(1, 4))
 

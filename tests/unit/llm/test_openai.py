@@ -7,11 +7,14 @@ from agentsuite.llm.base import LLMRequest
 from agentsuite.llm.openai import OpenAIProvider, _PRICING
 
 
+_DEFAULT_MODEL = "gpt-4.1"
+
+
 def _stub_client(text: str = "Hi", in_tokens: int = 10, out_tokens: int = 2) -> MagicMock:
     client = MagicMock()
     response = MagicMock()
     response.choices = [MagicMock(message=MagicMock(content=text))]
-    response.model = "gpt-5"
+    response.model = _DEFAULT_MODEL
     response.usage = MagicMock(prompt_tokens=in_tokens, completion_tokens=out_tokens)
     client.chat.completions.create.return_value = response
     return client
@@ -24,7 +27,7 @@ def test_provider_name():
 
 def test_default_model():
     p = OpenAIProvider(client=_stub_client())
-    assert p.default_model() == "gpt-5"
+    assert p.default_model() == _DEFAULT_MODEL
 
 
 def test_complete_returns_response_with_usage():
@@ -33,7 +36,7 @@ def test_complete_returns_response_with_usage():
     assert resp.text == "hello"
     assert resp.input_tokens == 100
     assert resp.output_tokens == 20
-    expected_usd = (100 * _PRICING["gpt-5"]["in"] + 20 * _PRICING["gpt-5"]["out"]) / 1_000_000
+    expected_usd = (100 * _PRICING[_DEFAULT_MODEL]["in"] + 20 * _PRICING[_DEFAULT_MODEL]["out"]) / 1_000_000
     assert resp.usd == pytest.approx(expected_usd)
 
 

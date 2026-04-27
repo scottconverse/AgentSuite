@@ -11,8 +11,8 @@ from agentsuite.agents.registry import default_registry
 from agentsuite.agents.cio.agent import CIOAgent
 from agentsuite.agents.cio.input_schema import CIOAgentInput
 from agentsuite.agents.cio.rubric import CIO_RUBRIC
-from agentsuite.agents.cio.stages.spec import SPEC_ARTIFACTS
-from agentsuite.llm.mock import _default_mock_for_cli
+from agentsuite.agents.cio.stages.spec import SPEC_ARTIFACTS, ConsistencyCheckFailed
+from agentsuite.llm.mock import MockLLMProvider, _default_mock_for_cli
 
 
 @pytest.mark.skipif(
@@ -111,3 +111,34 @@ def test_cio_agent_via_registry(tmp_path: Path) -> None:
     assert "strategy" in it_strategy_text.lower() or "it" in it_strategy_text.lower(), (
         "it-strategy.md does not contain expected IT strategy content"
     )
+
+
+def test_cio_consistency_check_failure_raises(tmp_path: Path) -> None:
+    """When consistency check returns a critical finding, ConsistencyCheckFailed is raised."""
+    base = _default_mock_for_cli()
+    # Remove the existing key that would match CIO consistency check.
+    # CIO spec.py system: "You are checking 9 CIO artifacts for consistency."
+    # Default mock key (full string): "You are checking 9 CIO artifacts for consistency. Return ONLY JSON."
+    existing_key = "You are checking 9 CIO artifacts for consistency. Return ONLY JSON."
+    patched_responses = {k: v for k, v in base.responses.items() if k != existing_key}
+    critical_response = json.dumps({
+        "mismatches": [
+            {
+                "dimension": "budget_alignment",
+                "severity": "critical",
+                "detail": "Technology roadmap investments conflict with budget-allocation-model constraints",
+            }
+        ]
+    })
+    patched_responses["checking 9 CIO artifacts for consistency"] = critical_response
+    llm = MockLLMProvider(responses=patched_responses)
+
+    agent = CIOAgent(output_root=tmp_path, llm=llm)
+    inp = CIOAgentInput(
+        user_request="test consistency failure",
+        organization_name="TechCorp Global",
+        strategic_priorities="cloud-first strategy, AI adoption",
+        it_maturity_level="Level 3 - Defined",
+    )
+    with pytest.raises(ConsistencyCheckFailed):
+        agent.run(request=inp, run_id="cio-consistency-fail")

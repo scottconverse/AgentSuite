@@ -8,7 +8,12 @@ Thanks for your interest. AgentSuite is open-source under MIT.
 git clone https://github.com/scottconverse/AgentSuite.git
 cd AgentSuite
 python -m venv .venv
-.venv/Scripts/pip install -e .[dev]
+# Windows:
+.venv\Scripts\pip install -e ".[dev]"
+# Mac/Linux:
+# .venv/bin/pip install -e ".[dev]"
+# Cross-platform alternative:
+# python -m pip install -e ".[dev]"
 pytest
 ```
 
@@ -84,20 +89,8 @@ This script runs all 8 checks (doc artifacts, version sync, CHANGELOG entry, lin
 2. Add a CHANGELOG.md entry under `[Unreleased]`, then promote to `[X.Y.Z] — YYYY-MM-DD`.
 3. Run `bash scripts/verify-release.sh` and `RUN_LIVE_TESTS=1 make test-live`.
 4. Commit, tag (`git tag vX.Y.Z`), push tag.
-5. CI builds and uploads to PyPI on tag push.
 
-Per `feedback_pypi_push.md`: every GitHub push of an AgentSuite release is paired with a PyPI publish.
-
-### One-time PyPI Trusted Publishing setup
-
-1. Go to https://pypi.org/manage/account/publishing/
-2. Add a new pending publisher:
-   - PyPI Project Name: `agentsuite`
-   - Owner: `scottconverse`
-   - Repository: `AgentSuite`
-   - Workflow: `release.yml`
-   - Environment: (leave blank)
-3. After the first release, the publisher becomes active automatically.
+AgentSuite does not publish to PyPI. Releases are distributed via GitHub only.
 
 ## Code style
 

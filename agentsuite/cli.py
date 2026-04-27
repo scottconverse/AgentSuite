@@ -11,6 +11,7 @@ import typer
 
 from agentsuite.agents.registry import default_registry
 from agentsuite.kernel.state_store import StateStore
+from agentsuite.llm.resolver import NoProviderConfigured, resolve_provider
 
 
 app = typer.Typer(help="AgentSuite — reasoning agents for vague intent → precise artifacts")
@@ -44,9 +45,11 @@ def _resolve_llm_for_cli() -> Any:
     if factory:
         module_name, fn_name = factory.split(":", 1)
         return getattr(importlib.import_module(module_name), fn_name)()
-    from agentsuite.llm.resolver import resolve_provider
-
-    return resolve_provider()
+    try:
+        return resolve_provider()
+    except NoProviderConfigured as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1)
 
 
 @founder_app.command("run")
@@ -206,6 +209,7 @@ def engineering_run_cmd(
     problem_domain: str = typer.Option(..., help="What problem does this system solve"),
     tech_stack: str = typer.Option(..., help="e.g. 'Python + FastAPI + PostgreSQL + Redis'"),
     scale_requirements: str = typer.Option(..., help="e.g. '10k RPM, 99.9% uptime, <200ms p99'"),
+    project_slug: Optional[str] = typer.Option(None, "--project-slug", help="Project slug for _kernel/ promotion"),
     inputs_dir: Optional[Path] = typer.Option(None, help="Dir with existing docs, ADRs, runbooks"),
     run_id: Optional[str] = typer.Option(None, help="Run ID (auto-generated if omitted)"),
 ) -> None:
@@ -233,11 +237,25 @@ def engineering_run_cmd(
     }, indent=2, default=str))
 
 
+@engineering_app.command("approve")
+def engineering_approve_cmd(
+    run_id: str = typer.Option(..., help="Run ID to approve"),
+    approver: str = typer.Option(..., help="Approver name"),
+    project_slug: str = typer.Option(..., help="Project slug"),
+) -> None:
+    """Approve an Engineering Agent run and promote artifacts."""
+    from agentsuite.agents.engineering.agent import EngineeringAgent
+    agent = EngineeringAgent(output_root=_output_root(), llm=_resolve_llm_for_cli())
+    agent.approve(run_id=run_id, approver=approver, project_slug=project_slug)
+    typer.echo(f"Approved {run_id} by {approver}")
+
+
 @marketing_app.command("run")
 def marketing_run_cmd(
     brand_name: str = typer.Option(..., help="Name of the brand or product being marketed"),
     campaign_goal: str = typer.Option(..., help="What the campaign is trying to achieve"),
     target_market: str = typer.Option(..., help="Who the campaign is targeting"),
+    project_slug: Optional[str] = typer.Option(None, "--project-slug", help="Project slug for _kernel/ promotion"),
     inputs_dir: Optional[Path] = typer.Option(None, help="Dir with existing brand assets, briefs, research docs"),
     budget_range: str = typer.Option("", help="e.g. '$50k–$100k over 3 months'"),
     timeline: str = typer.Option("", help="e.g. 'Q3 2024, 12-week campaign'"),
@@ -268,6 +286,19 @@ def marketing_run_cmd(
         "brand_name": brand_name,
         "cost_usd": result.cost_so_far.usd,
     }, indent=2, default=str))
+
+
+@marketing_app.command("approve")
+def marketing_approve_cmd(
+    run_id: str = typer.Option(..., help="Run ID to approve"),
+    approver: str = typer.Option(..., help="Approver name"),
+    project_slug: str = typer.Option(..., help="Project slug"),
+) -> None:
+    """Approve a Marketing Agent run and promote artifacts."""
+    from agentsuite.agents.marketing.agent import MarketingAgent
+    agent = MarketingAgent(output_root=_output_root(), llm=_resolve_llm_for_cli())
+    agent.approve(run_id=run_id, approver=approver, project_slug=project_slug)
+    typer.echo(f"Approved {run_id} by {approver}")
 
 
 @trust_risk_app.command("run")

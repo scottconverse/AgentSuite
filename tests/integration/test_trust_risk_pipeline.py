@@ -11,8 +11,8 @@ from agentsuite.agents.registry import default_registry
 from agentsuite.agents.trust_risk.agent import TrustRiskAgent
 from agentsuite.agents.trust_risk.input_schema import TrustRiskAgentInput
 from agentsuite.agents.trust_risk.rubric import TRUST_RISK_RUBRIC
-from agentsuite.agents.trust_risk.stages.spec import SPEC_ARTIFACTS
-from agentsuite.llm.mock import _default_mock_for_cli
+from agentsuite.agents.trust_risk.stages.spec import SPEC_ARTIFACTS, ConsistencyCheckFailed
+from agentsuite.llm.mock import MockLLMProvider, _default_mock_for_cli
 
 
 @pytest.mark.skipif(
@@ -111,3 +111,34 @@ def test_trust_risk_agent_via_registry(tmp_path: Path) -> None:
     assert "threat" in threat_model_text.lower() or "risk" in threat_model_text.lower(), (
         "threat-model.md does not contain expected security/risk content"
     )
+
+
+def test_trust_risk_consistency_check_failure_raises(tmp_path: Path) -> None:
+    """When consistency check returns a critical finding, ConsistencyCheckFailed is raised."""
+    base = _default_mock_for_cli()
+    # Remove the existing key that would match trust-risk consistency check.
+    # TrustRisk spec.py system: "You are checking 9 trust-risk-agent artifacts for consistency."
+    # Default mock key (full string): "You are checking 9 trust-risk-agent artifacts for consistency. Return ONLY JSON."
+    existing_key = "You are checking 9 trust-risk-agent artifacts for consistency. Return ONLY JSON."
+    patched_responses = {k: v for k, v in base.responses.items() if k != existing_key}
+    critical_response = json.dumps({
+        "mismatches": [
+            {
+                "dimension": "control_coverage",
+                "severity": "critical",
+                "detail": "Threat model identifies risk not covered by control framework",
+            }
+        ]
+    })
+    patched_responses["checking 9 trust-risk-agent artifacts for consistency"] = critical_response
+    llm = MockLLMProvider(responses=patched_responses)
+
+    agent = TrustRiskAgent(output_root=tmp_path, llm=llm)
+    inp = TrustRiskAgentInput(
+        user_request="test consistency failure",
+        product_name="SecureApp",
+        risk_domain="cloud infrastructure",
+        stakeholder_context="CISO and risk team",
+    )
+    with pytest.raises(ConsistencyCheckFailed):
+        agent.run(request=inp, run_id="trust-risk-consistency-fail")

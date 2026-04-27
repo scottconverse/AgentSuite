@@ -51,9 +51,9 @@
   <p>AgentSuite codifies the operating system around AI generation. Each agent walks a six-stage pipeline (intake → extract → spec → execute → qa → approval), persists 26 artifacts to disk, and promotes approved output into a long-lived <code>_kernel/</code> that downstream agents consume. The result is a reusable creative-ops or product-ops layer, not a one-off content generator.</p>
 
   <h2>Install</h2>
-  <pre><code>pip install agentsuite
+  <pre><code>pip install git+https://github.com/scottconverse/AgentSuite.git
 # or, no install:
-uvx agentsuite-mcp</code></pre>
+uvx --from git+https://github.com/scottconverse/AgentSuite.git agentsuite-mcp</code></pre>
 
   <h2>Quick start (CLI)</h2>
   <pre><code>export ANTHROPIC_API_KEY=sk-ant-...

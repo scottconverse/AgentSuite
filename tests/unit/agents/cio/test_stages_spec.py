@@ -29,7 +29,7 @@ _EXTRACTED = {
 }
 
 _CONSISTENCY_OK = json.dumps({
-    "checks": [
+    "mismatches": [
         {
             "dimension": "strategic_alignment",
             "status": "ok",
@@ -40,7 +40,7 @@ _CONSISTENCY_OK = json.dumps({
 })
 
 _CONSISTENCY_CRITICAL = json.dumps({
-    "checks": [
+    "mismatches": [
         {
             "dimension": "budget_roadmap_alignment",
             "status": "mismatch",
@@ -51,7 +51,7 @@ _CONSISTENCY_CRITICAL = json.dumps({
 })
 
 _CONSISTENCY_WARNING = json.dumps({
-    "checks": [
+    "mismatches": [
         {
             "dimension": "vendor_governance",
             "status": "mismatch",

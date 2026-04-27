@@ -64,6 +64,8 @@ include = ["agentsuite*"]
 "agentsuite.agents.marketing" = ["prompts/*.jinja2", "templates/*.md"]
 "agentsuite.agents.trust_risk" = ["prompts/*.jinja2", "templates/*.md"]
 "agentsuite.kernel" = ["prompts/*.jinja2"]
+"agentsuite.agents.product" = ["prompts/*.jinja2", "templates/*.md"]
+"agentsuite.agents.cio" = ["prompts/*.jinja2", "templates/*.md"]
 
 [tool.ruff]
 line-length = 100

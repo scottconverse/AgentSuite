@@ -135,7 +135,7 @@ def test_marketing_consistency_check_failure_raises(tmp_path: Path) -> None:
     patched_responses = dict(base.responses)
     consistency_key = "You are checking 9 marketing-agent artifacts for consistency. Return ONLY JSON."
     patched_responses[consistency_key] = json.dumps({
-        "checks": [
+        "mismatches": [
             {
                 "dimension": "audience_consistency",
                 "severity": "critical",

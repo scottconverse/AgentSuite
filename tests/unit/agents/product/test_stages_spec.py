@@ -28,7 +28,7 @@ _EXTRACTED = {
 }
 
 _CONSISTENCY_OK = json.dumps({
-    "checks": [
+    "mismatches": [
         {
             "dimension": "user personas",
             "status": "ok",
@@ -39,7 +39,7 @@ _CONSISTENCY_OK = json.dumps({
 })
 
 _CONSISTENCY_CRITICAL = json.dumps({
-    "checks": [
+    "mismatches": [
         {
             "dimension": "feature alignment",
             "status": "mismatch",
@@ -50,7 +50,7 @@ _CONSISTENCY_CRITICAL = json.dumps({
 })
 
 _CONSISTENCY_WARNING = json.dumps({
-    "checks": [
+    "mismatches": [
         {
             "dimension": "metrics traceability",
             "status": "mismatch",
@@ -115,7 +115,7 @@ def test_spec_runs_consistency_check(tmp_path: Path) -> None:
     report_path = writer.run_dir / "consistency_report.json"
     assert report_path.exists()
     report = json.loads(report_path.read_text(encoding="utf-8"))
-    assert "checks" in report
+    assert "mismatches" in report
 
 
 def test_spec_raises_on_critical_consistency_failure(tmp_path: Path) -> None:

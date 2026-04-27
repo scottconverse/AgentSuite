@@ -1,6 +1,7 @@
 """End-to-end Design pipeline integration test (mock LLM)."""
 from __future__ import annotations
 
+import json
 import os
 from pathlib import Path
 
@@ -8,9 +9,9 @@ import pytest
 
 from agentsuite.agents.design.agent import DesignAgent
 from agentsuite.agents.design.input_schema import DesignAgentInput
-from agentsuite.agents.design.stages.spec import SPEC_ARTIFACTS
+from agentsuite.agents.design.stages.spec import SPEC_ARTIFACTS, ConsistencyCheckFailed
 from agentsuite.agents.design.template_loader import TEMPLATE_NAMES
-from agentsuite.llm.mock import _default_mock_for_cli
+from agentsuite.llm.mock import MockLLMProvider, _default_mock_for_cli
 
 
 @pytest.mark.skipif(
@@ -60,6 +61,37 @@ def test_design_pipeline_emits_promoted_kernel_after_approval(tmp_path: Path) ->
     agent.approve(run_id="int-d2", approver="scott", project_slug="acme")
     kernel = tmp_path / "_kernel" / "acme"
     assert (kernel / "visual-direction.md").exists()
+
+
+def test_design_consistency_check_failure_raises(tmp_path: Path) -> None:
+    """When consistency check returns a critical finding, ConsistencyCheckFailed is raised."""
+    base = _default_mock_for_cli()
+    # Remove the existing "checking 9 artifacts" key so our critical override takes effect.
+    # Design spec.py system prompt contains "checking 9 artifacts for design consistency".
+    patched_responses = {k: v for k, v in base.responses.items() if k != "checking 9 artifacts"}
+    critical_response = json.dumps({
+        "mismatches": [
+            {
+                "dimension": "brand_voice_consistency",
+                "severity": "critical",
+                "detail": "Visual direction contradicts design-brief color palette",
+            }
+        ]
+    })
+    patched_responses["checking 9 artifacts for design consistency"] = critical_response
+    llm = MockLLMProvider(responses=patched_responses)
+
+    agent = DesignAgent(output_root=tmp_path, llm=llm)
+    inp = DesignAgentInput(
+        agent_name="design",
+        role_domain="design-ops",
+        user_request="test consistency failure",
+        target_audience="developers",
+        campaign_goal="launch",
+        channel="web",
+    )
+    with pytest.raises(ConsistencyCheckFailed):
+        agent.run(request=inp, run_id="design-consistency-fail")
 
 
 def test_design_pipeline_resume_from_spec(tmp_path: Path) -> None:

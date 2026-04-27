@@ -106,7 +106,7 @@ def _default_mock_for_cli(provider_name: str | None = None) -> "MockLLMProvider"
             "open_questions": ["What is the target launch date?", "Who owns the roadmap?"],
         }),
         "checking 9 product-agent artifacts": _json.dumps({
-            "checks": [
+            "mismatches": [
                 {"dimension": "persona_consistency", "status": "ok", "severity": "ok", "detail": "Personas consistent across PRD and story map"},
                 {"dimension": "feature_roadmap_alignment", "status": "ok", "severity": "ok", "detail": "Features in prioritization match roadmap"},
             ]
