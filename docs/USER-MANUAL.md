@@ -262,6 +262,101 @@ Inside `.agentsuite/runs/run-cli/brief-template-library/` you'll find eight fill
 - **Epic:** A large chunk of work that groups related user stories together. Think of it as a chapter heading — "User Onboarding" is an epic; "User sees a progress bar during setup" is a story inside it.
 - **KPI (Key Performance Indicator):** A number you track to know if something is working. For example, "percentage of users who complete setup within 7 days" is a KPI for an onboarding feature.
 
+## Using the Engineering Agent
+
+The Engineering Agent takes a system description and produces a complete set of technical planning documents — everything an engineering team needs to design, build, operate, and maintain a software system.
+
+### What it does
+
+In one sentence: you tell it the system name, the problem it solves, the technology stack, and the scale it needs to handle, and it writes nine specification documents and eight ready-to-fill templates in 30–120 seconds.
+
+### What you need to have ready
+
+**Required:**
+- **System name** — the name of the system or service you are designing (e.g. "Payment Processing Service")
+- **Problem domain** — one sentence describing the technical problem being solved (e.g. "Process and reconcile customer payments across multiple payment providers with guaranteed delivery")
+- **Tech stack** — the languages, frameworks, and databases you plan to use (e.g. "Python, FastAPI, PostgreSQL, Redis, Kubernetes")
+- **Scale requirements** — the load the system must handle (e.g. "10,000 transactions per minute, 99.99% uptime, sub-200ms p99 latency")
+
+**Optional (but helpful if you have them):**
+- Existing codebase documentation — architecture diagrams, API docs, README files (any `.txt`, `.md`, or `.pdf` files)
+- ADR history — past architecture decision records describing choices already made
+- Incident history — post-mortems or incident reports from related systems that inform risk areas
+
+None of the optional files are required. The agent produces useful output from the four required fields alone.
+
+### Step 1 — run the Engineering Agent
+
+```
+agentsuite engineering run --system-name "Payment Processing Service" --problem-domain "Process and reconcile customer payments across multiple payment providers with guaranteed delivery" --tech-stack "Python, FastAPI, PostgreSQL, Redis, Kubernetes" --scale-requirements "10,000 transactions per minute, 99.99% uptime, sub-200ms p99 latency"
+```
+
+The terminal prints a status block when it's done. It will say `"awaiting_approval"`.
+
+### Step 2 — review the nine output documents
+
+Open `.agentsuite/runs/run-cli/` in your file explorer. You'll see nine documents:
+
+| File | What it is |
+|---|---|
+| `architecture-decision-record.md` | Key architectural decisions with the context that drove them and the consequences of each choice. Start here. |
+| `system-design.md` | High-level system architecture — the major components, how they connect, and how data flows between them |
+| `api-spec.md` | API contracts: every endpoint, what you send it, and what it sends back |
+| `data-model.md` | The data entities (tables, collections, objects), how they relate to each other, and where they are stored |
+| `security-review.md` | Threat model, security controls in place, and a ranked assessment of remaining risks |
+| `deployment-plan.md` | Infrastructure layout, how the system gets deployed, and the configuration it needs to run |
+| `runbook.md` | Step-by-step operational procedures for common tasks and how to respond to incidents |
+| `tech-debt-register.md` | Known shortcuts and compromises, each with a priority level and a plan to address it |
+| `performance-requirements.md` | Service level agreements (SLAs), throughput targets, and what load the system must handle |
+
+Read `architecture-decision-record.md` first. If it reflects the right design direction, proceed to Step 3.
+
+### Step 3 — check your QA scores
+
+Open `qa_scores.json` in the same folder. Each document gets a score from 0 to 10. The pass threshold is 7.0. If any score is below 7.0, that document has a specific issue. Look for the `revision_instructions` field next to the low score — it tells you exactly what to change. You can edit the document by hand and re-run the QA step, or adjust your inputs and re-run the full agent.
+
+### Step 4 — approve
+
+```
+agentsuite engineering approve --run-id run-cli --approver yourname --project-slug payment-service
+```
+
+This copies the approved documents to `.agentsuite/_kernel/payment-service/` where they live permanently and can be used in future sessions.
+
+### The eight brief templates
+
+Inside `.agentsuite/runs/run-cli/brief-template-library/` you'll find eight fill-in-the-blank templates for common engineering tasks:
+
+| Template | When to use it |
+|---|---|
+| `sprint-ticket.md` | Write a well-scoped ticket for a sprint — includes acceptance criteria and definition of done |
+| `code-review-checklist.md` | Step-by-step checklist for reviewing a pull request consistently |
+| `incident-report.md` | Document an incident while it's happening — timeline, impact, actions taken |
+| `capacity-plan.md` | Estimate the infrastructure needed to meet growth targets over the next quarter or year |
+| `oncall-handoff.md` | Hand off on-call responsibilities with context on current issues and watch items |
+| `release-checklist.md` | Everything to verify before, during, and after deploying a release |
+| `postmortem.md` | Post-incident review — what happened, why, what changes prevent recurrence |
+| `vendor-evaluation.md` | Structured evaluation of a third-party tool, library, or service |
+
+### Common errors and what they mean
+
+| Error | What it means | What to do |
+|---|---|---|
+| `ConsistencyCheckFailed` | Two of the nine documents contradict each other (e.g. different scale targets in `system-design.md` vs. `performance-requirements.md`) | Make your `--scale-requirements` and `--tech-stack` descriptions more specific, then re-run |
+| Low QA scores (below 7.0) | A document is missing important detail or is too vague | Open `qa_scores.json`, read `revision_instructions`, edit the flagged document by hand or add more input context and re-run |
+| `NoProviderConfigured` | No API key found and Ollama isn't running | Set an API key (Step 2 above) or start Ollama (Step 2b above) |
+| `HardCapExceeded: $5.00` | The run cost more than the safety limit | Reduce the size of your input files, or raise the cap: `set AGENTSUITE_COST_CAP_USD=10` |
+| `extract stage produced invalid JSON` | The AI returned a formatting error | Re-run — this resolves itself almost every time |
+
+### Glossary additions
+
+- **ADR (Architecture Decision Record):** A short document capturing a single architectural choice — what was decided, why, what alternatives were considered, and what the consequences are. ADRs are written once and kept forever as a log of how the system's design evolved.
+- **SLA (Service Level Agreement):** A formal commitment about system behavior — typically uptime percentage (e.g. 99.9%), response time (e.g. under 200ms), or error rate (e.g. fewer than 0.1% of requests fail).
+- **Threat model:** A structured way of asking "what could go wrong, and who might cause it?" A threat model lists the ways an attacker or a failure could harm the system, ranked by likelihood and impact.
+- **Tech debt:** Code, design choices, or shortcuts that work now but will cost more to maintain or change later. Not inherently bad — sometimes the right trade-off — but it needs to be tracked and addressed deliberately.
+- **Runbook:** A set of step-by-step instructions for operating a system. Good runbooks let any engineer — not just the person who built the system — handle common tasks and incidents without guessing.
+- **Postmortem:** A blame-free review conducted after an incident. The goal is to understand what happened, why, and what changes prevent it from happening again — not to find someone at fault.
+
 ## Where to get help
 
 - Open an issue: https://github.com/scottconverse/AgentSuite/issues
