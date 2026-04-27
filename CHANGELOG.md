@@ -4,6 +4,20 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-04-26
+
+### Added
+- **Product Agent** (`agentsuite product run / approve`) — five-stage pipeline generating 9 specification artifacts and 8 brief templates
+  - Stage 1 — Intake: classifies uploaded research docs and competitor teardowns; produces `inputs_manifest.json`
+  - Stage 2 — Extract: LLM extracts user pain points, competitor gaps, market signals, technical constraints, assumed non-goals, and open questions into `extracted_context.json`
+  - Stage 3 — Spec: generates 9 PM artifacts — PRD, user story map, feature prioritization, success metrics, competitive analysis, user personas, acceptance criteria, product roadmap, risk register — plus a cross-artifact consistency check
+  - Stage 4 — Execute: renders 8 brief templates (sprint planning, stakeholder update, launch announcement, feature spec, user interview guide, A/B test plan, demo script, investor update) into `brief-template-library/`
+  - Stage 5 — QA: scores against a 9-dimension `PRODUCT_RUBRIC` (problem_clarity, user_grounding, scope_discipline, metric_specificity, feasibility_awareness, anti_feature_creep, acceptance_completeness, stakeholder_clarity, roadmap_sequencing); pass threshold 7.0
+- **MCP tools**: `product_run`, `product_resume`, `product_approve`, `product_get_status`, `product_list_runs` + 5 stage tools
+- **Skill**: `product-agent` skill with `/product-agent` slash command
+- **Golden test**: `tests/golden/test_product_acme_app.py` with frozen `acme-app` fixture
+- **Integration tests**: full pipeline, approval promotion, and resume-from-spec E2E tests
+
 ## [0.2.0] — 2026-04-26
 
 ### Added
@@ -57,6 +71,7 @@ Initial release.
 - Per-run cost cap only; per-day cap deferred.
 - Single MCP server with env-gated agent enablement (no per-agent server topology).
 
-[Unreleased]: https://github.com/scottconverse/AgentSuite/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/scottconverse/AgentSuite/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/scottconverse/AgentSuite/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/scottconverse/AgentSuite/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/scottconverse/AgentSuite/releases/tag/v0.1.0
