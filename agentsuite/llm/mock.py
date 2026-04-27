@@ -61,6 +61,7 @@ def _default_mock_for_cli(provider_name: str | None = None) -> "MockLLMProvider"
     from agentsuite.agents.product.stages.spec import SPEC_ARTIFACTS as _PRODUCT_SPEC_ARTIFACTS
     from agentsuite.agents.engineering.rubric import ENGINEERING_RUBRIC
     from agentsuite.agents.engineering.stages.spec import SPEC_ARTIFACTS as _ENGINEERING_SPEC_ARTIFACTS
+    from agentsuite.agents.marketing.stages.spec import SPEC_ARTIFACTS as _MARKETING_SPEC_ARTIFACTS
 
     extracted = {
         # Founder extract fields
@@ -153,4 +154,12 @@ def _default_mock_for_cli(provider_name: str | None = None) -> "MockLLMProvider"
         key = f"writing {stem}.md for an engineering team"
         if key not in responses:
             responses[key] = f"# {stem}\n\nMock engineering content."
+    for stem in _MARKETING_SPEC_ARTIFACTS:
+        key = f"writing {stem}.md for a marketing team"
+        if key not in responses:
+            responses[key] = f"# {stem.replace('-', ' ').title()}\n\nMock marketing content."
+    responses.setdefault(
+        "checking 9 marketing-agent artifacts",
+        _json.dumps({"checks": [{"dimension": "messaging alignment", "status": "ok", "severity": "ok", "detail": "No issues found."}]}),
+    )
     return MockLLMProvider(responses=responses, name=provider_name or "mock")
