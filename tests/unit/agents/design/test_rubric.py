@@ -11,8 +11,8 @@ def test_rubric_name_is_design():
     assert _rubric is DESIGN_RUBRIC
 
 
-def test_rubric_has_seven_dimensions():
-    assert len(DESIGN_RUBRIC.dimensions) == 7
+def test_rubric_has_nine_dimensions():
+    assert len(DESIGN_RUBRIC.dimensions) == 9
 
 
 def test_rubric_pass_threshold_is_7_0():

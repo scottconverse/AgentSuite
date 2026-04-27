@@ -7,32 +7,40 @@ from agentsuite.kernel.qa import QARubric, RubricDimension
 DESIGN_RUBRIC = QARubric(
     dimensions=[
         RubricDimension(
-            name="message_clarity",
-            question="Does the brief make the value proposition unambiguous in one read?",
+            name="spec_completeness",
+            question="Are all required sections present and substantively filled? No placeholder text, no TBD sections.",
         ),
         RubricDimension(
-            name="brand_fit",
-            question="Does the output match extracted brand voice and visual identity?",
+            name="brand_fidelity",
+            question="Do visual choices faithfully reflect the extracted brand system? Are colors, typography, and voice consistent?",
         ),
         RubricDimension(
-            name="typography_hierarchy",
-            question="Do type scale, weight, and line-height create a clear scan order?",
+            name="audience_fit",
+            question="Does the creative direction speak to the target audience's actual visual sophistication and preferences?",
         ),
         RubricDimension(
-            name="accessibility",
-            question="Are color contrast, focus states, font size, and alt text all addressed?",
+            name="craft_specificity",
+            question="Are directions specific enough for a designer to execute without asking follow-up questions?",
         ),
         RubricDimension(
-            name="format_compliance",
-            question="Does the output respect channel constraints (dimensions, file format, etc)?",
-        ),
-        RubricDimension(
-            name="production_readiness",
-            question="Can the asset be produced without further design rework?",
+            name="accessibility_rigor",
+            question="Are WCAG AA requirements explicitly addressed in the QA and audit documents?",
         ),
         RubricDimension(
             name="anti_genericity",
-            question="Does this avoid clichés and SaaS-default treatments, reflecting strategic fit?",
+            question="Are generic design clichés absent? Penalize 'clean and modern', 'bold and beautiful', 'minimalist yet impactful'.",
+        ),
+        RubricDimension(
+            name="revision_actionability",
+            question="Are revision instructions and QA findings specific, numbered, and executable without interpretation?",
+        ),
+        RubricDimension(
+            name="consistency",
+            question="Do typography hierarchy, color palette, and audience description match across all artifacts?",
+        ),
+        RubricDimension(
+            name="image_prompt_precision",
+            question="Does the image generation prompt specify layout, hierarchy, and technical parameters — not just mood?",
         ),
     ],
     pass_threshold=7.0,
