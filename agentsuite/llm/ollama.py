@@ -13,8 +13,12 @@ class OllamaProvider:
 
     def __init__(self, client: Any | None = None, *, default_model: str = "gemma4:e4b") -> None:
         if client is None:
-            import ollama as _ollama
-
+            try:
+                import ollama as _ollama
+            except ImportError as exc:
+                raise ImportError(
+                    "ollama package is not installed. Install it with: pip install ollama"
+                ) from exc
             client = _ollama.Client()
         self.client = client
         self._default_model = default_model

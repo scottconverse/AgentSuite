@@ -1,9 +1,19 @@
 """Unit tests for llm.resolver."""
+import sys
+from unittest.mock import MagicMock
+
 import pytest
 
 from agentsuite.llm.anthropic import AnthropicProvider
 from agentsuite.llm.openai import OpenAIProvider
 from agentsuite.llm.resolver import NoProviderConfigured, resolve_provider
+
+
+def _make_ollama_mock() -> MagicMock:
+    """Return a minimal mock of the ollama package."""
+    mock_pkg = MagicMock()
+    mock_pkg.Client.return_value = MagicMock()
+    return mock_pkg
 
 
 def test_resolver_uses_explicit_provider_arg(monkeypatch):
@@ -58,7 +68,10 @@ def test_resolver_falls_back_to_ollama_when_no_keys(monkeypatch):
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
     monkeypatch.setattr("agentsuite.llm.resolver._ollama_daemon_running", lambda: True)
-    p = resolve_provider()
+    mock_ollama = _make_ollama_mock()
+    with pytest.MonkeyPatch().context() as mp:
+        mp.setitem(sys.modules, "ollama", mock_ollama)
+        p = resolve_provider()
     assert isinstance(p, OllamaProvider)
 
 
@@ -66,7 +79,10 @@ def test_resolver_named_ollama_works(monkeypatch):
     from agentsuite.llm.ollama import OllamaProvider
 
     monkeypatch.setattr("agentsuite.llm.resolver._ollama_daemon_running", lambda: True)
-    p = resolve_provider("ollama")
+    mock_ollama = _make_ollama_mock()
+    with pytest.MonkeyPatch().context() as mp:
+        mp.setitem(sys.modules, "ollama", mock_ollama)
+        p = resolve_provider("ollama")
     assert isinstance(p, OllamaProvider)
 
 
