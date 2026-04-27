@@ -1,0 +1,23 @@
+{
+  "required_artifacts": [
+    "threat-model.md",
+    "risk-register.md",
+    "control-framework.md",
+    "incident-response-plan.md",
+    "compliance-matrix.md",
+    "vendor-risk-assessment.md",
+    "security-policy.md",
+    "audit-readiness-report.md",
+    "residual-risk-acceptance.md"
+  ],
+  "required_brief_templates": [
+    "breach-notification.md",
+    "executive-risk-summary.md",
+    "penetration-test-brief.md",
+    "remediation-tracker.md",
+    "risk-acceptance-form.md",
+    "security-awareness-brief.md",
+    "tabletop-exercise-scenario.md",
+    "vendor-security-questionnaire.md"
+  ]
+}
