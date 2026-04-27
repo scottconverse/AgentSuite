@@ -1,0 +1,75 @@
+"""Golden test: full Engineering run against the acme-platform fixture (mocked LLM)."""
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+from agentsuite.agents.engineering.agent import EngineeringAgent
+from agentsuite.agents.engineering.input_schema import EngineeringAgentInput
+from agentsuite.llm.mock import _default_mock_for_cli
+
+
+SNAPSHOT_DIR = Path(__file__).parent / "snapshots" / "engineering" / "acme-platform"
+
+
+def _load_snapshot(name: str) -> dict:
+    return json.loads((SNAPSHOT_DIR / name).read_text(encoding="utf-8"))
+
+
+def _run_engineering(tmp_path: Path):
+    agent = EngineeringAgent(output_root=tmp_path, llm=_default_mock_for_cli())
+    inp = EngineeringAgentInput(
+        agent_name="engineering",
+        role_domain="engineering-ops",
+        user_request="acme platform engineering spec",
+        system_name="Acme Platform",
+        problem_domain="E-commerce backend",
+        tech_stack="Python, FastAPI, PostgreSQL",
+        scale_requirements="10k concurrent users",
+    )
+    state = agent.run(request=inp, run_id="golden-acme-platform")
+    return state, tmp_path / "runs" / "golden-acme-platform"
+
+
+def test_golden_engineering_required_artifacts_present(tmp_path: Path) -> None:
+    structure = _load_snapshot("structure.json")
+    _, run_dir = _run_engineering(tmp_path)
+    for name in structure["required_artifacts"]:
+        assert (run_dir / name).exists(), f"missing {name}"
+    for tmpl in structure["required_brief_templates"]:
+        assert (run_dir / "brief-template-library" / tmpl).exists(), f"missing brief {tmpl}"
+
+
+def test_golden_engineering_reaches_approval(tmp_path: Path) -> None:
+    state, _ = _run_engineering(tmp_path)
+    assert state.stage == "approval"
+
+
+def test_golden_engineering_spec_artifact_non_empty(tmp_path: Path) -> None:
+    """Under mock LLM, body is a scaffold string — assert non-emptiness only."""
+    _, run_dir = _run_engineering(tmp_path)
+    body = (run_dir / "architecture-decision-record.md").read_text(encoding="utf-8")
+    assert len(body) > 0
+
+
+def test_golden_engineering_brief_template_library_complete(tmp_path: Path) -> None:
+    """Verify brief-template-library exists and all 8 templates are non-empty."""
+    structure = _load_snapshot("structure.json")
+    _, run_dir = _run_engineering(tmp_path)
+    library = run_dir / "brief-template-library"
+    assert library.exists(), "brief-template-library directory missing"
+    for tmpl_name in structure["required_brief_templates"]:
+        tmpl_path = library / tmpl_name
+        assert tmpl_path.exists(), f"missing brief template: {tmpl_name}"
+        body = tmpl_path.read_text(encoding="utf-8")
+        assert len(body) > 0, f"{tmpl_name} is empty"
+
+
+def test_golden_engineering_qa_scores_json_valid(tmp_path: Path) -> None:
+    """QA scores JSON must be parseable and contain 'passed' and 'scores' keys."""
+    _, run_dir = _run_engineering(tmp_path)
+    scores_path = run_dir / "qa_scores.json"
+    assert scores_path.exists()
+    data = json.loads(scores_path.read_text(encoding="utf-8"))
+    assert "passed" in data, "'passed' key missing from qa_scores.json"
+    assert "scores" in data, "'scores' key missing from qa_scores.json"

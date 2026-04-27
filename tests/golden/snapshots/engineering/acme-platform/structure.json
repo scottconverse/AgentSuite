@@ -1,0 +1,30 @@
+{
+  "required_artifacts": [
+    "_state.json",
+    "inputs_manifest.json",
+    "extracted_context.json",
+    "consistency_report.json",
+    "export-manifest-template.json",
+    "qa_report.md",
+    "qa_scores.json",
+    "architecture-decision-record.md",
+    "system-design.md",
+    "api-spec.md",
+    "data-model.md",
+    "security-review.md",
+    "deployment-plan.md",
+    "runbook.md",
+    "tech-debt-register.md",
+    "performance-requirements.md"
+  ],
+  "required_brief_templates": [
+    "sprint-ticket.md",
+    "code-review-checklist.md",
+    "incident-report.md",
+    "capacity-plan.md",
+    "oncall-handoff.md",
+    "release-checklist.md",
+    "postmortem.md",
+    "vendor-evaluation.md"
+  ]
+}
