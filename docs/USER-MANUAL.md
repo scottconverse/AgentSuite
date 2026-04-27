@@ -551,6 +551,100 @@ Inside `.agentsuite/runs/run-cli/brief-template-library/` you'll find eight fill
 - **Tabletop exercise:** A discussion-based simulation in which the security response team walks through a hypothetical incident scenario together. No systems are touched — the goal is to identify gaps in the incident response plan before a real event forces them to the surface.
 - **Penetration test (pen test):** A controlled, authorized attempt to breach a system's defenses. A pen test brief specifies the scope (which systems), the rules of engagement (what's allowed), and what the tester should report.
 
+## Using the CIO Agent
+
+The CIO Agent takes an organization name, strategic priorities, and IT maturity level and produces a complete set of IT strategy and governance documents — everything a CIO, IT director, or technology steering committee needs to plan, communicate, and govern technology investment.
+
+### What it does
+
+In one sentence: you tell it the organization name, what the business is trying to achieve, and how mature the IT function currently is, and it writes nine IT strategy and governance documents and eight ready-to-fill brief templates in 30–120 seconds.
+
+### What you need to have ready
+
+**Required:**
+- **Organization name** — the name of your company or department (e.g. "Acme Manufacturing Co.")
+- **Strategic priorities** — two or three sentences describing what the business is trying to achieve in the next one to three years (e.g. "Expand into two new markets, reduce operational costs by 15%, and improve customer self-service capabilities")
+- **IT maturity level** — an honest description of where the IT function stands today (e.g. "Reactive — we fix things when they break; no formal architecture or governance process in place" or "Managed — we have documented processes but they are not consistently followed")
+
+**Optional (but helpful if you have them):**
+- Existing IT documentation — current architecture diagrams, vendor contracts summary, IT org charts, or past roadmaps (any `.txt`, `.md`, or `.pdf` files)
+- Budget context — approximate IT budget and how it is currently split (e.g. "roughly $4M/year, 80% on keeping the lights on")
+- Regulatory or compliance context — any regulatory requirements that affect IT (e.g. "SOC 2, HIPAA, state data residency laws")
+
+None of the optional inputs are required. The agent produces useful output from the three required fields alone.
+
+### Step 1 — run the CIO Agent
+
+```
+agentsuite cio run --organization-name "Acme Manufacturing Co." --strategic-priorities "Expand into two new markets, reduce operational costs by 15%, and improve customer self-service capabilities" --it-maturity-level "Reactive — we fix things when they break; no formal architecture or governance process in place"
+```
+
+The terminal prints a status block when it's done. It will say `"awaiting_approval"`.
+
+### Step 2 — review the nine output documents
+
+Open `.agentsuite/runs/run-cli/` in your file explorer. You'll see nine documents:
+
+| File | What it is |
+|---|---|
+| `it-strategy.md` | The primary document — a multi-year IT strategy aligned to the business priorities you provided. Start here. |
+| `technology-roadmap.md` | A time-phased view of technology investments, retirements, and capability milestones across the planning horizon |
+| `vendor-portfolio.md` | A structured inventory of technology vendors with spend estimates, risk ratings, and strategic fit assessments |
+| `digital-transformation-plan.md` | A sequenced plan for digitizing processes, modernizing platforms, and evolving the operating model |
+| `it-governance-framework.md` | Decision rights, escalation paths, and a charter for the IT steering committee |
+| `enterprise-architecture.md` | A current-state and target-state view of the application, data, infrastructure, and integration landscape |
+| `budget-allocation-model.md` | An IT budget breakdown across run (keep the lights on), grow (incremental improvements), and transform (strategic change) categories |
+| `workforce-development-plan.md` | A skills gap analysis, training roadmap, and hiring plan for the IT organization |
+| `it-risk-appetite-statement.md` | A formal statement of the organization's tolerance for IT and technology risk, for use in governance and audit conversations |
+
+Read `it-strategy.md` first. If it reflects the right direction for the organization, proceed to Step 3.
+
+### Step 3 — check your QA scores
+
+Open `qa_scores.json` in the same folder. Each document gets a score from 0 to 10. The pass threshold is 7.0. If any score is below 7.0, look for the `revision_instructions` field next to the low score — it tells you exactly what to change. You can edit the document by hand and re-run the QA step, or adjust your inputs and re-run the full agent.
+
+### Step 4 — approve
+
+```
+agentsuite cio approve --run-id run-cli --approver yourname --project-slug acme-it
+```
+
+This copies the approved documents to `.agentsuite/_kernel/acme-it/` where they live permanently and can be used in future sessions.
+
+### The eight brief templates
+
+Inside `.agentsuite/runs/run-cli/brief-template-library/` you'll find eight fill-in-the-blank templates for common CIO communication tasks:
+
+| Template | When to use it |
+|---|---|
+| `board-technology-briefing.md` | Present the technology strategy and major IT decisions to the board of directors |
+| `it-steering-committee-agenda.md` | Run a structured IT steering committee meeting with the right discussion items and decision points |
+| `vendor-review-summary.md` | Summarize a vendor review for stakeholders — performance, cost, risk, and renewal recommendation |
+| `project-portfolio-status.md` | Give leadership a clear view of all active IT projects: status, budget, risks, and decisions needed |
+| `digital-initiative-proposal.md` | Propose a new digital initiative with business case, expected outcomes, and resource requirements |
+| `it-investment-case.md` | Build the case for a specific IT investment — cost, benefit, risk, and alternatives |
+| `technology-modernization-pitch.md` | Make the case for replacing or upgrading a legacy system to a non-technical executive audience |
+| `quarterly-it-review.md` | Quarterly report to leadership on IT performance, spend, projects, and risks |
+
+### Common errors and what they mean
+
+| Error | What it means | What to do |
+|---|---|---|
+| `ConsistencyCheckFailed` | Two of the nine documents contradict each other (e.g. the budget model allocates more to transformation than the maturity level supports) | Make your `--strategic-priorities` and `--it-maturity-level` descriptions more specific, then re-run |
+| Low QA scores (below 7.0) | A document is missing important detail or is too vague | Open `qa_scores.json`, read `revision_instructions`, edit the flagged document by hand or add more input context and re-run |
+| `NoProviderConfigured` | No API key found and Ollama isn't running | Set an API key (Step 2 above) or start Ollama (Step 2b above) |
+| `HardCapExceeded: $5.00` | The run cost more than the safety limit | Reduce the size of your input files, or raise the cap: `set AGENTSUITE_COST_CAP_USD=10` |
+| `extract stage produced invalid JSON` | The AI returned a formatting error | Re-run — this resolves itself almost every time |
+
+### Glossary additions
+
+- **IT maturity level:** A description of how well-developed the IT function is. Common levels run from "reactive" (fixing problems as they arise, no formal processes) through "managed" (documented processes, followed inconsistently) and "defined" (standardized and consistently followed) to "optimizing" (continuously measured and improved). Being honest about the current level helps the agent set realistic recommendations.
+- **Run / Grow / Transform budget split:** A way of categorizing IT spend by purpose. "Run" covers keeping existing systems operating (infrastructure, licenses, support). "Grow" covers incremental improvements to existing capabilities. "Transform" covers strategic initiatives that change the operating model. A typical mature IT organization spends roughly 70 / 20 / 10 across these categories, though the right split depends on the organization's strategy.
+- **Enterprise architecture:** A structured description of an organization's technology landscape — what applications exist, how data flows between them, what infrastructure they run on, and how they connect to each other and to external systems. A current-state architecture shows where things are today; a target-state architecture shows where they should be in two to three years.
+- **IT governance:** The system of decision rights and accountability structures that determines who can authorize IT investments, who sets technology standards, and how IT-related risks are managed. Good governance prevents shadow IT, reduces duplication, and ensures technology decisions align with business priorities.
+- **Digital transformation:** The process of replacing manual, paper-based, or legacy-technology processes with modern digital tools and ways of working. Transformation is not just about technology — it usually requires changes to processes, skills, and organizational structures as well.
+- **Vendor portfolio:** The complete set of technology vendors an organization relies on, with associated spend, contract terms, risk ratings, and strategic importance. Managing the portfolio actively — rather than letting contracts auto-renew — reduces cost, risk, and vendor lock-in.
+
 ## Where to get help
 
 - Open an issue: https://github.com/scottconverse/AgentSuite/issues

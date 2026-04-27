@@ -2,9 +2,9 @@
 
 > Seven role-specific reasoning agents that turn vague intent into precise operating artifacts.
 >
-> **v0.6.0** — Specification Kernel + Founder · Design · Product · Engineering · Marketing · Trust/Risk Agents
+> **v0.7.0** — Specification Kernel + Founder · Design · Product · Engineering · Marketing · Trust/Risk · CIO Agents
 
-AgentSuite is a Python package and MCP server. It exposes role-specific agents (Founder, Design, Product, Engineering, Marketing, and Trust/Risk shipped; CIO in a subsequent release) that take loose human intent and produce structured, reusable artifacts: brand systems, brief libraries, voice guides, prompt templates, engineering specs, and more.
+AgentSuite is a Python package and MCP server. It exposes role-specific agents (Founder, Design, Product, Engineering, Marketing, Trust/Risk, and CIO shipped) that take loose human intent and produce structured, reusable artifacts: brand systems, brief libraries, voice guides, prompt templates, engineering specs, IT strategies, and more.
 
 The agents are reasoning agents, not content generators. Output is a reusable system, not a one-off asset.
 
@@ -76,7 +76,7 @@ command = "uvx"
 args = ["agentsuite-mcp"]
 
 [servers.agentsuite.env]
-AGENTSUITE_ENABLED_AGENTS = "founder,design,product,engineering,marketing,trust-risk"
+AGENTSUITE_ENABLED_AGENTS = "founder,design,product,engineering,marketing,trust-risk,cio"
 ```
 
 Restart Codex. Tools `founder_run`, `founder_approve`, `founder_get_status`, `founder_list_runs`, `founder_resume`, plus the cross-agent `agentsuite_list_agents`, `agentsuite_kernel_artifacts`, `agentsuite_cost_report` are now callable.
@@ -91,7 +91,7 @@ Add to project-root `.mcp.json`:
     "agentsuite": {
       "command": "uvx",
       "args": ["agentsuite-mcp"],
-      "env": {"AGENTSUITE_ENABLED_AGENTS": "founder,design,product,engineering,marketing,trust-risk"}
+      "env": {"AGENTSUITE_ENABLED_AGENTS": "founder,design,product,engineering,marketing,trust-risk,cio"}
     }
   }
 }
@@ -140,6 +140,19 @@ Input: `product_name`, `risk_domain`, `stakeholder_context` (plus optional `regu
 
 Primary artifact: `threat-model.md`. On `trust_risk_approve`, all spec artifacts and brief templates are promoted to `.agentsuite/_kernel/<project_slug>/`.
 
+### CIO agent (v0.7.0) — 17 artifacts per run:
+
+Input: `organization_name`, `strategic_priorities`, `it_maturity_level`.
+
+| Stage | Artifacts |
+|---|---|
+| 3 spec | `it-strategy.md`, `technology-roadmap.md`, `vendor-portfolio.md`, `digital-transformation-plan.md`, `it-governance-framework.md`, `enterprise-architecture.md`, `budget-allocation-model.md`, `workforce-development-plan.md`, `it-risk-appetite-statement.md`, `consistency_report.json` |
+| 4 execute | `brief-template-library/` (8 brief templates: board-technology-briefing, it-steering-committee-agenda, vendor-review-summary, project-portfolio-status, digital-initiative-proposal, it-investment-case, technology-modernization-pitch, quarterly-it-review) + `export-manifest-template.json` |
+| 5 qa | `qa_report.md`, `qa_scores.json` |
+| state | `_state.json`, `_meta.json` |
+
+Primary artifact: `it-strategy.md`. On `cio_approve`, all spec artifacts and brief templates are promoted to `.agentsuite/_kernel/<project_slug>/`.
+
 ## Configuration
 
 | Env var | Default | Purpose |
@@ -186,9 +199,10 @@ Full architecture diagram with all agents: see `docs/README-FULL.pdf`.
 - v0.4.0 — Engineering Agent (architecture decisions, system design, API specs, security review, deployment, runbook, tech-debt register, performance requirements)
 - v0.5.0 — Marketing Agent (campaign brief, audience profile, messaging framework, content calendar, channel strategy, SEO keyword plan, competitive positioning, launch plan, measurement framework)
 - v0.6.0 — Trust/Risk Agent (threat model, risk register, control framework, incident response plan, compliance matrix, vendor risk assessment, security policy, audit readiness report, residual risk acceptance)
+- v0.7.0 — CIO Agent (IT strategy, technology roadmap, vendor portfolio, digital transformation plan, IT governance framework, enterprise architecture, budget allocation model, workforce development plan, IT risk appetite statement)
 
 **Roadmap:**
-- v0.7.0 — CIO Agent (vendor capability decomposition)
+- v0.8.0 — next agent
 
 ## Documentation
 

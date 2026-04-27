@@ -4,6 +4,24 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-04-27
+
+### Added
+- **CIO Agent** — 5-stage pipeline (intake → extract → spec → execute → qa) producing 9 IT strategy and governance artifacts:
+  - `it-strategy.md` — organization-wide IT strategy aligned to business priorities and maturity level (primary artifact)
+  - `technology-roadmap.md` — multi-horizon roadmap of technology investments, retirements, and capability milestones
+  - `vendor-portfolio.md` — structured inventory of technology vendors with spend, risk rating, and strategic fit assessment
+  - `digital-transformation-plan.md` — sequenced plan for digitizing processes, platforms, and operating models
+  - `it-governance-framework.md` — decision rights, escalation paths, and IT steering committee charter
+  - `enterprise-architecture.md` — current-state and target-state architecture across applications, data, infrastructure, and integration layers
+  - `budget-allocation-model.md` — IT budget breakdown across run/grow/transform categories with justification
+  - `workforce-development-plan.md` — skills gap analysis, training roadmap, and hiring plan for the IT organization
+  - `it-risk-appetite-statement.md` — formal statement of the organization's tolerance for IT and technology risk
+- **CIO brief templates** — 8 ready-to-fill templates: board-technology-briefing, it-steering-committee-agenda, vendor-review-summary, project-portfolio-status, digital-initiative-proposal, it-investment-case, technology-modernization-pitch, and quarterly-it-review.
+- **MCP tools** — 10 tools for the CIO agent (`agentsuite_cio_run`, `agentsuite_cio_approve`, `agentsuite_cio_list_runs`, `agentsuite_cio_get_artifact`, `agentsuite_cio_get_qa_scores`, plus 5 stage-level tools).
+- **CLI subcommand** — `agentsuite cio run` and `agentsuite cio approve`.
+- **Skill manifest** — `claude/skills/cio-agent/SKILL.md` with MCP snippet and install-skills.sh integration.
+
 ## [0.6.0] - 2026-04-27
 
 ### Added
@@ -109,7 +127,8 @@ Initial release.
 - Per-run cost cap only; per-day cap deferred.
 - Single MCP server with env-gated agent enablement (no per-agent server topology).
 
-[Unreleased]: https://github.com/scottconverse/AgentSuite/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/scottconverse/AgentSuite/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/scottconverse/AgentSuite/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/scottconverse/AgentSuite/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/scottconverse/AgentSuite/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/scottconverse/AgentSuite/compare/v0.3.0...v0.4.0
