@@ -1,5 +1,4 @@
 """Unit tests for AgentRegistry API hygiene."""
-import os
 import pytest
 from agentsuite.agents.registry import AgentRegistry, UnknownAgent
 
