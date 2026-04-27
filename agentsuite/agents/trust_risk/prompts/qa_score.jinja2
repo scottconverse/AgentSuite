@@ -1,0 +1,43 @@
+You are scoring trust-risk-agent artifacts against the TRUST_RISK_RUBRIC dimensions.
+
+Product name: {{ product_name }}
+Risk domain: {{ risk_domain }}
+Existing source docs available: {{ has_source_docs }}
+
+Artifacts (markdown text):
+{% for name, body in artifacts.items() %}
+=== {{ name }} ===
+{{ body }}
+
+{% endfor %}
+
+Score each TRUST_RISK_RUBRIC dimension 0.0–10.0:
+- threat_coverage: Does the assessment comprehensively identify threats across all relevant attack surfaces — network, application, identity, physical, and supply chain — rather than focusing on a narrow subset?
+- control_specificity: Are security controls concrete and implementable with specific technologies, configurations, and owners named — not vague policy statements like 'enforce least privilege'?
+- risk_quantification: Do risks have explicit likelihood and impact scores or a clear prioritization rationale? Are high-priority risks distinguishable from low-priority ones by more than intuition?
+- regulatory_alignment: Do the artifacts explicitly address applicable regulatory and compliance requirements, mapping controls to specific framework clauses or regulatory citations?
+- incident_readiness: Are incident response procedures actionable with defined roles, escalation paths, communication templates, and evidence-preservation steps — and have they been tested or tabletop-exercised?
+- zero_trust_posture: Are least-privilege and zero-trust principles applied throughout — with explicit verification steps, micro-segmentation, and no implicit trust granted based on network location or identity alone?
+- vendor_risk_awareness: Are third-party and supply chain risks explicitly identified, with vendor assessment criteria, contractual obligations, and monitoring processes defined?
+- audit_traceability: Are security decisions and controls traceable to specific requirements, evidence, or threat scenarios? Can an auditor follow the chain from threat to control to validation?
+- residual_risk_acceptance: Are remaining risks after controls explicitly acknowledged, with named risk owners, documented acceptance rationale, and planned review dates?
+
+Return JSON:
+{
+  "scores": {
+    "threat_coverage": 0.0,
+    "control_specificity": 0.0,
+    "risk_quantification": 0.0,
+    "regulatory_alignment": 0.0,
+    "incident_readiness": 0.0,
+    "zero_trust_posture": 0.0,
+    "vendor_risk_awareness": 0.0,
+    "audit_traceability": 0.0,
+    "residual_risk_acceptance": 0.0
+  },
+  "revision_instructions": ["specific actionable change"]
+}
+
+Be ruthless on residual_risk_acceptance — score 0.0 for any plan that leaves residual risks unacknowledged without named owners, documented rationale, and scheduled review dates.
+
+Return ONLY the JSON.

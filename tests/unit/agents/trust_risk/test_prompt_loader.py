@@ -12,6 +12,7 @@ from agentsuite.agents.trust_risk.prompt_loader import (
 EXPECTED_PROMPT_NAMES = [
     "extract",
     "intake",
+    "qa_score",
     "spec_audit_readiness_report",
     "spec_compliance_matrix",
     "spec_consistency_check",
@@ -25,14 +26,14 @@ EXPECTED_PROMPT_NAMES = [
 ]
 
 
-def test_list_prompts_count() -> None:
-    """list_prompts returns exactly 12 templates."""
+def test_list_prompts_returns_13() -> None:
+    """list_prompts returns exactly 13 templates."""
     prompts = list_prompts()
-    assert len(prompts) == 12, f"Expected 12, got {len(prompts)}: {prompts}"
+    assert len(prompts) == 13, f"Expected 13, got {len(prompts)}: {prompts}"
 
 
 def test_list_prompts_contains_all_names() -> None:
-    """All 12 expected prompt names are present."""
+    """All 13 expected prompt names are present."""
     prompts = list_prompts()
     for name in EXPECTED_PROMPT_NAMES:
         assert name in prompts, f"Missing expected prompt: {name}"
