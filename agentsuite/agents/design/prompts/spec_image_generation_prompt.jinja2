@@ -1,0 +1,53 @@
+You are writing image-generation-prompt.md — a stage-4 brief for an AI image generation system.
+
+Campaign goal: {{ campaign_goal }}
+Target audience: {{ target_audience }}
+Visual direction summary: {{ visual_direction_summary }}
+Deliverable: {{ deliverable_name }}
+Dimensions: {{ dimensions }}
+Brand voice: {{ brand_voice }}
+
+Your output is a structured prompt specification — not a prose description of what would be nice.
+
+Produce a markdown document with these sections:
+
+## 1. Primary Subject
+One sentence. What is the focal point of the image? Be literal and specific.
+
+## 2. Composition & Layout
+- Subject placement (rule of thirds, centered, asymmetric — specify)
+- Foreground / midground / background relationship
+- Safe zones for text overlay (top-left, bottom-third, etc. — be precise)
+- Aspect ratio and focal crop
+
+## 3. Lighting
+- Quality: hard / soft / diffused / directional
+- Source direction: top-left, overhead, backlit, etc.
+- Color temperature: warm (3000K), neutral (5500K), cool (7000K+)
+- Mood outcome: what the lighting should make the viewer feel
+
+## 4. Color Palette Enforcement
+- Dominant color: {{ dominant_color | default("derived from brand palette") }}
+- Accent color: {{ accent_color | default("none") }}
+- Colors to suppress (do not let these appear)
+
+## 5. Style & Rendering
+- Photographic / illustrative / 3D / abstract
+- Film stock or render quality reference (e.g., "Kodak Portra 400 grain", "flat vector", "octane render")
+- Texture preference
+- Post-processing direction (no filter, subtle grain, high contrast, matte)
+
+## 6. Negative Prompt Directives
+Explicit list of elements to exclude. Be specific:
+- Visual clichés to avoid
+- Text, watermarks, logos, artifacts
+- Competing brand aesthetics
+
+## 7. Final Prompt String
+The literal prompt string, formatted for direct use in Midjourney / DALL-E / Stable Diffusion:
+
+```
+[GENERATED PROMPT]
+```
+
+Return ONLY the markdown. No code fences except the prompt string block.

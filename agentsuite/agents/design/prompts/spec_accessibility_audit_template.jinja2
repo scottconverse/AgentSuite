@@ -1,0 +1,59 @@
+You are writing accessibility-audit.md — a structured audit of a design deliverable against WCAG 2.1 AA standards and platform-specific accessibility requirements.
+
+Campaign goal: {{ campaign_goal }}
+Deliverable: {{ deliverable_name }}
+Platform: {{ platform }}
+Design description or transcript:
+{{ design_description }}
+
+Produce a markdown document with these sections:
+
+## 1. Audit Summary
+Overall status: Pass / Fail / Conditional Pass
+Total issues: [Critical: N] [High: N] [Medium: N] [Low: N]
+
+## 2. Color Contrast (WCAG 1.4.3, 1.4.11)
+For each text / background combination found:
+| Element | Foreground | Background | Ratio | Required | Status |
+|---------|-----------|------------|-------|----------|--------|
+| Body text | | | | 4.5:1 | |
+| Large text (≥18pt/14pt bold) | | | | 3:1 | |
+| UI components | | | | 3:1 | |
+
+Flag any combination that fails. Provide the corrected hex value that achieves compliance.
+
+## 3. Text Legibility
+- [ ] Minimum body font size ≥16px (WCAG Advisory)
+- [ ] Line height ≥1.5× font size for body text
+- [ ] Character line length: 45–75 characters per line
+- [ ] Text not fully justified (causes uneven spacing for dyslexic readers)
+- [ ] Text rendering: no all-caps body text longer than 3 words
+
+## 4. Focus & Keyboard Navigation (for interactive deliverables)
+- [ ] Focus indicator visible on all interactive elements (min 3:1 contrast against adjacent colors)
+- [ ] Tab order logical and matches visual reading order
+- [ ] No keyboard traps
+- [ ] All actions achievable without mouse
+
+## 5. Images & Non-Text Content (WCAG 1.1.1)
+For each image/icon in the design:
+| Asset | Type | Alt text provided | Decorative? | Status |
+|-------|------|-------------------|-------------|--------|
+
+## 6. Motion & Animation (WCAG 2.3.1, 2.3.3)
+- [ ] No content flashes more than 3 times per second
+- [ ] Animations can be paused or disabled (respects prefers-reduced-motion)
+- [ ] No auto-playing video with audio without user control
+
+## 7. Remediation Plan
+For each failure, numbered and prioritized:
+- **Issue:** [describe]
+- **WCAG criterion:** [e.g., 1.4.3]
+- **Current value:** [e.g., contrast ratio 2.8:1]
+- **Required value:** [e.g., ≥4.5:1]
+- **Fix:** [specific corrected value or approach]
+
+## 8. Tools Used
+List the accessibility checking tools used (e.g., Stark plugin, Contrast Checker, axe DevTools).
+
+Return ONLY the markdown. No code fences.

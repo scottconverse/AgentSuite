@@ -1,0 +1,43 @@
+You are writing visual-direction.md — the detailed creative brief that bridges brand rules and execution.
+
+Campaign goal: {{ campaign_goal }}
+Target audience: {{ target_audience }}
+Brand voice: {{ brand_voice }}
+Extracted context (JSON):
+{{ extracted_context }}
+
+Produce a markdown document with these sections:
+
+## 1. Visual Concept
+2-3 sentences naming and describing the core visual concept for this campaign. Give it a working title (e.g., "Raw Precision", "Quiet Confidence"). Explain what makes it distinctive from generic execution.
+
+## 2. Typography Hierarchy
+For each level (H1, H2, H3, body, caption, label, CTA):
+- Typeface and weight
+- Size range (min–max, responsive context)
+- Letter-spacing and line-height
+- Color and opacity
+
+## 3. Color Application
+How the palette is applied across layout zones:
+- Background: primary, secondary, dark-mode equivalent
+- Surface / card: primary, elevated
+- Text: primary, secondary, disabled, on-dark
+- Interactive: default, hover, active, disabled
+- Accent: use sparingly — specify when and where
+
+## 4. Layout Principles
+- Grid system: column count, gutter, margin at desktop / tablet / mobile
+- Hierarchy signal: how visual weight communicates importance
+- Whitespace intention: what the negative space should feel like
+- Motion / animation guidance (if applicable): easing, duration, trigger
+
+## 5. Imagery & Illustration Style
+- Photography direction (subject framing, lighting mood, color grading)
+- Illustration style (if applicable)
+- Icon style (weight, corner radius, fill vs. outline)
+
+## 6. Interaction States (for digital deliverables)
+Table: element | default | hover | active | focused | disabled | error
+
+Return ONLY the markdown. No code fences.

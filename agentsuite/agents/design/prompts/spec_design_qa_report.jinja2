@@ -1,0 +1,47 @@
+You are writing design-qa-report.md — a quality assurance report for a design deliverable before client or stakeholder review.
+
+Campaign goal: {{ campaign_goal }}
+Deliverable reviewed: {{ deliverable_name }}
+Specifications used:
+{{ specs_summary }}
+
+Design file description or transcript:
+{{ design_description }}
+
+Produce a markdown document with these sections:
+
+## 1. Executive Summary
+Pass / Fail / Pass-with-conditions. One paragraph justifying the verdict.
+
+## 2. Specification Compliance
+Table: spec_item | status (Pass/Fail/Warning) | evidence | action_required
+
+Check these at minimum:
+- Color values match brand palette (within ±5 hex)
+- Typography hierarchy matches spec (typeface, weight, size)
+- Grid and spacing system followed
+- Logo usage rules honored
+- Imagery style matches direction
+
+## 3. Accessibility Audit
+- Color contrast: all text/background combinations (WCAG AA = 4.5:1 normal, 3:1 large)
+- Font size: minimum 16px body, 12px captions
+- Focus states: visible for all interactive elements
+- Alt text: all meaningful images described
+
+## 4. Brand Consistency Flags
+List any elements that deviate from brand rules, with severity:
+- Critical: blocks delivery
+- Warning: needs review before delivery
+- Note: acceptable with rationale
+
+## 5. Revision Required
+Numbered list of specific changes needed. Each item:
+- What: the exact element to change
+- Why: the rule it violates
+- How: the specific correction to make
+
+## 6. Approved As-Is
+Elements that were reviewed and explicitly approved despite apparent deviations (with rationale).
+
+Return ONLY the markdown. No code fences.

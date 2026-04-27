@@ -1,0 +1,52 @@
+You are writing mood-board-spec.md — a precise visual reference specification that art directors use to curate or brief a mood board.
+
+Campaign goal: {{ campaign_goal }}
+Target audience: {{ target_audience }}
+Visual concept name: {{ visual_concept_name | default("TBD") }}
+Brand voice: {{ brand_voice }}
+Extracted context (JSON):
+{{ extracted_context }}
+
+Produce a markdown document with these sections:
+
+## 1. Mood Board Intent
+One paragraph: what emotional response should someone feel after viewing this mood board? What creative decisions should it lock in?
+
+## 2. Mandatory Reference Categories
+For each category below, specify the visual criteria for inclusion:
+
+### Photography
+- Subject matter: (e.g., "candid portraits of people mid-task, never posed")
+- Lighting: (e.g., "natural window light, soft shadows, 5500K–6500K")
+- Color grade: (e.g., "desaturated midtones, preserved highlights, no warm filters")
+- Framing: (e.g., "loose crop with breathing room, subject off-center")
+
+### Typography Specimens
+- Which typographic combinations to source
+- At what scale and pairing (heading + body examples)
+- Forbidden combinations to avoid in curation
+
+### Color Palette Swatches
+Primary palette: {{ primary_palette | default("derived from extracted context") }}
+Accent palette: {{ accent_palette | default("derived from extracted context") }}
+- Specify exact hex values when known
+- Include "temperature" — warm / neutral / cool bias
+
+### Layout References
+- Grid density preference: open / structured / dense
+- White space: abundant / moderate / tight
+- Compositional style: asymmetric / centered / editorial
+
+## 3. Exclusion Criteria
+Hard exclusions — images that must not appear in the mood board even if they feel on-brand superficially:
+{{ anti_patterns | default("- Generic stock photography with staged poses\n- Lens flare and heavy bokeh effects\n- Overused 'flat lay' compositions") }}
+
+## 4. Reference Sources
+Recommended platforms and search terms (be specific — not just "look at Dribbble"):
+
+## 5. Mood Board Dimensions & Format
+- Canvas: [specify for tool — Figma frame / physical print / Miro board]
+- Minimum reference count: 12 images
+- Grid layout: [specify arrangement]
+
+Return ONLY the markdown. No code fences.

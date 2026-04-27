@@ -1,0 +1,31 @@
+You are checking typography hierarchy consistency across design specification artifacts before they are committed.
+
+Artifacts (markdown text):
+{% for name, body in artifacts.items() %}
+=== {{ name }} ===
+{{ body }}
+
+{% endfor %}
+
+Specifically, check for mismatches in:
+1. **Typography hierarchy** — do heading/body/caption specs in visual-direction, mood-board-spec, and design-brief agree on typeface, weight, and size range?
+2. **Color palette** — do hex values appear consistently across brand-rules-extracted, visual-direction, and design-brief? Flag any deviation > ±5 hex per channel.
+3. **Audience description** — does the target audience description match across all artifacts that reference it?
+4. **Brand voice** — do the tone words used across artifacts form a coherent set, or do they contradict each other?
+5. **Anti-patterns** — are the same visual exclusions honored across mood-board-spec, visual-direction, and image-generation-prompt?
+
+For each potential mismatch, return a JSON object:
+{
+  "mismatches": [
+    {
+      "field": "typography" | "color" | "audience" | "brand_voice" | "anti_patterns",
+      "files": ["file_a.md", "file_b.md"],
+      "details": "...",
+      "severity": "critical" | "warning"
+    }
+  ]
+}
+
+"critical" mismatches fail the run. "warning" mismatches are logged but do not fail.
+
+Return ONLY the JSON.

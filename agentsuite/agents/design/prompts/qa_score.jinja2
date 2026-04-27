@@ -1,0 +1,43 @@
+You are scoring design agent artifacts against the DESIGN_RUBRIC dimensions.
+
+Campaign goal: {{ campaign_goal }}
+Target audience: {{ target_audience }}
+Brand voice samples available: {{ has_brand_samples }}
+
+Artifacts (markdown text):
+{% for name, body in artifacts.items() %}
+=== {{ name }} ===
+{{ body }}
+
+{% endfor %}
+
+Score each DESIGN_RUBRIC dimension 0.0–10.0:
+- spec_completeness: Are all required sections present and substantively filled? (No placeholder text, no "TBD" sections)
+- brand_fidelity: Do visual choices faithfully reflect the extracted brand system? Are colors, typography, and voice consistent?
+- audience_fit: Does the creative direction speak to the stated target audience's actual visual sophistication and preferences?
+- craft_specificity: Are directions specific enough for a designer to execute without asking follow-up questions? Penalize vague adjectives without concrete specification.
+- accessibility_rigor: Are WCAG AA requirements explicitly addressed in the QA and audit documents?
+- anti_genericity: Are generic design clichés absent? Penalize "clean and modern", "bold and beautiful", "minimalist yet impactful", "dynamic", "vibrant", "stunning".
+- revision_actionability: Are revision instructions and QA findings specific, numbered, and executable without interpretation?
+- consistency: Do typography hierarchy, color palette, and audience description match across all artifacts?
+- image_prompt_precision: Does the image generation prompt specify layout, hierarchy, and technical parameters — not just mood?
+
+Return JSON:
+{
+  "scores": {
+    "spec_completeness": 0.0,
+    "brand_fidelity": 0.0,
+    "audience_fit": 0.0,
+    "craft_specificity": 0.0,
+    "accessibility_rigor": 0.0,
+    "anti_genericity": 0.0,
+    "revision_actionability": 0.0,
+    "consistency": 0.0,
+    "image_prompt_precision": 0.0
+  },
+  "revision_instructions": ["specific actionable change"]
+}
+
+Be ruthless on anti_genericity — score 0.0 for any artifact leading with "seamless", "revolutionize", "best-in-class", "world-class", "industry-leading", "next-generation", "cutting-edge", "synergy", "dynamic visual journey".
+
+Return ONLY the JSON.

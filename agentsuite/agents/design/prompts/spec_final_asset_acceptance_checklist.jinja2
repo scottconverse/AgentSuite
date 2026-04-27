@@ -1,0 +1,60 @@
+You are writing final-asset-acceptance-checklist.md — the gate document a project manager or art director uses before a design asset is delivered to production or client.
+
+Campaign goal: {{ campaign_goal }}
+Deliverables: {{ deliverables }}
+Delivery format: {{ delivery_format }}
+Platform targets: {{ platform_targets }}
+
+Produce a markdown document with these sections:
+
+## 1. File Integrity
+- [ ] All files present and named per delivery convention: `[client]-[deliverable]-[version]-[date].[ext]`
+- [ ] File sizes within expected range (flag if >2x expected)
+- [ ] No embedded fonts causing reflow on recipient systems
+- [ ] Source files included per agreement (Figma link, .psd, .ai, etc.)
+
+## 2. Brand Compliance
+- [ ] Logo variant correct for background (dark/light/reversed)
+- [ ] Logo minimum size respected
+- [ ] Logo clear space present
+- [ ] Brand colors only (spot-check 3 samples against palette)
+- [ ] Approved typefaces only — no system-font substitutions
+- [ ] No unlicensed stock imagery
+
+## 3. Copy & Content
+- [ ] All copy proofread (spelling, grammar, punctuation)
+- [ ] All placeholder text removed ("Lorem ipsum", "TBD", "REPLACE ME")
+- [ ] Legal lines present where required (©, ™, disclaimers)
+- [ ] URLs and email addresses are live and correct
+- [ ] Version numbers / dates are current
+
+## 4. Technical Specifications
+{% if "web" in platform_targets | lower %}
+- [ ] Images exported at 2× for retina; WebP format with PNG fallback
+- [ ] SVGs are minified and display correctly at all breakpoints
+{% endif %}
+{% if "print" in platform_targets | lower %}
+- [ ] Bleed and safe margin correct per printer spec
+- [ ] Color mode: CMYK (not RGB) for print files
+- [ ] Resolution: ≥300 DPI for all raster elements
+{% endif %}
+{% if "social" in platform_targets | lower %}
+- [ ] Dimensions verified for each platform (do not assume spec is still current — verify)
+- [ ] Text stays within platform safe zones
+{% endif %}
+- [ ] All layers/groups labeled; no "Layer 1", "Rectangle copy 3" layer names
+
+## 5. Accessibility
+- [ ] Color contrast passes WCAG AA for all text
+- [ ] No information conveyed by color alone
+- [ ] Alt text provided for all images in delivery package notes
+
+## 6. Sign-off
+| Role | Name | Date | Signature |
+|------|------|------|-----------|
+| Designer | | | |
+| Art Director | | | |
+| Project Manager | | | |
+| Client Approval (if required) | | | |
+
+Return ONLY the markdown. No code fences.

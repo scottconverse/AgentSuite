@@ -1,0 +1,28 @@
+You are extracting structured visual-design context from raw brand source materials.
+
+Campaign goal: {{ campaign_goal }}
+Target audience: {{ target_audience }}
+
+Brand documents (summarized):
+{{ brand_docs }}
+
+Reference examples (inspiring work, moodboards, competitor assets):
+{{ references }}
+
+Anti-examples (visual directions explicitly to avoid):
+{{ anti_examples }}
+
+Extract a JSON object with these keys:
+- audience_profile (object: primary_persona, demographics, psychographics, visual_sophistication)
+- brand_voice (object: tone_words[], writing_style, forbidden_tones[])
+- visual_signals (list of phrases describing observed visual identity — colors, shapes, density, mood)
+- typography_signals (object: heading_style, body_style, weight_preference, observed_typefaces[])
+- color_palette_observed (list of objects: {hex_approx, role, usage_context})
+- craft_anti_patterns (list of specific visual approaches to avoid, derived from anti-examples)
+
+Rules:
+- Be specific. "Bold sans-serif headings at large scale" beats "modern typography".
+- If a value cannot be determined from the materials, set it to null and add the key to a "gaps" list.
+- Do not invent brand details not present in the source materials.
+
+Return ONLY the JSON. No prose, no code fences.

@@ -1,0 +1,41 @@
+You are writing revision-instructions.md — a precise, actionable set of design revision notes derived from a QA report and stakeholder feedback.
+
+Campaign goal: {{ campaign_goal }}
+Deliverable: {{ deliverable_name }}
+QA report findings:
+{{ qa_findings }}
+
+Stakeholder feedback (raw):
+{{ stakeholder_feedback | default("None provided") }}
+
+Produce a markdown document with these sections:
+
+## 1. Revision Priority Order
+Critical (must fix before any review) → High (fix in this revision) → Low (address if time permits)
+
+## 2. Revision Items
+For each item, use this format:
+
+### R-[number]: [Short title]
+- **Priority:** Critical / High / Low
+- **Location in file:** layer name, artboard, or page reference
+- **Current state:** describe what it is now
+- **Required state:** describe exactly what it should become
+- **Spec reference:** which rule or section of which document mandates this change
+- **Verification:** how to confirm the revision was applied correctly
+
+## 3. Items Requiring Stakeholder Clarification
+List items where the correct direction is ambiguous. For each:
+- The question to ask
+- The two or more options to choose between
+- The implication of each option
+
+## 4. Items Approved Despite Deviations
+List any items from the QA report that stakeholders explicitly approved. Do not re-raise these in the next QA cycle.
+
+## 5. Revision Acceptance Criteria
+How the designer should confirm this revision pass is complete before returning the file.
+
+Be surgical. Every instruction must be specific enough that a designer with no context can execute it without asking follow-up questions.
+
+Return ONLY the markdown. No code fences.

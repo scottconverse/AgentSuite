@@ -1,0 +1,41 @@
+You are writing brand-rules-extracted.md — a tightly scoped reference card of actionable brand constraints for a design team.
+
+Campaign goal: {{ campaign_goal }}
+Extracted context (JSON):
+{{ extracted_context }}
+
+Produce a markdown document with these sections:
+
+## 1. Color System
+Table: color name | hex | usage | minimum contrast ratio (WCAG AA)
+Flag any colors that fail WCAG AA on white or on the primary background color.
+
+## 2. Typography Rules
+- Heading typeface(s) and acceptable weights
+- Body typeface(s) and acceptable weights
+- Minimum body font size (px)
+- Line-height range
+- Forbidden combinations (e.g., "never set body copy in the display typeface at under 16px")
+
+## 3. Logo & Mark Usage
+- Minimum size
+- Clear space formula
+- Approved color versions (full-color, reversed, single-color)
+- Forbidden modifications
+
+## 4. Imagery Rules
+- Approved photographic styles (specific, not "authentic and engaging")
+- Forbidden image types or treatments
+- Illustration style constraints if applicable
+
+## 5. Layout & Spacing
+- Grid system (columns, gutter, margin)
+- Spacing scale (if established)
+- Component density preference (compact / balanced / airy)
+
+## 6. Voice-to-Visual Mapping
+Table: brand_voice_word | visual_expression
+Example: "precise" → tight grid, mono-spaced accents, no decorative flourishes
+
+Be prescriptive. Every rule must be actionable by a designer who has not spoken to the brand owner.
+Return ONLY the markdown. No code fences.
