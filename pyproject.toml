@@ -61,6 +61,7 @@ include = ["agentsuite*"]
 "agentsuite.agents.founder" = ["templates/*.md", "prompts/*.jinja2"]
 "agentsuite.agents.design" = ["prompts/*.jinja2", "templates/*.md"]
 "agentsuite.agents.engineering" = ["prompts/*.jinja2", "templates/*.md"]
+"agentsuite.agents.marketing" = ["prompts/*.jinja2", "templates/*.md"]
 "agentsuite.kernel" = ["prompts/*.jinja2"]
 
 [tool.ruff]
