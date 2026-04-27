@@ -22,6 +22,8 @@ product_app = typer.Typer(name="product", help="Product Agent — generates PRD,
 app.add_typer(product_app, name="product")
 engineering_app = typer.Typer(name="engineering", help="Engineering Agent — generates architecture, API spec, runbook, and related artifacts.")
 app.add_typer(engineering_app, name="engineering")
+marketing_app = typer.Typer(name="marketing", help="Marketing Agent — generates campaign brief, messaging framework, channel strategy, and related artifacts.")
+app.add_typer(marketing_app, name="marketing")
 
 
 def _output_root() -> Path:
@@ -223,6 +225,43 @@ def engineering_run_cmd(
         "status": "awaiting_approval" if result.stage == "approval" else result.stage,
         "stage": result.stage,
         "system_name": system_name,
+        "cost_usd": result.cost_so_far.usd,
+    }, indent=2, default=str))
+
+
+@marketing_app.command("run")
+def marketing_run_cmd(
+    brand_name: str = typer.Option(..., help="Name of the brand or product being marketed"),
+    campaign_goal: str = typer.Option(..., help="What the campaign is trying to achieve"),
+    target_market: str = typer.Option(..., help="Who the campaign is targeting"),
+    inputs_dir: Optional[Path] = typer.Option(None, help="Dir with existing brand assets, briefs, research docs"),
+    budget_range: str = typer.Option("", help="e.g. '$50k–$100k over 3 months'"),
+    timeline: str = typer.Option("", help="e.g. 'Q3 2024, 12-week campaign'"),
+    channels: str = typer.Option("", help="e.g. 'paid social, email, content marketing'"),
+    run_id: Optional[str] = typer.Option(None, help="Run ID (auto-generated if omitted)"),
+) -> None:
+    """Run the Marketing Agent pipeline."""
+    from agentsuite.agents.marketing.agent import MarketingAgent
+    from agentsuite.agents.marketing.input_schema import MarketingAgentInput
+    inp = MarketingAgentInput(
+        agent_name="marketing",
+        role_domain="marketing-ops",
+        user_request=f"Generate marketing artifacts for {brand_name}",
+        brand_name=brand_name,
+        campaign_goal=campaign_goal,
+        target_market=target_market,
+        inputs_dir=inputs_dir,
+        budget_range=budget_range,
+        timeline=timeline,
+        channels=channels,
+    )
+    agent = MarketingAgent(output_root=_output_root(), llm=_resolve_llm_for_cli())
+    result = agent.run(request=inp, run_id=run_id or "run-cli")
+    typer.echo(json.dumps({
+        "run_id": result.run_id,
+        "status": "awaiting_approval" if result.stage == "approval" else result.stage,
+        "stage": result.stage,
+        "brand_name": brand_name,
         "cost_usd": result.cost_so_far.usd,
     }, indent=2, default=str))
 
