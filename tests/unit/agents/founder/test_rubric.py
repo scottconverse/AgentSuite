@@ -2,6 +2,10 @@
 from agentsuite.agents.founder.rubric import FOUNDER_RUBRIC
 
 
+def test_founder_rubric_dimension_count():
+    assert len(FOUNDER_RUBRIC.dimensions) == 9
+
+
 def test_founder_rubric_dimensions_present():
     names = [d.name for d in FOUNDER_RUBRIC.dimensions]
     assert "reusability" in names
@@ -11,6 +15,13 @@ def test_founder_rubric_dimensions_present():
     assert "template_specificity" in names
     assert "goal_alignment" in names
     assert "anti_genericity" in names
+    assert "constraint_adherence" in names
+    assert "completeness" in names
+
+
+def test_founder_rubric_all_questions_non_empty():
+    for dim in FOUNDER_RUBRIC.dimensions:
+        assert dim.question, f"dimension '{dim.name}' has empty question"
 
 
 def test_founder_rubric_pass_threshold():

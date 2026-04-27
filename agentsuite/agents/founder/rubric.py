@@ -32,6 +32,14 @@ FOUNDER_RUBRIC = QARubric(
             name="anti_genericity",
             question="Does this avoid generic SaaS landing-page voice and clichés?",
         ),
+        RubricDimension(
+            name="constraint_adherence",
+            question="Proposed strategy respects stated budget, timeline, and resource constraints without magical thinking?",
+        ),
+        RubricDimension(
+            name="completeness",
+            question="All required specification artifacts are populated with substantive, non-placeholder content?",
+        ),
     ],
     pass_threshold=7.0,
 )
