@@ -92,6 +92,15 @@ def build_server() -> _ServerWrapper:
                 output_root_fn=_output_root,
                 expose_stages=_expose_stages(),
             )
+        elif name == "marketing":
+            from agentsuite.agents.marketing import mcp_tools as marketing_mcp
+
+            marketing_mcp.register_tools(
+                server,
+                agent_class=lambda cls=agent_class: cls(output_root=_output_root()),  # type: ignore[misc]
+                output_root_fn=_output_root,
+                expose_stages=_expose_stages(),
+            )
 
     # Cross-agent shared tools
     def agentsuite_list_agents() -> dict[str, Any]:
