@@ -41,6 +41,7 @@ def _bootstrap_default_registry() -> AgentRegistry:
     from agentsuite.agents.design.agent import DesignAgent
     from agentsuite.agents.engineering.agent import EngineeringAgent
     from agentsuite.agents.founder.agent import FounderAgent
+    from agentsuite.agents.marketing.agent import MarketingAgent
     from agentsuite.agents.product.agent import ProductAgent
 
     reg = AgentRegistry()
@@ -48,6 +49,7 @@ def _bootstrap_default_registry() -> AgentRegistry:
     reg.register("design", DesignAgent)
     reg.register("product", ProductAgent)
     reg.register("engineering", EngineeringAgent)
+    reg.register("marketing", MarketingAgent)
     return reg
 
 
