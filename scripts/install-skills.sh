@@ -9,15 +9,22 @@ CLAUDE_HOME="${CLAUDE_HOME:-$HOME/.claude}"
 SKILLS_DIR="$CLAUDE_HOME/skills"
 COMMANDS_DIR="$CLAUDE_HOME/commands"
 
-mkdir -p "$SKILLS_DIR/founder-agent" "$COMMANDS_DIR"
+mkdir -p "$SKILLS_DIR/founder-agent" "$SKILLS_DIR/design-agent" "$COMMANDS_DIR"
 
 cp "$REPO_ROOT/claude/skills/founder-agent/SKILL.md" "$SKILLS_DIR/founder-agent/SKILL.md"
 cp "$REPO_ROOT/claude/skills/founder-agent/mcp-snippet.json" "$SKILLS_DIR/founder-agent/mcp-snippet.json"
 cp "$REPO_ROOT/claude/commands/founder-agent.md" "$COMMANDS_DIR/founder-agent.md"
 
+cp "$REPO_ROOT/claude/skills/design-agent/SKILL.md" "$SKILLS_DIR/design-agent/SKILL.md"
+cp "$REPO_ROOT/claude/skills/design-agent/mcp-snippet.json" "$SKILLS_DIR/design-agent/mcp-snippet.json"
+cp "$REPO_ROOT/claude/commands/design-agent.md" "$COMMANDS_DIR/design-agent.md"
+
 echo "Installed:"
 echo "  - $SKILLS_DIR/founder-agent/SKILL.md"
 echo "  - $SKILLS_DIR/founder-agent/mcp-snippet.json"
 echo "  - $COMMANDS_DIR/founder-agent.md"
+echo "  - $SKILLS_DIR/design-agent/SKILL.md"
+echo "  - $SKILLS_DIR/design-agent/mcp-snippet.json"
+echo "  - $COMMANDS_DIR/design-agent.md"
 echo ""
 echo "Restart Claude Code for the skill + slash command to be visible."
