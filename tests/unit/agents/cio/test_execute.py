@@ -1,7 +1,6 @@
 """Unit tests for agentsuite.agents.cio.stages.execute."""
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 from agentsuite.agents.cio.input_schema import CIOAgentInput

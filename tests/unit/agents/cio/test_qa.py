@@ -4,7 +4,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import pytest
 
 from agentsuite.agents.cio.input_schema import CIOAgentInput
 from agentsuite.agents.cio.rubric import CIO_RUBRIC
