@@ -34,13 +34,14 @@ class AgentRegistry:
         """
         raw = os.environ.get("AGENTSUITE_ENABLED_AGENTS", self.DEFAULT_ENABLED)
         names = [n.strip() for n in raw.split(",") if n.strip()]
-        registered = self.registered_names()
-        unknown = [n for n in names if n not in self._registered]
-        if unknown:
-            raise UnknownAgent(
-                f"Unknown agents in AGENTSUITE_ENABLED_AGENTS: {unknown}. "
-                f"Registered: {registered}"
-            )
+        if self._registered:
+            unknown = [n for n in names if n not in self._registered]
+            if unknown:
+                registered = self.registered_names()
+                raise UnknownAgent(
+                    f"Unknown agents in AGENTSUITE_ENABLED_AGENTS: {unknown}. "
+                    f"Registered: {registered}"
+                )
         return names
 
     def get_class(self, name: str) -> Type[BaseAgent]:
