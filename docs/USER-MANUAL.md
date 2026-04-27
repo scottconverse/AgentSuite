@@ -357,6 +357,105 @@ Inside `.agentsuite/runs/run-cli/brief-template-library/` you'll find eight fill
 - **Runbook:** A set of step-by-step instructions for operating a system. Good runbooks let any engineer — not just the person who built the system — handle common tasks and incidents without guessing.
 - **Postmortem:** A blame-free review conducted after an incident. The goal is to understand what happened, why, and what changes prevent it from happening again — not to find someone at fault.
 
+## Using the Marketing Agent
+
+The Marketing Agent takes a brand and campaign goal and produces a complete set of marketing planning documents — everything a marketing team needs to plan, execute, and measure a campaign.
+
+### What it does
+
+In one sentence: you tell it the brand name, the campaign goal, and the target market, and it writes nine strategy documents and eight ready-to-fill brief templates in 30–120 seconds.
+
+### What you need to have ready
+
+**Required:**
+- **Brand name** — the name of your company, product, or initiative (e.g. "Acme Widgets")
+- **Campaign goal** — one sentence describing what you want to achieve (e.g. "Generate 500 qualified leads for our new B2B SaaS product in Q3")
+- **Target market** — one sentence describing who you are trying to reach (e.g. "Operations managers at manufacturing companies with 50–500 employees")
+
+**Optional (but helpful if you have them):**
+- Existing brand documents — brand guidelines, past campaign briefs, tone-of-voice guides (any `.txt`, `.md`, or `.pdf` files)
+- Competitor documents — competitor ad examples, positioning statements, pricing pages
+- Budget range — how much you plan to spend (e.g. "$20,000 total" or "$5,000/month")
+- Timeline — when the campaign needs to launch and run (e.g. "Launch July 1, run 90 days")
+- Channels — channels you already know you want to use (e.g. "LinkedIn, email, content marketing")
+
+None of the optional inputs are required. The agent produces useful output from the three required fields alone.
+
+### Step 1 — run the Marketing Agent
+
+```
+agentsuite marketing run --brand-name "Acme Widgets" --campaign-goal "Generate 500 qualified leads for our new B2B SaaS product in Q3" --target-market "Operations managers at manufacturing companies with 50–500 employees"
+```
+
+The terminal prints a status block when it's done. It will say `"awaiting_approval"`.
+
+### Step 2 — review the nine output documents
+
+Open `.agentsuite/runs/run-cli/` in your file explorer. You'll see nine documents:
+
+| File | What it is |
+|---|---|
+| `campaign-brief.md` | The master campaign document — objectives, strategy, and the core messaging direction. Start here. |
+| `target-audience-profile.md` | A detailed profile of your ideal customer: who they are, what they care about, what motivates their decisions |
+| `messaging-framework.md` | Your value propositions, the key messages for each audience segment, and the tone and voice to use across all content |
+| `content-calendar.md` | An editorial calendar with proposed topics, formats, and the channels each piece of content belongs on |
+| `channel-strategy.md` | Which channels to use, how to split the budget across them, and what success looks like on each channel |
+| `seo-keyword-plan.md` | The search terms your audience uses, what they're trying to find, and the content gaps your campaign can fill |
+| `competitive-positioning.md` | How your brand sits relative to competitors and how to differentiate in messaging and targeting |
+| `launch-plan.md` | The step-by-step sequence for going to market — what happens first, what follows, and the milestones along the way |
+| `measurement-framework.md` | The metrics you'll track, how to attribute results to the campaign, and the reporting cadence to keep stakeholders informed |
+
+Read `campaign-brief.md` first. If it captures the right goal and audience, proceed to Step 3.
+
+### Step 3 — check your QA scores
+
+Open `qa_scores.json` in the same folder. Each document gets a score from 0 to 10. The pass threshold is 7.0. If any score is below 7.0, that document has a specific issue. Look for the `revision_instructions` field next to the low score — it tells you exactly what to change. You can edit the document by hand and re-run the QA step, or add more context to your inputs and re-run the full agent.
+
+The QA rubric evaluates nine things for each document: strategic alignment, audience clarity, message specificity, competitive differentiation, channel fit, measurability, feasibility, internal consistency, and actionability. A score below 7.0 means the document is missing something important in one or more of these areas.
+
+### Step 4 — approve
+
+```
+agentsuite marketing approve --run-id run-cli --approver yourname --project-slug my-campaign
+```
+
+This copies the approved documents to `.agentsuite/_kernel/my-campaign/` where they live permanently and can be used in future sessions.
+
+### The eight brief templates
+
+Inside `.agentsuite/runs/run-cli/brief-template-library/` you'll find eight fill-in-the-blank templates for common marketing tasks:
+
+| Template | When to use it |
+|---|---|
+| `ad-copy-brief.md` | Brief for a copywriter or AI tool producing paid ad copy — display, search, or social |
+| `blog-post-brief.md` | Brief for a long-form article or thought leadership post |
+| `email-campaign.md` | Brief for a single email or a multi-email nurture sequence |
+| `influencer-brief.md` | Brief for an influencer or content creator partnership |
+| `landing-page-brief.md` | Brief for a campaign or product landing page |
+| `press-release.md` | Template for a product announcement, partnership, or news release |
+| `quarterly-report.md` | Internal or external summary of campaign performance over a quarter |
+| `social-post-series.md` | Brief for a series of coordinated posts across one or more social platforms |
+
+### Common errors and what they mean
+
+| Error | What it means | What to do |
+|---|---|---|
+| `ConsistencyCheckFailed` | Two of the nine documents contradict each other (e.g. the channel strategy targets a different audience than the audience profile) | Make your `--campaign-goal` and `--target-market` descriptions more specific, then re-run |
+| Low QA scores (below 7.0) | A document is missing important detail or is too vague | Open `qa_scores.json`, read `revision_instructions`, edit the flagged document by hand or add more input context and re-run |
+| `NoProviderConfigured` | No API key found and Ollama isn't running | Set an API key (Step 2 above) or start Ollama (Step 2b above) |
+| `HardCapExceeded: $5.00` | The run cost more than the safety limit | Reduce the size of your input files, or raise the cap: `set AGENTSUITE_COST_CAP_USD=10` |
+| `extract stage produced invalid JSON` | The AI returned a formatting error | Re-run — this resolves itself almost every time |
+
+### Glossary additions
+
+- **ICP (Ideal Customer Profile):** A detailed description of the type of company or person who is the best fit for your product or service. Unlike a persona (which describes an individual), an ICP describes the characteristics of the whole account — industry, size, budget, and buying process.
+- **Value proposition:** A clear statement of the specific benefit your product or service delivers to a customer. A strong value proposition answers: "Why should I choose this over the alternative?"
+- **Channel mix:** The combination of marketing channels (email, paid search, social media, content, events, etc.) used in a campaign. A good channel mix is chosen based on where the target audience actually spends time, not just what's familiar.
+- **KPI (Key Performance Indicator):** A number you track to know if something is working. For a marketing campaign, examples include cost per lead, click-through rate, conversion rate, and return on ad spend.
+- **Attribution model:** The method used to assign credit for a conversion to a particular marketing touchpoint. For example, a "last-touch" model gives all credit to the final interaction before a customer converts; a "multi-touch" model spreads credit across all interactions.
+- **Go-to-market (GTM):** The plan for how a product, feature, or campaign reaches its audience. A GTM plan covers positioning, messaging, channels, launch sequence, and the roles responsible for each step.
+- **Psychographic:** Details about an audience's attitudes, values, interests, and lifestyle — as opposed to demographics (age, job title, company size), which describe who they are. Psychographics describe why they make decisions.
+
 ## Where to get help
 
 - Open an issue: https://github.com/scottconverse/AgentSuite/issues
