@@ -44,9 +44,17 @@ class DesignAgent(BaseAgent):
             def runner(state: RunState, ctx: StageContext) -> RunState:
                 ctx.edits.setdefault("llm", self.llm)
                 if not isinstance(state.inputs, DesignAgentInput):
-                    state = state.model_copy(update={
-                        "inputs": DesignAgentInput.model_validate(state.inputs.model_dump())
-                    })
+                    # On resume, the caller may supply the original typed input
+                    # via edits["inputs"] because RunState serialises inputs as
+                    # the base AgentRequest, dropping subclass-only fields such
+                    # as campaign_goal.  Prefer the edits value when present.
+                    typed_inputs = ctx.edits.get("inputs")
+                    if isinstance(typed_inputs, DesignAgentInput):
+                        state = state.model_copy(update={"inputs": typed_inputs})
+                    else:
+                        state = state.model_copy(update={
+                            "inputs": DesignAgentInput.model_validate(state.inputs.model_dump())
+                        })
                 return handler(state, ctx)
             return runner
 
