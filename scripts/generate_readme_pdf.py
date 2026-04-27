@@ -859,8 +859,6 @@ def build_pdf():
         # Three-column details table
         spec_text = "\n".join(f"• {a}" for a in ag["spec_artifacts"])
         brief_text = "\n".join(f"• {b}" for b in ag["brief_templates"])
-        rubric_text = "\n".join(f"• {r}" for r in ag["rubric"])
-
         detail_data = [
             ["Inputs", "Spec Artifacts (Stage 3)", "Brief Templates (Stage 4)"],
             [
