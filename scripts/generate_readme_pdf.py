@@ -5,8 +5,6 @@ Uses reportlab for professional PDF output.
 Output: <repo-root>/README-FULL.pdf
 """
 
-import os
-import sys
 from pathlib import Path
 from datetime import date
 
@@ -16,17 +14,17 @@ from datetime import date
 from reportlab.lib.pagesizes import LETTER
 from reportlab.lib.units import inch
 from reportlab.lib.colors import (
-    HexColor, white, black, Color
+    HexColor, white
 )
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
+from reportlab.lib.enums import TA_CENTER
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
-    PageBreak, HRFlowable, KeepTogether
+    PageBreak
 )
 from reportlab.platypus.flowables import Flowable
 from reportlab.graphics.shapes import (
-    Drawing, Rect, String, Line, Group, Polygon
+    Drawing, Rect, String, Line, Polygon
 )
 from reportlab.graphics import renderPDF
 
@@ -168,8 +166,8 @@ def code_block(text):
     """Return a code-block paragraph."""
     lines = text.strip().split("\n")
     safe = "<br/>".join(
-        l.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-        for l in lines
+        line.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        for line in lines
     )
     return Paragraph(safe, CODE)
 
