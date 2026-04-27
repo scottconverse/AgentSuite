@@ -49,6 +49,10 @@ class ArtifactWriter:
             ArtifactRef with path, kind, stage, and SHA-256 hash of content.
         """
         full = self.run_dir / relative_path
+        full_resolved = full.resolve()
+        run_dir_resolved = self.run_dir.resolve()
+        if not full_resolved.is_relative_to(run_dir_resolved):
+            raise ValueError(f"Artifact path escapes run_dir: {relative_path!r}")
         full.parent.mkdir(parents=True, exist_ok=True)
         full.write_text(content, encoding="utf-8")
         sha = hashlib.sha256(content.encode("utf-8")).hexdigest()

@@ -1,6 +1,8 @@
 """Unit tests for kernel.artifacts."""
 import json
 
+import pytest
+
 
 from agentsuite.kernel.artifacts import ArtifactWriter
 
@@ -57,3 +59,22 @@ def test_promote_copies_to_kernel_dir(tmp_path):
     assert any(p.name == "brand-system.md" for p in promoted)
     kernel_path = tmp_path / "_kernel" / "patentforgelocal" / "brand-system.md"
     assert kernel_path.read_text(encoding="utf-8") == "promoted"
+
+
+def test_writer_rejects_path_traversal(tmp_path):
+    w = ArtifactWriter(output_root=tmp_path, run_id="r1")
+    with pytest.raises(ValueError, match="escapes run_dir"):
+        w.write("../../etc/secret.txt", "bad", kind="spec", stage="spec")
+
+
+def test_writer_rejects_deeply_nested_traversal(tmp_path):
+    w = ArtifactWriter(output_root=tmp_path, run_id="r1")
+    with pytest.raises(ValueError, match="escapes run_dir"):
+        w.write("subdir/../../../../../../etc/passwd", "bad", kind="spec", stage="spec")
+
+
+def test_writer_allows_nested_paths(tmp_path):
+    w = ArtifactWriter(output_root=tmp_path, run_id="r1")
+    ref = w.write("a/b/c/file.md", "content", kind="spec", stage="spec")
+    assert ref.path.exists()
+    assert ref.path.read_text(encoding="utf-8") == "content"
