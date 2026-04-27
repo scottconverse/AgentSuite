@@ -4,6 +4,40 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-04-27
+
+### Added
+- **Public API surface** — `from agentsuite import FounderAgent, DesignAgent, ...` now works from the top-level package. All 7 agent classes, kernel types (`BaseAgent`, `AgentRequest`, `RunState`, `ArtifactWriter`), registry (`AgentRegistry`, `default_registry`), and `ProviderNotInstalled` re-exported from `agentsuite/__init__.py`.
+- **Registry-driven CLI dispatcher** — `AgentCLISpec` dataclass in `agentsuite.kernel.base_agent`. Each agent module exposes `build_cli_spec() -> AgentCLISpec`. `cli.py` now iterates agent modules and generates Typer subcommands generically — adding a new agent no longer requires touching `cli.py`.
+- **Founder rubric expanded to 9 dimensions** — added `constraint_adherence` (strategy respects stated budget, timeline, and resource constraints) and `completeness` (all spec artifacts populated with substantive content). Now consistent with all other agents.
+- **Architecture diagram in README** — Mermaid `flowchart LR` diagram of the 5-stage pipeline with QA gate and approval branch.
+- **Sample output on landing page** — CLI output example added to `docs/index.html`.
+
+### Changed
+- **LLM SDK dependencies are now optional extras** — `pip install agentsuite` installs only the core library (pydantic, typer, httpx, jinja2). Provider SDKs are opt-in: `pip install agentsuite[anthropic]`, `agentsuite[openai]`, `agentsuite[gemini]`, `agentsuite[ollama]`, `agentsuite[mcp]`, `agentsuite[image]`, or `agentsuite[all]`.
+- **`approve` commands normalized** — all 7 agents now return `{"run_id", "status", "approved_by"}` JSON. Previously marketing, engineering, product, trust-risk, and cio returned plain text.
+
+## [0.7.1] - 2026-04-27
+
+### Added
+- **CI wheel-smoke job** — builds the wheel, installs in a fresh venv (no extras), and verifies all 7 `prompt_loader` imports plus `agentsuite --help` and `agentsuite-mcp --help`. Catches missing package-data and broken entry points before users do.
+- **Branch protection on `main`** — all 5 CI checks required: `lint / ruff-mypy`, `test / cleanroom`, `test / unit-integration-golden (3.11)`, `test / unit-integration-golden (3.12)`, `test / wheel-smoke`. Force-push blocked.
+- **`AgentRegistry.registered_names()`** — new public method returning sorted list of all registered agent names. Used by `cli.py` and `agentsuite agents` command.
+- **QA boundary test** — `test_qa_boundary_exactly_at_threshold_passes` and `test_qa_boundary_just_below_threshold_fails` pin the `>= 7.0` scoring behavior.
+- **RunState round-trip test** — documents that subclass-specific fields do not survive JSON round-trip through `RunState.inputs` (typed as `AgentRequest`).
+- **`HardCapExceeded` propagation test** — integration test verifying the exception propagates correctly through `_drive()`.
+- **Golden test JSON structure assertions** — all 7 agent golden tests now assert `qa_scores.json` has `scores/average/passed/requires_revision` keys and `consistency_report.json` has `mismatches`.
+- **`ProviderNotInstalled(ImportError)`** — new exception class in `agentsuite.llm.base`. Raised by all provider constructors when the optional SDK is missing, with a `pip install agentsuite[extra]` hint.
+
+### Fixed
+- **Path traversal guard in `ArtifactWriter.write()`** — raises `ValueError` when a relative path escapes the run directory. Prevents `../../etc/passwd`-style writes.
+- **Gemini API key precedence** — `GEMINI_API_KEY` now correctly takes priority over `GOOGLE_API_KEY` in both the resolver and the provider constructor.
+- **`AgentRegistry.enabled_names()` validation** — only validates against registered agents when the registry is non-empty. Previously raised `UnknownAgent` on empty registries with env vars set.
+- **Cost persistence on stage exception** — `_drive()` now saves `cost_so_far` to the state store in the `except` branch, so partial costs are not lost when a stage raises.
+- **`mcp_server.py` deferred import** — `FastMCP` import moved inside `build_server()`. Module now imports cleanly without the `mcp` SDK installed; the `ProviderNotInstalled`-style error is only raised when the server is actually started.
+- **Mock consistency-check responses** — 4 agent mock responses were returning `consistent`/`findings` keys instead of `mismatches`. Fixed to match the schema all 5-stage agents expect.
+- **`dev` extra includes all LLM SDKs** — `pip install agentsuite[dev]` now installs all optional SDK extras, so the full test suite runs on a clean clone without manual extra installation.
+
 ## [0.7.0] - 2026-04-27
 
 ### Added
