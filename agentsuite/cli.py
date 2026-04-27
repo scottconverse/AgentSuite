@@ -485,7 +485,7 @@ def agents_cmd() -> None:
     reg = default_registry()
     typer.echo(json.dumps({
         "enabled": reg.enabled_names(),
-        "all_registered": sorted(reg._registered.keys()),
+        "all_registered": reg.registered_names(),
     }, indent=2))
 
 

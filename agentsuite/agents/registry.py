@@ -23,10 +23,25 @@ class AgentRegistry:
         """Register a concrete agent class under ``name``."""
         self._registered[name] = agent_class
 
+    def registered_names(self) -> list[str]:
+        """Return all registered agent names, sorted."""
+        return sorted(self._registered.keys())
+
     def enabled_names(self) -> list[str]:
-        """Return enabled agent names from AGENTSUITE_ENABLED_AGENTS env (or default)."""
+        """Return enabled agent names from AGENTSUITE_ENABLED_AGENTS env (or default).
+
+        Raises UnknownAgent if any name in the env var is not registered.
+        """
         raw = os.environ.get("AGENTSUITE_ENABLED_AGENTS", self.DEFAULT_ENABLED)
-        return [n.strip() for n in raw.split(",") if n.strip()]
+        names = [n.strip() for n in raw.split(",") if n.strip()]
+        registered = self.registered_names()
+        unknown = [n for n in names if n not in self._registered]
+        if unknown:
+            raise UnknownAgent(
+                f"Unknown agents in AGENTSUITE_ENABLED_AGENTS: {unknown}. "
+                f"Registered: {registered}"
+            )
+        return names
 
     def get_class(self, name: str) -> Type[BaseAgent]:
         """Return the registered class for ``name``. Raises UnknownAgent if disabled or unregistered."""
