@@ -58,7 +58,7 @@ def test_default_registry_has_design_registered(monkeypatch):
 def test_design_agent_class_accessible_via_registry(monkeypatch):
     from agentsuite.agents.design.agent import DesignAgent
     from agentsuite.agents.registry import AgentRegistry
-    monkeypatch.setenv("AGENTSUITE_ENABLED_AGENTS", "founder,design")
+    monkeypatch.setenv("AGENTSUITE_ENABLED_AGENTS", "design")
     reg = AgentRegistry()
     reg.register("design", DesignAgent)
     cls = reg.get_class("design")
