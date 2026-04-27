@@ -69,3 +69,23 @@ def test_qa_report_renders_markdown():
     assert "Average score: 7.00" in md
     assert "| a | 8.00 |" in md
     assert "| b | 6.00 |" in md
+
+
+def test_qa_boundary_exactly_at_threshold_passes():
+    """Score exactly at threshold should pass (>= not >)."""
+    r = QARubric(
+        dimensions=[RubricDimension(name="a", question="?")],
+        pass_threshold=7.0,
+    )
+    result = r.score({"a": 7.0}, revision_instructions=[])
+    assert result.passed is True
+
+
+def test_qa_boundary_just_below_threshold_fails():
+    """Score 0.01 below threshold should fail."""
+    r = QARubric(
+        dimensions=[RubricDimension(name="a", question="?")],
+        pass_threshold=7.0,
+    )
+    result = r.score({"a": 6.99}, revision_instructions=["fix it"])
+    assert result.passed is False
