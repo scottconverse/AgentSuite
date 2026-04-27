@@ -1,0 +1,30 @@
+{
+  "required_artifacts": [
+    "_state.json",
+    "inputs_manifest.json",
+    "extracted_context.json",
+    "consistency_report.json",
+    "export-manifest-template.json",
+    "qa_report.md",
+    "qa_scores.json",
+    "visual-direction.md",
+    "design-brief.md",
+    "mood-board-spec.md",
+    "brand-rules-extracted.md",
+    "image-generation-prompt.md",
+    "revision-instructions.md",
+    "design-qa-report.md",
+    "accessibility-audit-template.md",
+    "final-asset-acceptance-checklist.md"
+  ],
+  "required_brief_templates": [
+    "banner-ad.md",
+    "email-header.md",
+    "social-graphic.md",
+    "landing-hero.md",
+    "deck-slide.md",
+    "print-flyer.md",
+    "video-thumbnail.md",
+    "icon-set.md"
+  ]
+}
