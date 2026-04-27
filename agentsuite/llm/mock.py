@@ -64,6 +64,8 @@ def _default_mock_for_cli(provider_name: str | None = None) -> "MockLLMProvider"
     from agentsuite.agents.marketing.stages.spec import SPEC_ARTIFACTS as _MARKETING_SPEC_ARTIFACTS
     from agentsuite.agents.trust_risk.rubric import TRUST_RISK_RUBRIC
     from agentsuite.agents.trust_risk.stages.spec import SPEC_ARTIFACTS as _TRUST_RISK_SPEC_ARTIFACTS
+    from agentsuite.agents.cio.rubric import CIO_RUBRIC
+    from agentsuite.agents.cio.stages.spec import SPEC_ARTIFACTS as _CIO_SPEC_ARTIFACTS
 
     extracted = {
         # Founder extract fields
@@ -169,6 +171,25 @@ def _default_mock_for_cli(provider_name: str | None = None) -> "MockLLMProvider"
             },
             "revision_instructions": [],
         }),
+        # CIO pipeline responses
+        "You are indexing IT source materials for a CIO strategy assessment.": "Indexed IT source materials. Ready to extract context.",
+        "You are extracting structured IT and technology context from documents. Return ONLY valid JSON.": _json.dumps({
+            "technology_pain_points": ["Legacy ERP on-premise with high maintenance cost"],
+            "strategic_gaps": ["No cloud adoption strategy", "Weak data governance"],
+            "vendor_landscape": ["SAP ERP", "Microsoft 365", "AWS (limited use)"],
+            "digital_maturity_signals": ["Ad-hoc project management", "Limited self-service analytics"],
+            "budget_signals": ["Flat IT budget YoY", "Capex-heavy spend profile"],
+            "open_questions": ["Is cloud migration a board priority?", "Who owns the data strategy?"],
+        }),
+        "You are checking 9 CIO artifacts for consistency. Return ONLY JSON.": _json.dumps({
+            "passed": True,
+            "issues": [],
+        }),
+        "You are scoring 9 CIO artifacts. Return ONLY JSON.": _json.dumps({
+            "scores": {d.name: 8.0 for d in CIO_RUBRIC.dimensions},
+            "revision_instructions": {},
+            "requires_revision": False,
+        }),
         # Trust/Risk pipeline responses
         "extracting structured trust and risk context": _json.dumps({
             "threat_indicators": ["SQL injection vectors in API endpoints", "Weak credential policies"],
@@ -209,4 +230,8 @@ def _default_mock_for_cli(provider_name: str | None = None) -> "MockLLMProvider"
         key = f"writing {stem}.md for a trust and risk team"
         if key not in responses:
             responses[key] = f"# {stem.replace('-', ' ').title()}\n\nMock trust/risk content."
+    for stem in _CIO_SPEC_ARTIFACTS:
+        key = f"writing {stem}.md for a CIO team"
+        if key not in responses:
+            responses[key] = f"# {stem.replace('-', ' ').title()}\n\nMock CIO content."
     return MockLLMProvider(responses=responses, name=provider_name or "mock")

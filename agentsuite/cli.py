@@ -26,6 +26,8 @@ marketing_app = typer.Typer(name="marketing", help="Marketing Agent — generate
 app.add_typer(marketing_app, name="marketing")
 trust_risk_app = typer.Typer(name="trust-risk", help="Trust/Risk Agent — generates threat model, risk register, control framework, and related artifacts.")
 app.add_typer(trust_risk_app, name="trust-risk")
+cio_app = typer.Typer(name="cio", help="CIO Agent — generates IT strategy, technology roadmap, vendor portfolio, and related artifacts.")
+app.add_typer(cio_app, name="cio")
 
 
 def _output_root() -> Path:
@@ -337,6 +339,82 @@ def trust_risk_list_runs_cmd() -> None:
             continue
         state = StateStore(run_dir=d).load()
         if state is None or state.agent != "trust-risk":
+            continue
+        out.append({
+            "run_id": state.run_id,
+            "agent": state.agent,
+            "stage": state.stage,
+            "cost_usd": state.cost_so_far.usd,
+        })
+    typer.echo(json.dumps(out, indent=2))
+
+
+@cio_app.command("run")
+def cio_run_cmd(
+    organization_name: str = typer.Option(..., help="Name of the organization being assessed"),
+    strategic_priorities: str = typer.Option(..., help="Top IT/digital strategic priorities"),
+    it_maturity_level: str = typer.Option(..., help="e.g. 'Level 1 – Ad hoc', 'Level 3 – Defined'"),
+    budget_context: str = typer.Option("", help="e.g. 'flat budget', '$5M annual IT capex'"),
+    digital_initiatives: str = typer.Option("", help="Active or planned digital transformation programs"),
+    regulatory_environment: str = typer.Option("", help="e.g. 'HIPAA, SOX, FedRAMP'"),
+    it_docs_dir: Optional[Path] = typer.Option(None, help="Dir with existing IT strategy, roadmap, or architecture docs"),
+    run_id: Optional[str] = typer.Option(None, help="Run ID (auto-generated if omitted)"),
+) -> None:
+    """Run the CIO Agent pipeline."""
+    from agentsuite.agents.cio.agent import CIOAgent
+    from agentsuite.agents.cio.input_schema import CIOAgentInput
+
+    existing_it_docs: list[Path] = list(it_docs_dir.iterdir()) if it_docs_dir and it_docs_dir.is_dir() else []
+
+    inp = CIOAgentInput(
+        agent_name="cio",
+        role_domain="cio-ops",
+        user_request=f"Generate CIO strategy artifacts for {organization_name}",
+        organization_name=organization_name,
+        strategic_priorities=strategic_priorities,
+        it_maturity_level=it_maturity_level,
+        budget_context=budget_context,
+        digital_initiatives=digital_initiatives,
+        regulatory_environment=regulatory_environment,
+        existing_it_docs=existing_it_docs,
+    )
+    agent = CIOAgent(output_root=_output_root(), llm=_resolve_llm_for_cli())
+    result = agent.run(request=inp, run_id=run_id or "run-cli")
+    typer.echo(json.dumps({
+        "run_id": result.run_id,
+        "status": "awaiting_approval" if result.stage == "approval" else result.stage,
+        "stage": result.stage,
+        "organization_name": organization_name,
+        "cost_usd": result.cost_so_far.usd,
+    }, indent=2, default=str))
+
+
+@cio_app.command("approve")
+def cio_approve_cmd(
+    run_id: str = typer.Option(..., help="Run ID to approve"),
+    approver: str = typer.Option(..., help="Approver name"),
+    project_slug: str = typer.Option(..., help="Project slug"),
+) -> None:
+    """Approve a CIO Agent run and promote artifacts."""
+    from agentsuite.agents.cio.agent import CIOAgent
+    agent = CIOAgent(output_root=_output_root(), llm=_resolve_llm_for_cli())
+    agent.approve(run_id=run_id, approver=approver, project_slug=project_slug)
+    typer.echo(f"Approved {run_id} by {approver}")
+
+
+@cio_app.command("list-runs")
+def cio_list_runs_cmd() -> None:
+    """List all CIO runs in the current output directory."""
+    runs_dir = _output_root() / "runs"
+    if not runs_dir.exists():
+        typer.echo("[]")
+        return
+    out = []
+    for d in sorted(runs_dir.iterdir()):
+        if not d.is_dir():
+            continue
+        state = StateStore(run_dir=d).load()
+        if state is None or state.agent != "cio":
             continue
         out.append({
             "run_id": state.run_id,
