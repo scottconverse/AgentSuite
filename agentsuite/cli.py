@@ -24,6 +24,8 @@ engineering_app = typer.Typer(name="engineering", help="Engineering Agent — ge
 app.add_typer(engineering_app, name="engineering")
 marketing_app = typer.Typer(name="marketing", help="Marketing Agent — generates campaign brief, messaging framework, channel strategy, and related artifacts.")
 app.add_typer(marketing_app, name="marketing")
+trust_risk_app = typer.Typer(name="trust-risk", help="Trust/Risk Agent — generates threat model, risk register, control framework, and related artifacts.")
+app.add_typer(trust_risk_app, name="trust-risk")
 
 
 def _output_root() -> Path:
@@ -264,6 +266,85 @@ def marketing_run_cmd(
         "brand_name": brand_name,
         "cost_usd": result.cost_so_far.usd,
     }, indent=2, default=str))
+
+
+@trust_risk_app.command("run")
+def trust_risk_run_cmd(
+    product_name: str = typer.Option(..., help="Name of the product or system being assessed"),
+    risk_domain: str = typer.Option(..., help="Risk domain (e.g. 'cloud infrastructure', 'SaaS application')"),
+    stakeholder_context: str = typer.Option(..., help="Who the assessment is for and their security responsibilities"),
+    regulatory_context: str = typer.Option("", help="Applicable regulations (e.g. 'SOC 2 Type II, HIPAA')"),
+    threat_model_scope: str = typer.Option("", help="Scope of the threat model (e.g. 'external attackers, insider threats')"),
+    compliance_frameworks: str = typer.Option("", help="Compliance frameworks (e.g. 'NIST CSF, ISO 27001')"),
+    policy_dir: Optional[Path] = typer.Option(None, help="Dir with existing security policy documents"),
+    incident_dir: Optional[Path] = typer.Option(None, help="Dir with incident reports"),
+    run_id: Optional[str] = typer.Option(None, help="Run ID (auto-generated if omitted)"),
+) -> None:
+    """Run the Trust/Risk Agent pipeline."""
+    from agentsuite.agents.trust_risk.agent import TrustRiskAgent
+    from agentsuite.agents.trust_risk.input_schema import TrustRiskAgentInput
+
+    existing_policies: list[Path] = list(policy_dir.iterdir()) if policy_dir and policy_dir.is_dir() else []
+    incident_reports: list[Path] = list(incident_dir.iterdir()) if incident_dir and incident_dir.is_dir() else []
+
+    inp = TrustRiskAgentInput(
+        agent_name="trust-risk",
+        role_domain="trust-risk-ops",
+        user_request=f"Generate trust and risk assessment for {product_name}",
+        product_name=product_name,
+        risk_domain=risk_domain,
+        stakeholder_context=stakeholder_context,
+        regulatory_context=regulatory_context,
+        threat_model_scope=threat_model_scope,
+        compliance_frameworks=compliance_frameworks,
+        existing_policies=existing_policies,
+        incident_reports=incident_reports,
+    )
+    agent = TrustRiskAgent(output_root=_output_root(), llm=_resolve_llm_for_cli())
+    result = agent.run(request=inp, run_id=run_id or "run-cli")
+    typer.echo(json.dumps({
+        "run_id": result.run_id,
+        "status": "awaiting_approval" if result.stage == "approval" else result.stage,
+        "stage": result.stage,
+        "product_name": product_name,
+        "cost_usd": result.cost_so_far.usd,
+    }, indent=2, default=str))
+
+
+@trust_risk_app.command("approve")
+def trust_risk_approve_cmd(
+    run_id: str = typer.Option(..., help="Run ID to approve"),
+    approver: str = typer.Option(..., help="Approver name"),
+    project_slug: str = typer.Option(..., help="Project slug"),
+) -> None:
+    """Approve a Trust/Risk Agent run and promote artifacts."""
+    from agentsuite.agents.trust_risk.agent import TrustRiskAgent
+    agent = TrustRiskAgent(output_root=_output_root(), llm=_resolve_llm_for_cli())
+    agent.approve(run_id=run_id, approver=approver, project_slug=project_slug)
+    typer.echo(f"Approved {run_id} by {approver}")
+
+
+@trust_risk_app.command("list-runs")
+def trust_risk_list_runs_cmd() -> None:
+    """List all trust-risk runs in the current output directory."""
+    runs_dir = _output_root() / "runs"
+    if not runs_dir.exists():
+        typer.echo("[]")
+        return
+    out = []
+    for d in sorted(runs_dir.iterdir()):
+        if not d.is_dir():
+            continue
+        state = StateStore(run_dir=d).load()
+        if state is None or state.agent != "trust-risk":
+            continue
+        out.append({
+            "run_id": state.run_id,
+            "agent": state.agent,
+            "stage": state.stage,
+            "cost_usd": state.cost_so_far.usd,
+        })
+    typer.echo(json.dumps(out, indent=2))
 
 
 @app.command("list-runs")

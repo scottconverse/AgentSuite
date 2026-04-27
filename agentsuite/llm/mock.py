@@ -62,6 +62,8 @@ def _default_mock_for_cli(provider_name: str | None = None) -> "MockLLMProvider"
     from agentsuite.agents.engineering.rubric import ENGINEERING_RUBRIC
     from agentsuite.agents.engineering.stages.spec import SPEC_ARTIFACTS as _ENGINEERING_SPEC_ARTIFACTS
     from agentsuite.agents.marketing.stages.spec import SPEC_ARTIFACTS as _MARKETING_SPEC_ARTIFACTS
+    from agentsuite.agents.trust_risk.rubric import TRUST_RISK_RUBRIC
+    from agentsuite.agents.trust_risk.stages.spec import SPEC_ARTIFACTS as _TRUST_RISK_SPEC_ARTIFACTS
 
     extracted = {
         # Founder extract fields
@@ -167,6 +169,23 @@ def _default_mock_for_cli(provider_name: str | None = None) -> "MockLLMProvider"
             },
             "revision_instructions": [],
         }),
+        # Trust/Risk pipeline responses
+        "extracting structured trust and risk context": _json.dumps({
+            "threat_indicators": ["SQL injection vectors in API endpoints", "Weak credential policies"],
+            "control_gaps": ["No MFA enforced", "Unpatched third-party libraries"],
+            "regulatory_signals": ["GDPR Article 32 applies", "SOC 2 CC6.1 relevant"],
+            "incident_patterns": ["Phishing attempt Q1 2026", "Unauthorized access attempt Q4 2025"],
+            "open_questions": ["Is penetration testing scheduled?", "Who owns vendor risk reviews?"],
+        }),
+        "You are checking 9 trust-risk-agent artifacts for consistency. Return ONLY JSON.": _json.dumps({
+            "passed": True,
+            "issues": [],
+        }),
+        "You are scoring 9 trust-risk-agent artifacts. Return ONLY JSON.": _json.dumps({
+            "scores": {d.name: 8.0 for d in TRUST_RISK_RUBRIC.dimensions},
+            "revision_instructions": {},
+            "requires_revision": False,
+        }),
     }
     for stem in SPEC_ARTIFACTS:
         responses[f"writing {stem}.md"] = f"# {stem}\nMocked content."
@@ -186,4 +205,8 @@ def _default_mock_for_cli(provider_name: str | None = None) -> "MockLLMProvider"
         key = f"writing {stem}.md for a marketing team"
         if key not in responses:
             responses[key] = f"# {stem.replace('-', ' ').title()}\n\nMock marketing content."
+    for stem in _TRUST_RISK_SPEC_ARTIFACTS:
+        key = f"writing {stem}.md for a trust and risk team"
+        if key not in responses:
+            responses[key] = f"# {stem.replace('-', ' ').title()}\n\nMock trust/risk content."
     return MockLLMProvider(responses=responses, name=provider_name or "mock")
