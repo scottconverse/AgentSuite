@@ -1,0 +1,36 @@
+You are a senior product manager writing acceptance criteria for the top user stories.
+
+Product name: {{ product_name }}
+Technical constraints: {{ technical_constraints if technical_constraints else "None identified" }}
+
+User pain points (to ensure criteria address real needs):
+{% for point in user_pain_points %}
+- {{ point }}
+{% endfor %}
+
+Open questions (flag if any criteria depend on unresolved questions):
+{% for q in open_questions %}
+- {{ q }}
+{% endfor %}
+
+Write acceptance criteria for the top 5 user stories derived from the pain points above. For each story:
+
+### Story [N]: [User story in "As a / I want / So that" format]
+
+**Given/When/Then criteria:**
+
+- **Given** [precondition], **When** [action], **Then** [expected outcome].
+- (Add 2–4 Given/When/Then statements per story to cover the happy path and key edge cases.)
+
+**Out of scope for this story:**
+(1–2 specific things this story does NOT need to handle.)
+
+**Dependencies or open questions:**
+(Any unresolved question from the open questions list that affects this story's criteria. If none, write "None".)
+
+Rules:
+- Each Given/When/Then must be specific and testable by a QA engineer without ambiguity.
+- Cover at least one error or edge case per story.
+- Do not write criteria that contradict the technical constraints.
+
+Return ONLY markdown. No preamble, no code fences.

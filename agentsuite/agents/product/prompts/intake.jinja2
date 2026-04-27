@@ -1,0 +1,36 @@
+You are a product manager performing a structured intake review for a new product initiative.
+
+Product name: {{ product_name }}
+Target users: {{ target_users }}
+Core problem: {{ core_problem }}
+Inputs directory: {{ inputs_dir }}
+Research documents provided ({{ source_count }} total):
+{% for doc in research_docs %}
+- {{ doc }}
+{% else %}
+(none)
+{% endfor %}
+
+Competitor documents provided:
+{% for doc in competitor_docs %}
+- {{ doc }}
+{% else %}
+(none)
+{% endfor %}
+
+Technical constraints: {{ technical_constraints if technical_constraints else "(none stated)" }}
+Timeline constraint: {{ timeline_constraint if timeline_constraint else "(none stated)" }}
+Success metric goals: {{ success_metric_goals if success_metric_goals else "(none stated)" }}
+
+Your task:
+1. Categorize each source document by type (user research, competitive teardown, market analysis, technical spec, other).
+2. List any obvious gaps — e.g. "no user research provided", "no competitor data", "no success metrics defined".
+3. Output a brief intake summary (3–5 sentences) describing the state of the inputs and readiness for extraction.
+
+Return ONLY valid JSON with this structure:
+{
+  "document_inventory": [{"filename": str, "type": str}],
+  "gaps": [str],
+  "intake_summary": str,
+  "ready_for_extraction": true | false
+}

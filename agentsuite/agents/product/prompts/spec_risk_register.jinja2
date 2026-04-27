@@ -1,0 +1,31 @@
+You are a product manager creating a risk register to surface threats to the product's success before they become problems.
+
+Product name: {{ product_name }}
+Timeline constraint: {{ timeline_constraint if timeline_constraint else "Not specified" }}
+Technical constraints: {{ technical_constraints if technical_constraints else "None identified" }}
+
+Open questions (potential sources of risk):
+{% for q in open_questions %}
+- {{ q }}
+{% endfor %}
+
+Create a risk register as a markdown table with 5–8 risks:
+
+| Risk | Likelihood (H/M/L) | Impact (H/M/L) | Mitigation | Owner |
+|------|-------------------|----------------|------------|-------|
+
+Likelihood: H = likely to occur; M = possible; L = unlikely but worth tracking.
+Impact: H = would derail the product or timeline; M = significant but recoverable; L = minor setback.
+
+After the table, add:
+
+## Top 3 Risks Requiring Immediate Action
+(For each of the 3 highest-priority risks, write 2–3 sentences expanding on the mitigation strategy and what must happen in the next sprint to reduce exposure.)
+
+Rules:
+- Include risks from multiple categories: technical, market, user adoption, timeline, regulatory/compliance, team/resourcing.
+- Mitigation must be a specific action, not a vague platitude ("monitor the situation" is not a mitigation).
+- Owner should be a role (e.g. "Engineering Lead", "Product Manager", "Legal") not a person's name.
+- At least one risk must come from the open questions list.
+
+Return ONLY markdown. No preamble, no code fences.

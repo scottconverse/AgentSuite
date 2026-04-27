@@ -1,0 +1,40 @@
+You are a product manager writing a phased product roadmap to communicate what will be built and when.
+
+Product name: {{ product_name }}
+Timeline constraint: {{ timeline_constraint if timeline_constraint else "Not specified — use Now/Next/Later framing" }}
+Success metric goals: {{ success_metric_goals if success_metric_goals else "Not specified" }}
+
+User pain points (items to address):
+{% for point in user_pain_points %}
+- {{ point }}
+{% endfor %}
+
+Competitor gaps (opportunities to capture):
+{% for gap in competitor_gaps %}
+- {{ gap }}
+{% endfor %}
+
+Write a phased product roadmap. If a timeline constraint is given (e.g. "MVP in 6 weeks"), use time-based phases (Month 1 / Month 2 / Month 3 or similar). Otherwise use Now / Next / Later.
+
+For each phase:
+
+## Phase: [Name]
+
+**Theme:** (One sentence describing the strategic focus of this phase.)
+
+**Deliverables:**
+(3–5 specific items — features, capabilities, or milestones — with a one-sentence rationale for each.)
+
+**Why this sequence:**
+(2–3 sentences explaining why this phase comes before the next. Reference dependencies, risk reduction, or user value unlocked.)
+
+**Success signal:**
+(What metric or outcome indicates this phase was successful before moving to the next?)
+
+Rules:
+- Each phase must have a coherent theme — not a grab-bag of features.
+- Sequencing rationale must be explicit, not assumed.
+- The roadmap must address the stated success metric goals by the final phase.
+- Do not include features that are out of scope.
+
+Return ONLY markdown. No preamble, no code fences.

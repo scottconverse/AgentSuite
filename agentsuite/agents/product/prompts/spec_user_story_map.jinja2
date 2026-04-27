@@ -1,0 +1,35 @@
+You are a product manager creating a user story map to visualize the product experience end-to-end.
+
+Product name: {{ product_name }}
+Target users: {{ target_users }}
+Core problem: {{ core_problem }}
+
+User pain points:
+{% for point in user_pain_points %}
+- {{ point }}
+{% endfor %}
+
+Open questions:
+{% for q in open_questions %}
+- {{ q }}
+{% endfor %}
+
+Create a user story map structured as a markdown table with three levels:
+
+**Activity** — the high-level thing the user is trying to accomplish (3–5 activities).
+**Task** — a specific action within that activity (2–4 tasks per activity).
+**User Story** — a concrete story in "As a [user] / I want [action] / So that [outcome]" format (one per task).
+
+Format:
+
+| Activity | Task | User Story |
+|----------|------|------------|
+| [Activity name] | [Task name] | As a [user], I want [action], so that [outcome]. |
+
+Rules:
+- Activities should represent the full user journey from discovery through value realization.
+- Tasks should be atomic enough to estimate and test.
+- User stories must be written from the user's perspective, not the system's.
+- Address the core pain points — do not write stories for edge cases.
+
+Return ONLY markdown. No preamble, no code fences.

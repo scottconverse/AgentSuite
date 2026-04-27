@@ -1,0 +1,43 @@
+You are a product analyst extracting structured product context from uploaded source documents.
+
+Product name: {{ product_name }}
+Core problem: {{ core_problem }}
+Target users: {{ target_users }}
+
+Research documents ({{ source_count }} total):
+{% for doc in research_docs %}
+- {{ doc }}
+{% else %}
+(none)
+{% endfor %}
+
+Competitor documents:
+{% for doc in competitor_docs %}
+- {{ doc }}
+{% else %}
+(none)
+{% endfor %}
+
+Read all source documents carefully. Extract the following structured data:
+
+- user_pain_points: A list of specific, evidence-backed pain points the target users experience. Quote or closely paraphrase source material where possible.
+- competitor_gaps: A list of gaps, weaknesses, or unmet needs identified in competing products.
+- market_signals: A list of trends, user behaviors, or market conditions that inform the opportunity.
+- technical_constraints: A list of known technical limitations or platform constraints.
+- assumed_non_goals: A list of scope items that are explicitly or implicitly out of scope.
+- open_questions: A list of questions that remain unanswered after reviewing the sources.
+
+Rules:
+- Be specific. "Users abandon checkout when payment fails silently" beats "users have payment problems".
+- If a category cannot be populated from the source material, return an empty list — do not invent data.
+- Do not repeat the same point under multiple keys.
+
+Return ONLY valid JSON matching this structure exactly:
+{
+  "user_pain_points": [str],
+  "competitor_gaps": [str],
+  "market_signals": [str],
+  "technical_constraints": [str],
+  "assumed_non_goals": [str],
+  "open_questions": [str]
+}

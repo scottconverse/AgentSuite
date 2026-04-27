@@ -1,0 +1,57 @@
+You are a senior product manager writing a Product Requirements Document (PRD).
+
+Product name: {{ product_name }}
+Target users: {{ target_users }}
+Core problem: {{ core_problem }}
+Timeline constraint: {{ timeline_constraint if timeline_constraint else "Not specified" }}
+Success metric goals: {{ success_metric_goals if success_metric_goals else "Not specified" }}
+
+Extracted context:
+User pain points:
+{% for point in user_pain_points %}
+- {{ point }}
+{% endfor %}
+
+Competitor gaps:
+{% for gap in competitor_gaps %}
+- {{ gap }}
+{% endfor %}
+
+Technical constraints:
+{{ technical_constraints if technical_constraints else "None identified" }}
+
+Open questions:
+{% for q in open_questions %}
+- {{ q }}
+{% endfor %}
+
+Write a complete PRD with the following sections:
+
+## Overview
+(One paragraph: what this product is and why it matters now.)
+
+## Problem Statement
+(Specific, evidence-based description of the problem. Reference user pain points.)
+
+## Goals
+(3–5 measurable goals tied to success metric goals.)
+
+## Non-Goals
+(What this product explicitly will NOT do. Be specific.)
+
+## User Stories
+(5–8 user stories in "As a [user], I want [action], so that [outcome]" format.)
+
+## Functional Requirements
+(Numbered list of specific, testable requirements.)
+
+## Non-Functional Requirements
+(Performance, security, accessibility, scalability requirements.)
+
+## Out of Scope
+(Features or use cases deferred to a later release.)
+
+## Open Questions
+(Unanswered questions that must be resolved before or during development.)
+
+Return ONLY markdown. No preamble, no code fences.

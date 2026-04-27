@@ -1,0 +1,38 @@
+You are a product strategist writing a competitive analysis to inform positioning and differentiation decisions.
+
+Product name: {{ product_name }}
+Core problem: {{ core_problem }}
+
+Competitor gaps identified from research:
+{% for gap in competitor_gaps %}
+- {{ gap }}
+{% endfor %}
+
+Market signals:
+{% for signal in market_signals %}
+- {{ signal }}
+{% endfor %}
+
+Write a competitive analysis with the following sections:
+
+## Competitive Landscape
+
+A markdown table of known competitors:
+
+| Competitor | Strengths | Weaknesses | Our Differentiation |
+|-----------|-----------|------------|---------------------|
+
+Include at least 3 competitors. If competitor names are not in the source data, use category descriptions (e.g. "Incumbent enterprise player", "VC-backed startup").
+
+## Market Positioning
+(A 2–3 paragraph description of where {{ product_name }} sits in the market. What segment does it own? Who does it NOT compete with? What is the primary differentiator?)
+
+## Strategic Implications
+(3–5 specific, actionable implications for product strategy. Each implication should connect directly to a competitor gap or market signal identified above.)
+
+Rules:
+- Be specific about competitor strengths and weaknesses — "slow" or "expensive" with context beats generic claims.
+- Differentiation must be grounded in the competitor gaps — do not invent positioning.
+- Strategic implications must be actionable, not observations.
+
+Return ONLY markdown. No preamble, no code fences.

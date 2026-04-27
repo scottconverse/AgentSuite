@@ -1,0 +1,35 @@
+You are a product manager creating a feature prioritization matrix to guide MVP scoping and roadmap decisions.
+
+Product name: {{ product_name }}
+Timeline constraint: {{ timeline_constraint if timeline_constraint else "Not specified" }}
+Success metric goals: {{ success_metric_goals if success_metric_goals else "Not specified" }}
+
+User pain points:
+{% for point in user_pain_points %}
+- {{ point }}
+{% endfor %}
+
+Competitor gaps (opportunities to differentiate):
+{% for gap in competitor_gaps %}
+- {{ gap }}
+{% endfor %}
+
+Create a feature prioritization matrix as a markdown table:
+
+| Feature | User Impact (1–10) | Effort (1–10) | Priority | Rationale |
+|---------|-------------------|---------------|----------|-----------|
+
+Scoring:
+- User Impact: 10 = solves a critical pain point for all users; 1 = nice-to-have for few users.
+- Effort: 10 = very high effort (weeks of eng); 1 = trivial (hours).
+- Priority: P0 = must-have for MVP; P1 = important, next release; P2 = future consideration.
+
+After the table, add two sections:
+
+## MVP Feature Set
+(List P0 features and explain why they constitute a viable MVP given the timeline and goals.)
+
+## Deferred Features
+(List P1 and P2 features and briefly explain why they are deferred.)
+
+Return ONLY markdown. No preamble, no code fences.

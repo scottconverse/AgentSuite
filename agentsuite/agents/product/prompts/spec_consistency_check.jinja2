@@ -1,0 +1,45 @@
+You are a senior product manager performing a cross-artifact consistency audit before the product spec package is finalized.
+
+Product name: {{ product_name }}
+
+Artifacts to check:
+{% for name in artifact_names %}
+- {{ name }}
+{% endfor %}
+
+Artifact content (excerpts):
+{% for name, snippet in artifact_snippets %}
+=== {{ name }} ===
+{{ snippet }}
+
+{% endfor %}
+
+Check the following consistency dimensions:
+
+1. **User personas** — Are the user types, roles, and goals described in the PRD consistent with those in the user story map and user persona map? Flag any persona that appears in one artifact but not others, or whose goals differ between artifacts.
+
+2. **Feature alignment** — Do the features listed in the feature prioritization matrix appear in the product roadmap? Are any P0 features missing from the roadmap, or any roadmap items absent from prioritization?
+
+3. **Metrics traceability** — Are the success metrics in the success metrics framework directly traceable to goals stated in the PRD? Flag any metric with no clear PRD goal anchor, or any PRD goal with no metric.
+
+4. **Acceptance criteria alignment** — Are the acceptance criteria consistent with the user stories in the PRD and user story map? Flag any acceptance criterion that contradicts or extends beyond its corresponding user story.
+
+For each check, return a result with:
+- "ok" if no issues found
+- "mismatch" if inconsistencies exist, with specific details
+
+Return ONLY valid JSON:
+{
+  "checks": [
+    {
+      "dimension": str,
+      "status": "ok" | "mismatch",
+      "severity": "ok" | "warning" | "critical",
+      "detail": str
+    }
+  ]
+}
+
+"critical" = the inconsistency would produce conflicting requirements or unmeasurable goals.
+"warning" = the inconsistency is a gap or ambiguity that should be resolved but does not block development.
+"ok" severity = no issues found for this dimension.
