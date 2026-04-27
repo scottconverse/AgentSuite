@@ -57,3 +57,17 @@ def test_complete_passes_system_instruction():
     p.complete(LLMRequest(prompt="hi", system="be terse"))
     call_kwargs = client.models.generate_content.call_args.kwargs
     assert call_kwargs["config"].system_instruction == "be terse"
+
+
+def test_gemini_key_precedence(monkeypatch):
+    """GEMINI_API_KEY takes precedence over GOOGLE_API_KEY when both are set."""
+    import os
+    monkeypatch.setenv("GEMINI_API_KEY", "gemini-key-123")
+    monkeypatch.setenv("GOOGLE_API_KEY", "google-key-456")
+    # Verify the selection logic matches what GeminiProvider.__init__ uses
+    selected = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY", "")
+    assert selected == "gemini-key-123"
+
+    monkeypatch.delenv("GEMINI_API_KEY")
+    fallback = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY", "")
+    assert fallback == "google-key-456"

@@ -23,7 +23,7 @@ class GeminiProvider:
 
             from google import genai
 
-            client = genai.Client(api_key=os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY", ""))
+            client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY", ""))
         self.client = client
 
     def default_model(self) -> str:
