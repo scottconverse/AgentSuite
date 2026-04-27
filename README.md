@@ -2,9 +2,9 @@
 
 > Seven role-specific reasoning agents that turn vague intent into precise operating artifacts.
 >
-> **v0.1.0** — Specification Kernel + Founder Agent
+> **v0.4.0** — Specification Kernel + Founder · Design · Product · Engineering Agents
 
-AgentSuite is a Python package and MCP server. It exposes role-specific agents (Founder first; Design, Product, Engineering, Marketing, Trust/Risk, and CIO in subsequent releases) that take loose human intent and produce structured, reusable artifacts: brand systems, brief libraries, voice guides, prompt templates, and more.
+AgentSuite is a Python package and MCP server. It exposes role-specific agents (Founder, Design, Product, and Engineering shipped; Marketing, Trust/Risk, and CIO in subsequent releases) that take loose human intent and produce structured, reusable artifacts: brand systems, brief libraries, voice guides, prompt templates, engineering specs, and more.
 
 The agents are reasoning agents, not content generators. Output is a reusable system, not a one-off asset.
 
@@ -76,7 +76,7 @@ command = "uvx"
 args = ["agentsuite-mcp"]
 
 [servers.agentsuite.env]
-AGENTSUITE_ENABLED_AGENTS = "founder"
+AGENTSUITE_ENABLED_AGENTS = "founder,design,product,engineering"
 ```
 
 Restart Codex. Tools `founder_run`, `founder_approve`, `founder_get_status`, `founder_list_runs`, `founder_resume`, plus the cross-agent `agentsuite_list_agents`, `agentsuite_kernel_artifacts`, `agentsuite_cost_report` are now callable.
@@ -91,7 +91,7 @@ Add to project-root `.mcp.json`:
     "agentsuite": {
       "command": "uvx",
       "args": ["agentsuite-mcp"],
-      "env": {"AGENTSUITE_ENABLED_AGENTS": "founder"}
+      "env": {"AGENTSUITE_ENABLED_AGENTS": "founder,design,product,engineering"}
     }
   }
 }
@@ -99,9 +99,9 @@ Add to project-root `.mcp.json`:
 
 Restart the harness.
 
-## What the Founder agent produces
+## What the agents produce
 
-26 artifacts per run:
+### Founder agent — 26 artifacts per run:
 
 | Stage | Artifacts |
 |---|---|
@@ -112,13 +112,26 @@ Restart the harness.
 | 5 qa | `qa_report.md`, `qa_scores.json` |
 | state | `_state.json`, `_meta.json` |
 
-On `founder_approve`, the spec artifacts + brief-template-library are promoted to `.agentsuite/_kernel/<project_slug>/` for use by downstream agents (Design, Product, Marketing — coming in v0.2 onward).
+On `founder_approve`, the spec artifacts + brief-template-library are promoted to `.agentsuite/_kernel/<project_slug>/` for use by downstream agents.
+
+### Design agent — see CHANGELOG for artifact list.
+
+### Product agent — see CHANGELOG for artifact list.
+
+### Engineering agent — 17 artifacts per run:
+
+| Stage | Artifacts |
+|---|---|
+| 3 spec | `architecture-decision-record.md`, `system-design.md`, `api-spec.md`, `data-model.md`, `security-review.md`, `deployment-plan.md`, `runbook.md`, `tech-debt-register.md`, `performance-requirements.md` |
+| 4 execute | `brief-template-library/` (8 brief templates: sprint ticket, code review checklist, incident report, capacity plan, on-call handoff, release checklist, postmortem, vendor evaluation) |
+| 5 qa | `qa_report.md`, `qa_scores.json` |
+| state | `_state.json`, `_meta.json` |
 
 ## Configuration
 
 | Env var | Default | Purpose |
 |---|---|---|
-| `AGENTSUITE_ENABLED_AGENTS` | `founder` | Comma-separated agent names to expose |
+| `AGENTSUITE_ENABLED_AGENTS` | `founder` | Comma-separated agent names to expose (e.g. `founder,design,product,engineering`) |
 | `AGENTSUITE_OUTPUT_DIR` | `.agentsuite` | Where artifacts are written |
 | `AGENTSUITE_LLM_PROVIDER` | (auto-detect) | Force `anthropic`, `openai`, `gemini`, or `ollama` |
 | `AGENTSUITE_COST_CAP_USD` | `5.0` | Hard kill cap per run |
@@ -153,11 +166,13 @@ Full architecture diagram with all agents: see `docs/README-FULL.pdf`.
 
 ## Status
 
-v0.1.0 ships the kernel + Founder agent. Roadmap:
-
+**Shipped:**
+- v0.1.0 — Specification Kernel + Founder Agent
 - v0.2.0 — Design Agent (brief generation, brand QA scoring)
 - v0.3.0 — Product Agent (PM intent → UI spec → coding handoff)
-- v0.4.0 — Engineering Agent (annotated bug reports, PR review visuals)
+- v0.4.0 — Engineering Agent (architecture decisions, system design, API specs, security review, deployment, runbook, tech-debt register, performance requirements)
+
+**Roadmap:**
 - v0.5.0 — Marketing Agent (multilingual localization briefs)
 - v0.6.0 — Trust/Risk Agent (synthetic-evidence red team)
 - v0.7.0 — CIO Agent (vendor capability decomposition)
