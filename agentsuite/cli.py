@@ -18,6 +18,8 @@ founder_app = typer.Typer(help="Founder agent commands")
 app.add_typer(founder_app, name="founder")
 design_app = typer.Typer(help="Design agent commands")
 app.add_typer(design_app, name="design")
+product_app = typer.Typer(name="product", help="Product Agent — generates PRD, roadmap, and brief templates.")
+app.add_typer(product_app, name="product")
 
 
 def _output_root() -> Path:
@@ -143,6 +145,51 @@ def design_approve_cmd(
         "status": "done",
         "approved_by": state.approved_by,
     }, indent=2))
+
+
+@product_app.command("run")
+def product_run_cmd(
+    product_name: str = typer.Option(..., help="Product name"),
+    target_users: str = typer.Option(..., help="Who the product is for"),
+    core_problem: str = typer.Option(..., help="Core problem being solved"),
+    project_slug: str = typer.Option(..., help="Project slug for output dir"),
+    inputs_dir: Optional[Path] = typer.Option(None, help="Dir with research/competitive docs"),
+    run_id: Optional[str] = typer.Option(None, help="Run ID (auto-generated if omitted)"),
+) -> None:
+    """Run the Product Agent pipeline."""
+    from agentsuite.agents.product.agent import ProductAgent
+    from agentsuite.agents.product.input_schema import ProductAgentInput
+    inp = ProductAgentInput(
+        agent_name="product",
+        role_domain="product-ops",
+        user_request=f"Generate product spec for {product_name}",
+        product_name=product_name,
+        target_users=target_users,
+        core_problem=core_problem,
+        inputs_dir=inputs_dir,
+    )
+    agent = ProductAgent(output_root=_output_root(), llm=_resolve_llm_for_cli())
+    result = agent.run(request=inp, run_id=run_id or "run-cli")
+    typer.echo(json.dumps({
+        "run_id": result.run_id,
+        "status": "awaiting_approval" if result.stage == "approval" else result.stage,
+        "stage": result.stage,
+        "project_slug": project_slug,
+        "cost_usd": result.cost_so_far.usd,
+    }, indent=2, default=str))
+
+
+@product_app.command("approve")
+def product_approve_cmd(
+    run_id: str = typer.Option(..., help="Run ID to approve"),
+    approver: str = typer.Option(..., help="Approver name"),
+    project_slug: str = typer.Option(..., help="Project slug"),
+) -> None:
+    """Approve a Product Agent run and promote artifacts."""
+    from agentsuite.agents.product.agent import ProductAgent
+    agent = ProductAgent(output_root=_output_root(), llm=_resolve_llm_for_cli())
+    agent.approve(run_id=run_id, approver=approver, project_slug=project_slug)
+    typer.echo(f"Approved {run_id} by {approver}")
 
 
 @app.command("list-runs")

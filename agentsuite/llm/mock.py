@@ -58,6 +58,7 @@ def _default_mock_for_cli(provider_name: str | None = None) -> "MockLLMProvider"
     from agentsuite.agents.founder.stages.spec import SPEC_ARTIFACTS
     from agentsuite.agents.design.rubric import DESIGN_RUBRIC
     from agentsuite.agents.design.stages.spec import SPEC_ARTIFACTS as _DESIGN_SPEC_ARTIFACTS
+    from agentsuite.agents.product.stages.spec import SPEC_ARTIFACTS as _PRODUCT_SPEC_ARTIFACTS
 
     extracted = {
         # Founder extract fields
@@ -88,6 +89,35 @@ def _default_mock_for_cli(provider_name: str | None = None) -> "MockLLMProvider"
             "scores": {d.name: 8.0 for d in DESIGN_RUBRIC.dimensions},
             "revision_instructions": [],
         }),
+        # Product pipeline responses
+        "extracting structured product context": _json.dumps({
+            "user_pain_points": ["Users spend too long on manual specification tasks"],
+            "competitor_gaps": ["Competitor A lacks automated PRD generation"],
+            "market_signals": ["Growing demand for AI-assisted product management"],
+            "technical_constraints": ["Must integrate with existing issue trackers"],
+            "assumed_non_goals": ["Mobile app", "Offline mode"],
+            "open_questions": ["What is the target launch date?", "Who owns the roadmap?"],
+        }),
+        "checking 9 product-agent artifacts": _json.dumps({
+            "checks": [
+                {"dimension": "persona_consistency", "status": "ok", "severity": "ok", "detail": "Personas consistent across PRD and story map"},
+                {"dimension": "feature_roadmap_alignment", "status": "ok", "severity": "ok", "detail": "Features in prioritization match roadmap"},
+            ]
+        }),
+        "scoring 9 product-agent": _json.dumps({
+            "scores": {
+                "problem_clarity": 8.0,
+                "user_grounding": 7.5,
+                "scope_discipline": 8.0,
+                "metric_specificity": 7.0,
+                "feasibility_awareness": 8.0,
+                "anti_feature_creep": 7.5,
+                "acceptance_completeness": 8.0,
+                "stakeholder_clarity": 7.0,
+                "roadmap_sequencing": 8.0,
+            },
+            "revision_instructions": ["Clarify the success metrics timeframe"],
+        }),
     }
     for stem in SPEC_ARTIFACTS:
         responses[f"writing {stem}.md"] = f"# {stem}\nMocked content."
@@ -95,4 +125,8 @@ def _default_mock_for_cli(provider_name: str | None = None) -> "MockLLMProvider"
         key = f"writing {stem}.md"
         if key not in responses:
             responses[key] = f"# {stem}\n\nContent."
+    for stem in _PRODUCT_SPEC_ARTIFACTS:
+        key = f"writing {stem}.md for a product manager"
+        if key not in responses:
+            responses[key] = f"# {stem.replace('-', ' ').title()}\n\nThis is the {stem} artifact for the product."
     return MockLLMProvider(responses=responses, name=provider_name or "mock")
