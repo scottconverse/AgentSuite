@@ -99,6 +99,14 @@ AgentSuite does not publish to PyPI. Releases are distributed via GitHub only.
 - Pydantic for all data shapes that cross module boundaries.
 - Jinja2 for prompts and templates with `StrictUndefined` (fail loudly on missing variables).
 
+## Architecture decisions
+
+Load-bearing design decisions live in [`docs/adr/`](docs/adr/) as short
+Architecture Decision Records. Read them before proposing a change that
+crosses a recorded decision (rubric shape, RunState contract, retry
+policy, MCP naming, cost-cap split, distribution channel, resume
+semantics). New ADRs follow the template in [`docs/adr/README.md`](docs/adr/README.md).
+
 ## Reporting bugs
 
 Open an issue at https://github.com/scottconverse/AgentSuite/issues with: Python version, OS, full traceback, the command you ran, and the contents of `.agentsuite/runs/<failing-run-id>/_state.json` if applicable.
