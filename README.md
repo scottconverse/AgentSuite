@@ -161,6 +161,33 @@ Input: `organization_name`, `strategic_priorities`, `it_maturity_level`.
 
 Primary artifact: `it-strategy.md`. On `cio_approve`, all spec artifacts and brief templates are promoted to `.agentsuite/_kernel/<project_slug>/`.
 
+## Quick start (Python SDK)
+
+Use AgentSuite programmatically — no CLI required:
+
+```python
+from pathlib import Path
+from agentsuite import FounderAgent, resolve_provider
+from agentsuite.agents.founder.input_schema import FounderAgentInput
+from agentsuite.kernel.schema import Constraints
+
+agent = FounderAgent(output_root=Path(".agentsuite"), llm=resolve_provider())
+state = agent.run(
+    request=FounderAgentInput(
+        agent_name="founder",
+        role_domain="product",
+        user_request="My startup builds X for Y",
+        business_goal="Validate and launch",
+        project_slug="my-startup",
+        constraints=Constraints(),
+    ),
+    run_id="my-run",
+)
+print(state.stage)   # "approval"
+```
+
+`resolve_provider()` auto-detects your API key from environment variables. See [Configuration](#configuration) for the full list of env vars.
+
 ## Configuration
 
 | Env var | Default | Purpose |
