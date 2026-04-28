@@ -16,6 +16,10 @@ class NotAtApprovalStage(RuntimeError):
     """Raised when approve() is called but run is not at the approval stage."""
 
 
+class RevisionRequired(RuntimeError):
+    """Raised when approve() is called but QA flagged the run as needing revision."""
+
+
 class ApprovalGate:
     """Gate that promotes run artifacts and marks the run done on human approval."""
 
@@ -36,6 +40,11 @@ class ApprovalGate:
         if state.stage != "approval":
             raise NotAtApprovalStage(
                 f"Run is at stage '{state.stage}', not 'approval'"
+            )
+        if state.requires_revision:
+            raise RevisionRequired(
+                "QA flagged this run as requiring revision. "
+                "Address the QA feedback and re-run before approving."
             )
         self.writer.promote(project_slug=project_slug)
         state.stage = "done"
