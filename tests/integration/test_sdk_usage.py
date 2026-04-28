@@ -5,9 +5,8 @@ a caller can instantiate FounderAgent and run it without touching the CLI or MCP
 """
 from pathlib import Path
 
-from agentsuite import FounderAgent
+from agentsuite import FounderAgent, resolve_provider
 from agentsuite.llm.mock import _default_mock_for_cli
-from agentsuite.llm.resolver import resolve_provider
 from agentsuite.agents.founder.input_schema import FounderAgentInput
 from agentsuite.kernel.schema import Constraints
 
