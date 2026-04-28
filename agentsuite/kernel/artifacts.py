@@ -26,6 +26,18 @@ class ArtifactWriter:
         self.run_dir.mkdir(parents=True, exist_ok=True)
         self._refs: list[ArtifactRef] = []
 
+    def _resolve_safe(self, relative_path: str) -> Path:
+        """Resolve relative_path to an absolute path within run_dir.
+
+        Raises ValueError if the resolved path escapes run_dir (path traversal guard).
+        """
+        full = self.run_dir / relative_path
+        full_resolved = full.resolve()
+        run_dir_resolved = self.run_dir.resolve()
+        if not full_resolved.is_relative_to(run_dir_resolved):
+            raise ValueError(f"Artifact path escapes run_dir: {relative_path!r}")
+        return full_resolved
+
     def write(
         self,
         relative_path: str,
@@ -48,15 +60,11 @@ class ArtifactWriter:
         Returns:
             ArtifactRef with path, kind, stage, and SHA-256 hash of content.
         """
-        full = self.run_dir / relative_path
-        full_resolved = full.resolve()
-        run_dir_resolved = self.run_dir.resolve()
-        if not full_resolved.is_relative_to(run_dir_resolved):
-            raise ValueError(f"Artifact path escapes run_dir: {relative_path!r}")
+        full = self._resolve_safe(relative_path)
         full.parent.mkdir(parents=True, exist_ok=True)
         full.write_text(content, encoding="utf-8")
         sha = hashlib.sha256(content.encode("utf-8")).hexdigest()
-        ref = ArtifactRef(path=full, kind=kind, stage=stage, sha256=sha)
+        ref = ArtifactRef(path=full, kind=kind, stage=stage, sha256=sha)  # full is already resolved
         self._register(ref)
         return ref
 
