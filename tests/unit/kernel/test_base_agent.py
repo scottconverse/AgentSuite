@@ -82,3 +82,33 @@ def test_approve_promotes_artifacts(tmp_path):
     state = agent.approve(run_id="r1", approver="scott", project_slug="proj")
     assert state.stage == "done"
     assert (tmp_path / "_kernel" / "proj" / "primary.md").exists()
+
+
+def test_drive_returns_immediately_when_stage_is_approval(tmp_path):
+    """_drive must be a no-op when state is already at 'approval'."""
+    from agentsuite.kernel.artifacts import ArtifactWriter
+    from agentsuite.kernel.schema import RunState
+    from agentsuite.kernel.state_store import StateStore
+
+    agent = _FakeAgent(output_root=tmp_path)
+    writer = ArtifactWriter(output_root=tmp_path, run_id="r1")
+    store = StateStore(run_dir=writer.run_dir)
+    state = RunState(run_id="r1", agent="fake", stage="approval", inputs=_req())
+    store.save(state)
+    result = agent._drive(state, writer, store, edits={})
+    assert result.stage == "approval"
+
+
+def test_drive_returns_immediately_when_stage_is_done(tmp_path):
+    """_drive must be a no-op when state is already at 'done'."""
+    from agentsuite.kernel.artifacts import ArtifactWriter
+    from agentsuite.kernel.schema import RunState
+    from agentsuite.kernel.state_store import StateStore
+
+    agent = _FakeAgent(output_root=tmp_path)
+    writer = ArtifactWriter(output_root=tmp_path, run_id="r1")
+    store = StateStore(run_dir=writer.run_dir)
+    state = RunState(run_id="r1", agent="fake", stage="done", inputs=_req())
+    store.save(state)
+    result = agent._drive(state, writer, store, edits={})
+    assert result.stage == "done"

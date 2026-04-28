@@ -99,6 +99,11 @@ class BaseAgent(ABC):
         store: StateStore,
         edits: dict[str, Any],
     ) -> RunState:
+        # Runs already at "approval" or "done" are terminal — return as-is.
+        # Without this guard, a non-pipeline stage falls through to start_idx=0
+        # and silently restarts from intake.
+        if state.stage in ("approval", "done"):
+            return state
         handlers = self.stage_handlers()
         cost_tracker = CostTracker()
         ctx = StageContext(writer=writer, cost_tracker=cost_tracker, edits=edits)
