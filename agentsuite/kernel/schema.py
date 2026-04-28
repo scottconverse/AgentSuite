@@ -67,17 +67,27 @@ class AgentRequest(BaseModel):
 
 
 class Cost(BaseModel):
-    """Aggregable token + dollar cost record for one or more LLM calls."""
+    """Aggregable token + dollar cost record for one or more LLM calls.
+
+    The optional ``model`` field carries the most recent model id seen by an
+    aggregating tracker — last-wins under :meth:`__add__`. ``None`` if the
+    caller did not record a model. Used by ``cost_summary.json`` so a run
+    report can name the model that produced each stage's cost.
+    """
     model_config = ConfigDict(extra="forbid")
     input_tokens: int = 0
     output_tokens: int = 0
     usd: float = 0.0
+    model: str | None = None
 
     def __add__(self, other: Cost) -> Cost:
+        # Last-non-None wins for model so an aggregate reflects the latest call.
+        merged_model = other.model if other.model is not None else self.model
         return Cost(
             input_tokens=self.input_tokens + other.input_tokens,
             output_tokens=self.output_tokens + other.output_tokens,
             usd=self.usd + other.usd,
+            model=merged_model,
         )
 
 

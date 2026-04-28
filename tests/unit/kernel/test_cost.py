@@ -1,4 +1,7 @@
 """Unit tests for kernel.cost."""
+import json
+from pathlib import Path
+
 import pytest
 
 from agentsuite.kernel.cost import CostCap, CostTracker, HardCapExceeded
@@ -76,3 +79,109 @@ def test_hard_cap_does_not_mutate_total_on_overflow():
     with pytest.raises(HardCapExceeded):
         t.add(Cost(usd=2.0))  # second attempt with same overflow
     assert t.total.usd == pytest.approx(4.0)
+
+
+# --- per-stage telemetry (v0.9.0) ----------------------------------------
+
+
+def test_per_stage_breakdown_when_current_stage_set():
+    """Costs added under a current_stage land in per_stage AND total."""
+    t = CostTracker(cap=CostCap(hard_kill_usd=10.0))
+    t.current_stage = "intake"
+    t.add(Cost(input_tokens=100, output_tokens=50, usd=0.10))
+    t.current_stage = "extract"
+    t.add(Cost(input_tokens=200, output_tokens=80, usd=0.20))
+    t.add(Cost(input_tokens=50, output_tokens=20, usd=0.05))  # second extract call
+    assert t.total.usd == pytest.approx(0.35)
+    assert t.per_stage["intake"].usd == pytest.approx(0.10)
+    assert t.per_stage["extract"].usd == pytest.approx(0.25)
+    # Aggregation within a stage sums tokens too.
+    assert t.per_stage["extract"].input_tokens == 250
+    assert t.per_stage["extract"].output_tokens == 100
+
+
+def test_per_stage_skipped_when_current_stage_none():
+    """Without current_stage set, total still accumulates but per_stage stays empty."""
+    t = CostTracker(cap=CostCap(hard_kill_usd=10.0))
+    t.add(Cost(usd=0.10))
+    assert t.total.usd == pytest.approx(0.10)
+    assert t.per_stage == {}
+
+
+def test_summary_schema_keys():
+    """summary() returns the documented schema."""
+    t = CostTracker(
+        cap=CostCap(hard_kill_usd=5.0),
+        run_id="run-abc",
+        agent="founder",
+        provider="anthropic",
+    )
+    t.current_stage = "intake"
+    t.add(Cost(input_tokens=100, output_tokens=50, usd=0.10, model="claude-sonnet-4-6"))
+    s = t.summary()
+    assert set(s.keys()) == {
+        "run_id", "agent", "provider", "model",
+        "stages",
+        "total_input_tokens", "total_output_tokens", "total_cost_usd",
+        "cap_usd", "cap_remaining_usd", "cap_warned",
+    }
+    assert s["run_id"] == "run-abc"
+    assert s["agent"] == "founder"
+    assert s["provider"] == "anthropic"
+    assert s["model"] == "claude-sonnet-4-6"
+    assert s["total_cost_usd"] == pytest.approx(0.10)
+    assert s["cap_usd"] == pytest.approx(5.0)
+    assert s["cap_remaining_usd"] == pytest.approx(4.9)
+    assert s["cap_warned"] is False
+    assert len(s["stages"]) == 1
+    assert s["stages"][0]["stage"] == "intake"
+    assert s["stages"][0]["cost_usd"] == pytest.approx(0.10)
+    assert s["stages"][0]["model"] == "claude-sonnet-4-6"
+
+
+def test_summary_orders_stages_canonically():
+    """stages list follows the canonical Stage Literal order, not insertion order."""
+    t = CostTracker(cap=CostCap(hard_kill_usd=10.0))
+    # Add in non-canonical order: spec, then intake, then extract.
+    for stage in ("spec", "intake", "extract"):
+        t.current_stage = stage  # type: ignore[assignment]
+        t.add(Cost(usd=0.01))
+    stages_in_summary = [row["stage"] for row in t.summary()["stages"]]
+    assert stages_in_summary == ["intake", "extract", "spec"]
+
+
+def test_save_summary_writes_json(tmp_path: Path):
+    """save_summary persists the summary dict as JSON, parents created."""
+    t = CostTracker(cap=CostCap(hard_kill_usd=5.0), run_id="run-xyz", agent="design")
+    t.current_stage = "intake"
+    t.add(Cost(input_tokens=10, output_tokens=5, usd=0.01))
+    out = tmp_path / "deep" / "nested" / "cost_summary.json"
+    t.save_summary(out)
+    assert out.exists()
+    loaded = json.loads(out.read_text(encoding="utf-8"))
+    assert loaded["run_id"] == "run-xyz"
+    assert loaded["agent"] == "design"
+    assert loaded["total_cost_usd"] == pytest.approx(0.01)
+
+
+def test_summary_cap_warned_flag_tracks_soft_warn():
+    """cap_warned is True once soft_warn is exceeded, False before."""
+    t = CostTracker(cap=CostCap(soft_warn_usd=0.5, hard_kill_usd=5.0))
+    t.current_stage = "intake"
+    t.add(Cost(usd=0.4))
+    assert t.summary()["cap_warned"] is False
+    t.add(Cost(usd=0.2))  # crosses soft warn
+    assert t.summary()["cap_warned"] is True
+
+
+def test_cost_model_field_last_wins_under_aggregation():
+    """Cost.__add__ takes the latest non-None model so summary reflects most recent call."""
+    a = Cost(input_tokens=10, output_tokens=5, usd=0.01, model="claude-haiku-4-5-20251001")
+    b = Cost(input_tokens=20, output_tokens=8, usd=0.02, model="claude-sonnet-4-6")
+    merged = a + b
+    assert merged.model == "claude-sonnet-4-6"
+    assert merged.usd == pytest.approx(0.03)
+    # Single None preserves the other's model.
+    c = Cost(usd=0.0)
+    assert (a + c).model == "claude-haiku-4-5-20251001"
+    assert (c + a).model == "claude-haiku-4-5-20251001"

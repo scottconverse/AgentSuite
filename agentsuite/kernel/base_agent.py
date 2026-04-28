@@ -105,21 +105,32 @@ class BaseAgent(ABC):
         if state.stage in ("approval", "done"):
             return state
         handlers = self.stage_handlers()
-        cost_tracker = CostTracker()
+        cost_tracker = CostTracker(run_id=state.run_id, agent=state.agent)
         ctx = StageContext(writer=writer, cost_tracker=cost_tracker, edits=edits)
         start_idx = PIPELINE_ORDER.index(state.stage) if state.stage in PIPELINE_ORDER else 0
+        cost_summary_path = writer.run_dir / "cost_summary.json"
         for stage in PIPELINE_ORDER[start_idx:]:
             if stage not in handlers:
                 raise NotImplementedError(f"Agent {self.name} missing handler for stage '{stage}'")
+            cost_tracker.current_stage = stage
             try:
                 state = handlers[stage](state, ctx)
                 state.artifacts = writer.refs()
                 state.cost_so_far = cost_tracker.total
                 store.save(state)
+                # Persist cost_summary.json after every successful stage so a
+                # crashed run still leaves an authoritative cost record on disk.
+                cost_tracker.save_summary(cost_summary_path)
                 _log.debug("✔ %s complete", stage)
             except Exception:
                 state.cost_so_far = cost_tracker.total
                 store.save(state)
+                # Best-effort partial summary on failure; never mask the
+                # original exception.
+                try:
+                    cost_tracker.save_summary(cost_summary_path)
+                except Exception:  # noqa: BLE001 — defensive
+                    pass
                 raise
             if state.stage == "approval":
                 break
