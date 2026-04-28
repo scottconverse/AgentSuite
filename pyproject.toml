@@ -33,7 +33,7 @@ openai = ["openai>=1.50,<2"]
 gemini = ["google-genai>=1.0,<2"]
 ollama = ["ollama>=0.4,<1"]
 mcp = ["mcp>=1.0,<2"]
-image = ["pillow>=10.0,<12"]
+image = ["pillow>=10.0,<13"]
 all = ["agentsuite[anthropic,openai,gemini,ollama,mcp,image]"]
 ocr = ["pytesseract>=0.3"]
 dev = [
