@@ -11,6 +11,12 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 - **v0.9.2** — Screenshots + committed `examples/sample-output/founder/` fixture (P4).
 - **v1.0.0-rc1 / v1.0.0** — Compatibility freeze, Discussions seeding, "Why AgentSuite" hook, three good-first-issue tickets, signed tags, public launch.
 
+## [0.8.4] - 2026-04-28
+
+### Fixed
+
+- **Release workflow `pip-audit` + `cyclonedx-py` invocation paths** — the v0.8.3 first-tag release run failed because both tools are installed in the outer system pip while the workflow called them via `.audit-venv/bin/`, where they don't exist. Reverted to system PATH for the tools, kept `.audit-venv` as the dependency-closure source for `pip freeze` and the SBOM interpreter target. v0.8.3 is the intended feature surface; v0.8.4 is the same surface with a working release pipeline.
+
 ## [0.8.3] - 2026-04-28
 
 ### Added
@@ -234,7 +240,8 @@ Initial release.
 - Per-run cost cap only; per-day cap deferred.
 - Single MCP server with env-gated agent enablement (no per-agent server topology).
 
-[Unreleased]: https://github.com/scottconverse/AgentSuite/compare/v0.8.3...HEAD
+[Unreleased]: https://github.com/scottconverse/AgentSuite/compare/v0.8.4...HEAD
+[0.8.4]: https://github.com/scottconverse/AgentSuite/compare/v0.8.3...v0.8.4
 [0.8.3]: https://github.com/scottconverse/AgentSuite/compare/v0.8.2...v0.8.3
 [0.8.2]: https://github.com/scottconverse/AgentSuite/compare/v0.8.1...v0.8.2
 [0.8.1]: https://github.com/scottconverse/AgentSuite/compare/v0.8.0...v0.8.1
