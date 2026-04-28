@@ -7,8 +7,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable
 
-_log = logging.getLogger(__name__)
-
 from agentsuite.kernel.approval import ApprovalGate
 from agentsuite.kernel.artifacts import ArtifactWriter
 from agentsuite.kernel.cost import CostTracker
@@ -16,6 +14,7 @@ from agentsuite.kernel.qa import QARubric
 from agentsuite.kernel.schema import AgentRequest, RunState, Stage
 from agentsuite.kernel.state_store import StateStore
 
+_log = logging.getLogger(__name__)
 
 PIPELINE_ORDER: list[Stage] = ["intake", "extract", "spec", "execute", "qa"]
 
