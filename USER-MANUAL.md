@@ -1,6 +1,6 @@
 # AgentSuite User Manual
 
-**Version 0.8.0**
+**Version 0.8.1**
 
 ---
 
@@ -94,6 +94,29 @@ pip install "agentsuite[anthropic] @ git+https://github.com/scottconverse/AgentS
 ```
 
 This installs AgentSuite with the Anthropic Claude provider. To use a different AI provider instead, replace `[anthropic]` with `[openai]`, `[gemini]`, or `[ollama]`. To install all providers at once: `agentsuite[all]`.
+
+### Extras / Optional dependencies
+
+AgentSuite uses "extras" to install only the AI provider libraries you need. Here is what each extra includes:
+
+| Extra | What it installs | When to use it |
+|---|---|---|
+| `[anthropic]` | The `anthropic` Python library | You are using Anthropic Claude (recommended default) |
+| `[openai]` | The `openai` Python library | You are using OpenAI GPT models |
+| `[gemini]` | The `google-generativeai` library | You are using Google Gemini models |
+| `[ollama]` | The `ollama` Python library | You are running models locally via Ollama |
+| `[all]` | All four provider libraries above | You want to switch between providers without reinstalling |
+| `[mcp]` | MCP server dependencies | You are wiring AgentSuite into Claude Code, Codex, or another MCP-compatible tool |
+
+Example — install with OpenAI support:
+```
+pip install "agentsuite[openai] @ git+https://github.com/scottconverse/AgentSuite.git"
+```
+
+Example — install everything including MCP:
+```
+pip install "agentsuite[all,mcp] @ git+https://github.com/scottconverse/AgentSuite.git"
+```
 
 You will see a lot of text scroll by as your computer downloads and installs AgentSuite from GitHub (a website where open-source software is stored). This is normal. When it finishes, your prompt returns.
 
@@ -260,6 +283,8 @@ Use the Founder agent at the very beginning of a project, when you are establish
 - `--business-goal` — what you are trying to achieve with this run, in plain language (required)
 - `--project-slug` — a short lowercase label for the project, used to name the output folder (optional)
 - `--inputs-dir` — path to a folder of source materials such as brand docs or research files (optional)
+- `--run-id` — a unique label for this run, used to name the output folder (optional; auto-generated as `run-YYYYMMDDTHHMMSS-<6hex>` if omitted)
+- `--force` — overwrite an existing run directory of the same name instead of failing (optional; without this flag, re-running with the same `--run-id` will error to protect your existing output)
 
 **CLI command**
 
@@ -276,9 +301,15 @@ On Windows, replace the backslash line breaks with a single long line:
 agentsuite founder run --business-goal "Launch Acme invoicing for small businesses" --project-slug acme --inputs-dir ./my-brand-inputs
 ```
 
+To overwrite a previous run with the same ID, add `--force`:
+
+```
+agentsuite founder run --business-goal "Launch Acme invoicing for small businesses" --project-slug acme --force
+```
+
 **How to approve**
 
-After reviewing the documents in `.agentsuite/runs/run-cli/`, run:
+After reviewing the documents in `.agentsuite/runs/<run-id>/`, run:
 
 ```
 agentsuite founder approve --run-id run-cli --approver "Your Name" --project-slug acme
@@ -323,17 +354,28 @@ Use the Design agent after the Founder agent has established your brand identity
 
 **What you need to provide**
 
-- `--brand-name` — the name of the brand being designed for (required)
-- `--design-brief` — two to four sentences describing the design goals and the feeling the brand should evoke (required)
 - `--target-audience` — one sentence describing who will interact with this design (required)
+- `--campaign-goal` — one sentence describing the design goal or what this visual identity must achieve (required)
+- `--channel` — the primary channel or medium where this design will appear (required; examples: "web app," "print," "mobile")
+- `--project-slug` — a short lowercase label for the project, used to name the output folder (optional)
+- `--inputs-dir` — path to a folder of existing brand materials (optional)
+- `--run-id` — unique label for this run (optional; auto-generated as `run-YYYYMMDDTHHMMSS-<6hex>` if omitted)
+- `--force` — overwrite an existing run directory of the same name (optional)
 
 **CLI command**
 
 ```
 agentsuite design run \
-  --brand-name "Acme" \
-  --design-brief "Modern and trustworthy. Clean layouts with generous whitespace. Professional but approachable — not corporate." \
-  --target-audience "Small business owners aged 30-55 who are not tech-savvy but expect professional tools"
+  --target-audience "Small business owners aged 30-55 who are not tech-savvy but expect professional tools" \
+  --campaign-goal "Create a modern, trustworthy visual identity that feels professional but approachable" \
+  --channel "web app" \
+  --project-slug acme-design
+```
+
+On Windows, use a single long line:
+
+```
+agentsuite design run --target-audience "Small business owners aged 30-55 who are not tech-savvy but expect professional tools" --campaign-goal "Create a modern, trustworthy visual identity that feels professional but approachable" --channel "web app" --project-slug acme-design
 ```
 
 **How to approve**
@@ -382,10 +424,10 @@ Use the Product agent when you are starting a new feature or product, or when yo
 - `--product-name` — the name of the product or feature being specified (required)
 - `--target-users` — one sentence describing who this is for (required)
 - `--core-problem` — one sentence describing the problem you are solving (required)
-
-Optionally, you can also provide:
-- `--research-dir` — path to a folder containing user research files (interview notes, survey exports, analytics data)
-- `--competitor-dir` — path to a folder containing competitor notes or feature comparisons
+- `--project-slug` — a short lowercase label for the project (optional)
+- `--inputs-dir` — path to a folder of source materials such as research files or competitor notes (optional)
+- `--run-id` — unique label for this run (optional; auto-generated as `run-YYYYMMDDTHHMMSS-<6hex>` if omitted)
+- `--force` — overwrite an existing run directory of the same name (optional)
 
 **CLI command**
 
@@ -393,7 +435,14 @@ Optionally, you can also provide:
 agentsuite product run \
   --product-name "Onboarding Flow v2" \
   --target-users "Small business owners who sign up but never complete setup" \
-  --core-problem "Users drop off before completing their first task because the setup steps are unclear"
+  --core-problem "Users drop off before completing their first task because the setup steps are unclear" \
+  --project-slug onboarding-v2
+```
+
+On Windows, use a single long line:
+
+```
+agentsuite product run --product-name "Onboarding Flow v2" --target-users "Small business owners who sign up but never complete setup" --core-problem "Users drop off before completing their first task because the setup steps are unclear" --project-slug onboarding-v2
 ```
 
 **How to approve**
@@ -444,9 +493,10 @@ Use the Engineering agent at the start of any significant software project or wh
 - `--problem-domain` — one sentence describing the technical problem being solved (required)
 - `--tech-stack` — the languages, frameworks, and databases you plan to use (required)
 - `--scale-requirements` — the load and reliability targets the system must meet (required)
-
-Optionally:
-- Existing architecture docs, ADR history, or incident reports in a folder you point to
+- `--project-slug` — a short lowercase label for the project (optional)
+- `--inputs-dir` — path to a folder of existing architecture docs, ADR history, or incident reports (optional)
+- `--run-id` — unique label for this run (optional; auto-generated as `run-YYYYMMDDTHHMMSS-<6hex>` if omitted)
+- `--force` — overwrite an existing run directory of the same name (optional)
 
 **CLI command**
 
@@ -455,7 +505,14 @@ agentsuite engineering run \
   --system-name "Payment Processing Service" \
   --problem-domain "Process and reconcile customer payments across multiple payment providers with guaranteed delivery" \
   --tech-stack "Python, FastAPI, PostgreSQL, Redis, Kubernetes" \
-  --scale-requirements "10,000 transactions per minute, 99.99% uptime, sub-200ms p99 latency"
+  --scale-requirements "10,000 transactions per minute, 99.99% uptime, sub-200ms p99 latency" \
+  --project-slug payment-service
+```
+
+On Windows, use a single long line:
+
+```
+agentsuite engineering run --system-name "Payment Processing Service" --problem-domain "Process and reconcile customer payments across multiple payment providers with guaranteed delivery" --tech-stack "Python, FastAPI, PostgreSQL, Redis, Kubernetes" --scale-requirements "10,000 transactions per minute, 99.99% uptime, sub-200ms p99 latency" --project-slug payment-service
 ```
 
 **How to approve**
@@ -505,8 +562,13 @@ Use the Marketing agent when planning a new campaign, launching a product or fea
 - `--brand-name` — the name of your company or product (required)
 - `--campaign-goal` — one sentence describing what you want to achieve (required)
 - `--target-market` — one sentence describing who you are trying to reach (required)
-
-Optionally: existing brand documents, competitor notes, budget range, timeline, and preferred channels.
+- `--project-slug` — a short lowercase label for the project (optional)
+- `--inputs-dir` — path to a folder of existing brand documents or competitor notes (optional)
+- `--budget-range` — the approximate campaign budget (optional; example: "$10,000–$50,000")
+- `--timeline` — the campaign duration or launch window (optional; example: "Q3 2026, 12 weeks")
+- `--channels` — preferred marketing channels (optional; example: "LinkedIn, email, content marketing")
+- `--run-id` — unique label for this run (optional; auto-generated as `run-YYYYMMDDTHHMMSS-<6hex>` if omitted)
+- `--force` — overwrite an existing run directory of the same name (optional)
 
 **CLI command**
 
@@ -514,7 +576,17 @@ Optionally: existing brand documents, competitor notes, budget range, timeline, 
 agentsuite marketing run \
   --brand-name "Acme Widgets" \
   --campaign-goal "Generate 500 qualified leads for our new B2B SaaS product in Q3" \
-  --target-market "Operations managers at manufacturing companies with 50-500 employees"
+  --target-market "Operations managers at manufacturing companies with 50-500 employees" \
+  --budget-range "$20,000–$40,000" \
+  --timeline "Q3 2026, 12 weeks" \
+  --channels "LinkedIn, email, content marketing" \
+  --project-slug acme-campaign
+```
+
+On Windows, use a single long line:
+
+```
+agentsuite marketing run --brand-name "Acme Widgets" --campaign-goal "Generate 500 qualified leads for our new B2B SaaS product in Q3" --target-market "Operations managers at manufacturing companies with 50-500 employees" --project-slug acme-campaign
 ```
 
 **How to approve**
@@ -564,8 +636,13 @@ Use the Trust/Risk agent before a security audit, when preparing for regulatory 
 - `--product-name` — the name of your product, system, or organization being assessed (required)
 - `--risk-domain` — the area of risk you want to focus on (required; examples: "cloud infrastructure security," "regulatory compliance — SOC 2 Type II," "third-party vendor risk")
 - `--stakeholder-context` — who needs to see and act on these documents (required; examples: "CISO, VP Engineering, and external auditors")
-
-Optionally: applicable regulations, threat model scope boundaries, and compliance frameworks you are working toward.
+- `--regulatory-context` — applicable regulations or standards (optional; example: "SOC 2 Type II, HIPAA, PCI-DSS")
+- `--threat-model-scope` — the boundaries of what is in and out of scope for the threat model (optional)
+- `--compliance-frameworks` — specific compliance frameworks you are working toward (optional; example: "NIST CSF, ISO 27001")
+- `--policy-dir` — path to a folder of existing security policies (optional)
+- `--incident-dir` — path to a folder of past incident reports (optional)
+- `--run-id` — unique label for this run (optional; auto-generated as `run-YYYYMMDDTHHMMSS-<6hex>` if omitted)
+- `--force` — overwrite an existing run directory of the same name (optional)
 
 **CLI command**
 
@@ -573,7 +650,15 @@ Optionally: applicable regulations, threat model scope boundaries, and complianc
 agentsuite trust-risk run \
   --product-name "PaymentVault API" \
   --risk-domain "cloud infrastructure security" \
-  --stakeholder-context "CISO, VP Engineering, and external auditors"
+  --stakeholder-context "CISO, VP Engineering, and external auditors" \
+  --regulatory-context "PCI-DSS, SOC 2 Type II" \
+  --compliance-frameworks "NIST CSF"
+```
+
+On Windows, use a single long line:
+
+```
+agentsuite trust-risk run --product-name "PaymentVault API" --risk-domain "cloud infrastructure security" --stakeholder-context "CISO, VP Engineering, and external auditors"
 ```
 
 **How to approve**
@@ -623,8 +708,12 @@ Use the CIO agent at the start of an annual planning cycle, when preparing a tec
 - `--organization-name` — the name of your company or department (required)
 - `--strategic-priorities` — two or three sentences describing what the business is trying to achieve in the next one to three years (required)
 - `--it-maturity-level` — an honest description of where the IT function stands today (required; examples: "Reactive — we fix things when they break; no formal architecture or governance process," or "Managed — we have documented processes but they are not consistently followed")
-
-Optionally: existing IT documentation, budget context, and applicable regulatory requirements.
+- `--budget-context` — the approximate IT budget or spend context (optional; example: "$2M annual IT budget, 60% run/40% change")
+- `--digital-initiatives` — current or planned digital transformation initiatives (optional)
+- `--regulatory-environment` — regulatory or compliance obligations that affect IT (optional; example: "HIPAA, SOX")
+- `--it-docs-dir` — path to a folder of existing IT documentation (optional)
+- `--run-id` — unique label for this run (optional; auto-generated as `run-YYYYMMDDTHHMMSS-<6hex>` if omitted)
+- `--force` — overwrite an existing run directory of the same name (optional)
 
 **CLI command**
 
@@ -632,7 +721,15 @@ Optionally: existing IT documentation, budget context, and applicable regulatory
 agentsuite cio run \
   --organization-name "Acme Manufacturing Co." \
   --strategic-priorities "Expand into two new markets, reduce operational costs by 15%, and improve customer self-service capabilities" \
-  --it-maturity-level "Reactive — we fix things when they break; no formal architecture or governance process in place"
+  --it-maturity-level "Reactive — we fix things when they break; no formal architecture or governance process in place" \
+  --budget-context "$3M annual IT budget" \
+  --regulatory-environment "SOX, state data privacy laws"
+```
+
+On Windows, use a single long line:
+
+```
+agentsuite cio run --organization-name "Acme Manufacturing Co." --strategic-priorities "Expand into two new markets, reduce operational costs by 15%, and improve customer self-service capabilities" --it-maturity-level "Reactive — we fix things when they break; no formal architecture or governance process in place"
 ```
 
 **How to approve**
@@ -655,7 +752,7 @@ agentsuite cio approve --run-id run-cli --approver "Your Name" --project-slug ac
 
 ## 8. Reading Your Results
 
-After any agent run completes, open the output folder in your file explorer. By default this is `.agentsuite/runs/run-cli/` inside whatever folder you were in when you ran the command.
+After any agent run completes, open the output folder in your file explorer. By default this is `.agentsuite/runs/<run-id>/` inside whatever folder you were in when you ran the command. If you did not specify a `--run-id`, the folder will be named with the auto-generated ID shown in the command output (for example, `.agentsuite/runs/run-20260427T143022-a3f9c1/`).
 
 **The nine documents** are the primary output. Read the "Start here" document for each agent first (listed in each agent chapter above). It gives you the overall picture. The other eight documents fill in specific areas in more depth.
 
@@ -855,7 +952,7 @@ This glossary defines every technical term used in this manual. Terms are listed
 
 **Risk register:** A living document that lists every known risk to the organization, rated by likelihood and impact, with an owner and a current mitigation status.
 
-**Run ID:** A label that identifies a specific agent run. The default run ID is `run-cli`. You reference the run ID when you approve: `--run-id run-cli`. You can specify a different run ID with `--run-id my-custom-id` if you want to keep multiple runs separate.
+**Run ID:** A label that identifies a specific agent run. If you do not specify `--run-id`, AgentSuite auto-generates one in the format `run-YYYYMMDDTHHMMSS-<6hex>` (for example, `run-20260427T143022-a3f9c1`). You reference the run ID when you approve: `--run-id run-20260427T143022-a3f9c1`. You can specify a custom run ID with `--run-id my-label` if you want a predictable folder name. If you re-run with the same run ID, add `--force` to overwrite the existing folder — without it, the run will error to protect your previous output.
 
 **Runbook:** A set of step-by-step instructions for operating a system. Good runbooks let any engineer — not just the person who built the system — handle common tasks and incidents without guessing.
 
@@ -884,4 +981,4 @@ This glossary defines every technical term used in this manual. Terms are listed
 
 ---
 
-*AgentSuite v0.8.0 — User Manual*
+*AgentSuite v0.8.1 — User Manual*
