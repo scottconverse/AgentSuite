@@ -4,6 +4,33 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-04-27
+
+### Added
+- **Unique auto-generated run IDs** (B1) — omitting `--run-id` generates a `run-<timestamp>-<hex>` ID automatically; `run_id` is returned in the JSON output.
+- **`--force` flag on all `run` commands** (B2) — re-running an existing run ID without `--force` exits 1 with a clear error; `--force` overwrites.
+- **Duplicate agent registration guard** (B3) — `AgentRegistry.register()` raises `ValueError` on duplicate name.
+- **`ArtifactWriter._resolve_safe()`** (B4) — private method validating relative paths stay within `run_dir`; raises `ValueError` for traversal, null-byte, and Windows absolute paths.
+- **`enabled_names()` always validates** (B5) — validation no longer skipped when registry is empty.
+- **`resolve_provider` and `NoProviderConfigured` in public API** (C1) — re-exported from `agentsuite/__init__.py`.
+- **Python SDK quick-start in README** (C2) — complete `FounderAgent` programmatic usage example.
+- **`NoProviderConfigured` message tests** (C3) — 8 parametrised tests covering all 4 providers.
+- **CLI error wrapping with `--debug`** (D2) — exceptions produce a clean one-line stderr message; `--debug` shows full traceback.
+- **`--latest` flag on all `approve` commands** (D3) — auto-selects the most recently modified run for the agent.
+- **Stage progress markers** (D1) — `✔ <stage> complete` printed after each pipeline stage before the final JSON.
+- **Standardised `run` JSON output** (D4) — all 7 agents return `{"run_id", "primary_path", "status"}`.
+- **MCP server deferred FastMCP import** (E1) — `FastMCP` moved under `TYPE_CHECKING`; no import error without the `mcp` extra.
+- **Founder rubric dimension validation** (E2) — raises `ValueError` (not `KeyError`) for legacy 7-dim input.
+- **Windows/mixed-slash path traversal tests** (E3) — platform-gated backslash tests; forward-slash traversal test runs everywhere.
+- **USER-MANUAL.md extras table and CLI flag reconciliation** (F1/F3) — provider extras documented; all 7 agent flag sections reconciled with `build_cli_spec()`.
+- **Landing page version badge** (F2) — updated to v0.8.1.
+- **`docs/troubleshooting.md`** (F4) — new guide covering 5 failure modes.
+- **`docs-drift` CI job** (G2) — checks 6 required doc artifacts exist and version in `pyproject.toml` matches latest CHANGELOG entry.
+
+### Fixed
+- Windows CI false-positive in path traversal test — backslash paths now correctly gated to `win32` only.
+- CLI test crash on mixed progress-marker + JSON output — `_extract_json()` helper skips progress lines before parsing.
+
 ## [0.8.0] - 2026-04-27
 
 > **Note:** v0.7.1 was prepared in code but never tagged or released as a standalone version; its contents shipped as part of v0.8.0.
