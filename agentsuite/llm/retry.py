@@ -66,10 +66,7 @@ class RetryingLLMProvider:
 
     def __init__(self, inner: LLMProvider) -> None:
         self._inner = inner
-
-    @property
-    def name(self) -> str:
-        return self._inner.name
+        self.name: str = inner.name  # settable instance var — satisfies LLMProvider Protocol
 
     def default_model(self) -> str:
         return self._inner.default_model()
@@ -90,6 +87,6 @@ class RetryingLLMProvider:
             before_sleep=before_sleep_log(_log, logging.WARNING),
         ):
             with attempt:
-                return self._inner.complete(request)  # type: ignore[return-value]
+                return self._inner.complete(request)
 
         raise AssertionError("unreachable — tenacity reraise=True guarantees an exception")
