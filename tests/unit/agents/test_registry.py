@@ -94,3 +94,41 @@ def test_all_seven_default_agents_register_without_error():
     assert set(reg.registered_names()) == {
         "founder", "design", "product", "engineering", "marketing", "trust_risk", "cio"
     }
+
+
+def test_enabled_names_normalizes_hyphen_to_underscore(monkeypatch):
+    """'trust-risk' in env var normalizes to 'trust_risk' (the registered key)."""
+    monkeypatch.setenv("AGENTSUITE_ENABLED_AGENTS", "trust-risk")
+    reg = AgentRegistry()
+    reg._registered["trust_risk"] = object  # type: ignore[assignment]
+    result = reg.enabled_names()
+    assert result == ["trust_risk"]
+
+
+def test_readme_enabled_agents_value_works(monkeypatch):
+    """The literal README env-var value (with 'trust-risk' hyphen) must not raise.
+
+    This is a docs-driven smoke test: if the README example breaks, this test
+    breaks too.  Caught the P0 where B5's unconditional validation + the
+    hyphenated README name crashed the MCP server on import.
+    """
+    import agentsuite.agents.registry as reg_mod
+    reg_mod._DEFAULT_REGISTRY = None  # reset singleton
+    monkeypatch.setenv(
+        "AGENTSUITE_ENABLED_AGENTS",
+        "founder,design,product,engineering,marketing,trust-risk,cio",
+    )
+    reg = reg_mod.default_registry()
+    names = reg.enabled_names()
+    assert set(names) == {
+        "founder", "design", "product", "engineering", "marketing", "trust_risk", "cio"
+    }
+
+
+def test_underscore_form_also_works(monkeypatch):
+    """The underscore form 'trust_risk' continues to work after normalization."""
+    monkeypatch.setenv("AGENTSUITE_ENABLED_AGENTS", "trust_risk")
+    reg = AgentRegistry()
+    reg._registered["trust_risk"] = object  # type: ignore[assignment]
+    result = reg.enabled_names()
+    assert result == ["trust_risk"]
