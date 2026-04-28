@@ -21,6 +21,8 @@ class AgentRegistry:
 
     def register(self, name: str, agent_class: Type[BaseAgent]) -> None:
         """Register a concrete agent class under ``name``."""
+        if name in self._registered:
+            raise ValueError(f"Agent '{name}' already registered")
         self._registered[name] = agent_class
 
     def registered_names(self) -> list[str]:
