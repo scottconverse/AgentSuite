@@ -38,6 +38,16 @@ def test_state_store_load_missing_returns_none(tmp_path):
     assert store.load() is None
 
 
+def test_state_store_save_leaves_no_tmp_files(tmp_path):
+    """Atomic save must not leave .tmp files behind on success."""
+    store = StateStore(run_dir=tmp_path)
+    state = RunState(run_id="r1", agent="founder", inputs=_request())
+    store.save(state)
+    leftover = list(tmp_path.glob("*.tmp"))
+    assert leftover == [], f"Stale .tmp files after save: {leftover}"
+    assert store.path.exists()
+
+
 def test_state_store_preserves_agent_subclass_fields(tmp_path):
     """Agent-specific subclass fields survive StateStore save/load round-trip.
 
