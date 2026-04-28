@@ -1,8 +1,11 @@
 """TrustRiskAgent — wires the kernel BaseAgent to trust/risk stage handlers."""
 from __future__ import annotations
 
+import os
+from datetime import datetime
 from pathlib import Path
 from typing import Any
+from uuid import uuid4
 
 from agentsuite.agents.trust_risk.rubric import TRUST_RISK_RUBRIC
 from agentsuite.agents.trust_risk.stages.execute import execute_stage
@@ -85,7 +88,8 @@ def build_cli_spec() -> AgentCLISpec:
         compliance_frameworks: str = typer.Option("", help="Compliance frameworks (e.g. 'NIST CSF, ISO 27001')"),
         policy_dir: Path | None = typer.Option(None, help="Dir with existing security policy documents"),
         incident_dir: Path | None = typer.Option(None, help="Dir with incident reports"),
-        run_id: str | None = typer.Option(None, help="Run ID (auto-generated if omitted)"),
+        run_id: str | None = typer.Option(None, help="Run ID (default: auto-generated timestamp+uuid)"),
+        force: bool = typer.Option(False, "--force", help="Overwrite existing run directory if it exists"),
     ) -> None:
         """Run the Trust/Risk Agent pipeline."""
         from agentsuite.agents.trust_risk.input_schema import TrustRiskAgentInput
@@ -107,7 +111,12 @@ def build_cli_spec() -> AgentCLISpec:
             incident_reports=incident_reports,
         )
         agent = TrustRiskAgent(output_root=_output_root(), llm=_resolve_llm_for_cli())
-        result = agent.run(request=inp, run_id=run_id or "run-cli")
+        rid = run_id or f"run-{datetime.now().strftime('%Y%m%dT%H%M%S')}-{uuid4().hex[:6]}"
+        run_dir = Path(os.environ.get("AGENTSUITE_OUTPUT_DIR", ".agentsuite")) / "runs" / rid
+        if run_dir.exists() and not force:
+            typer.echo(f"Error: run '{rid}' already exists. Use --force to overwrite.", err=True)
+            raise typer.Exit(1)
+        result = agent.run(request=inp, run_id=rid)
         typer.echo(json.dumps({
             "run_id": result.run_id,
             "status": "awaiting_approval" if result.stage == "approval" else result.stage,

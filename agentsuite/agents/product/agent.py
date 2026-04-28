@@ -1,8 +1,11 @@
 """ProductAgent — wires the kernel BaseAgent to product stage handlers."""
 from __future__ import annotations
 
+import os
+from datetime import datetime
 from pathlib import Path
 from typing import Any
+from uuid import uuid4
 
 from agentsuite.agents.product.rubric import PRODUCT_RUBRIC
 from agentsuite.agents.product.stages.execute import execute_stage
@@ -78,7 +81,8 @@ def build_cli_spec() -> AgentCLISpec:
         core_problem: str = typer.Option(..., help="Core problem being solved"),
         project_slug: str = typer.Option(..., help="Project slug for output dir"),
         inputs_dir: Path | None = typer.Option(None, help="Dir with research/competitive docs"),
-        run_id: str | None = typer.Option(None, help="Run ID (auto-generated if omitted)"),
+        run_id: str | None = typer.Option(None, help="Run ID (default: auto-generated timestamp+uuid)"),
+        force: bool = typer.Option(False, "--force", help="Overwrite existing run directory if it exists"),
     ) -> None:
         """Run the Product Agent pipeline."""
         from agentsuite.agents.product.input_schema import ProductAgentInput
@@ -94,7 +98,12 @@ def build_cli_spec() -> AgentCLISpec:
             inputs_dir=inputs_dir,
         )
         agent = ProductAgent(output_root=_output_root(), llm=_resolve_llm_for_cli())
-        result = agent.run(request=inp, run_id=run_id or "run-cli")
+        rid = run_id or f"run-{datetime.now().strftime('%Y%m%dT%H%M%S')}-{uuid4().hex[:6]}"
+        run_dir = Path(os.environ.get("AGENTSUITE_OUTPUT_DIR", ".agentsuite")) / "runs" / rid
+        if run_dir.exists() and not force:
+            typer.echo(f"Error: run '{rid}' already exists. Use --force to overwrite.", err=True)
+            raise typer.Exit(1)
+        result = agent.run(request=inp, run_id=rid)
         typer.echo(json.dumps({
             "run_id": result.run_id,
             "status": "awaiting_approval" if result.stage == "approval" else result.stage,
