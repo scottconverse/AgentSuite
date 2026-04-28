@@ -4,7 +4,10 @@ from __future__ import annotations
 import logging
 import os
 from pathlib import Path
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any, Callable
+
+if TYPE_CHECKING:
+    from mcp.server.fastmcp import FastMCP
 
 from agentsuite.agents.registry import default_registry
 from agentsuite.mcp_models import RunSummary
@@ -25,7 +28,7 @@ def _expose_stages() -> bool:
 class _ServerWrapper:
     """Thin wrapper around FastMCP exposing the registered tool list for tests."""
 
-    def __init__(self, mcp: Any) -> None:
+    def __init__(self, mcp: "FastMCP") -> None:
         self.mcp = mcp
         self._tool_names: list[str] = []
 
