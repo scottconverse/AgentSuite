@@ -7,6 +7,7 @@ import pytest
 from agentsuite.llm.anthropic import AnthropicProvider
 from agentsuite.llm.openai import OpenAIProvider
 from agentsuite.llm.resolver import NoProviderConfigured, resolve_provider
+from agentsuite.llm.retry import RetryingLLMProvider
 
 
 def _make_ollama_mock() -> MagicMock:
@@ -22,14 +23,16 @@ def test_resolver_uses_explicit_provider_arg(monkeypatch):
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     monkeypatch.setenv("ANTHROPIC_API_KEY", "fake")
     p = resolve_provider("anthropic")
-    assert isinstance(p, AnthropicProvider)
+    assert isinstance(p, RetryingLLMProvider)
+    assert isinstance(p._inner, AnthropicProvider)
 
 
 def test_resolver_uses_env_provider(monkeypatch):
     monkeypatch.setenv("AGENTSUITE_LLM_PROVIDER", "openai")
     monkeypatch.setenv("OPENAI_API_KEY", "fake")
     p = resolve_provider()
-    assert isinstance(p, OpenAIProvider)
+    assert isinstance(p, RetryingLLMProvider)
+    assert isinstance(p._inner, OpenAIProvider)
 
 
 def test_resolver_auto_detects_anthropic_first(monkeypatch):
@@ -37,7 +40,8 @@ def test_resolver_auto_detects_anthropic_first(monkeypatch):
     monkeypatch.setenv("ANTHROPIC_API_KEY", "fake")
     monkeypatch.setenv("OPENAI_API_KEY", "fake")
     p = resolve_provider()
-    assert isinstance(p, AnthropicProvider)
+    assert isinstance(p, RetryingLLMProvider)
+    assert isinstance(p._inner, AnthropicProvider)
 
 
 def test_resolver_falls_back_to_openai_when_only_openai_present(monkeypatch):
@@ -45,7 +49,8 @@ def test_resolver_falls_back_to_openai_when_only_openai_present(monkeypatch):
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     monkeypatch.setenv("OPENAI_API_KEY", "fake")
     p = resolve_provider()
-    assert isinstance(p, OpenAIProvider)
+    assert isinstance(p, RetryingLLMProvider)
+    assert isinstance(p._inner, OpenAIProvider)
 
 
 def test_resolver_raises_when_no_keys(monkeypatch):
@@ -72,7 +77,8 @@ def test_resolver_falls_back_to_ollama_when_no_keys(monkeypatch):
     with pytest.MonkeyPatch().context() as mp:
         mp.setitem(sys.modules, "ollama", mock_ollama)
         p = resolve_provider()
-    assert isinstance(p, OllamaProvider)
+    assert isinstance(p, RetryingLLMProvider)
+    assert isinstance(p._inner, OllamaProvider)
 
 
 def test_resolver_named_ollama_works(monkeypatch):
@@ -83,7 +89,8 @@ def test_resolver_named_ollama_works(monkeypatch):
     with pytest.MonkeyPatch().context() as mp:
         mp.setitem(sys.modules, "ollama", mock_ollama)
         p = resolve_provider("ollama")
-    assert isinstance(p, OllamaProvider)
+    assert isinstance(p, RetryingLLMProvider)
+    assert isinstance(p._inner, OllamaProvider)
 
 
 def test_resolver_named_ollama_raises_when_daemon_down(monkeypatch):
@@ -107,7 +114,8 @@ def test_resolver_falls_back_to_gemini(monkeypatch):
     monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
     monkeypatch.setenv("GEMINI_API_KEY", "fake")
     p = resolve_provider()
-    assert isinstance(p, GeminiProvider)
+    assert isinstance(p, RetryingLLMProvider)
+    assert isinstance(p._inner, GeminiProvider)
 
 
 def test_resolver_named_gemini_works(monkeypatch):
@@ -115,7 +123,8 @@ def test_resolver_named_gemini_works(monkeypatch):
 
     monkeypatch.setenv("GEMINI_API_KEY", "fake")
     p = resolve_provider("gemini")
-    assert isinstance(p, GeminiProvider)
+    assert isinstance(p, RetryingLLMProvider)
+    assert isinstance(p._inner, GeminiProvider)
 
 
 def test_resolver_accepts_google_api_key_alias(monkeypatch):
@@ -124,7 +133,8 @@ def test_resolver_accepts_google_api_key_alias(monkeypatch):
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     monkeypatch.setenv("GOOGLE_API_KEY", "fake")
     p = resolve_provider("gemini")
-    assert isinstance(p, GeminiProvider)
+    assert isinstance(p, RetryingLLMProvider)
+    assert isinstance(p._inner, GeminiProvider)
 
 
 # ---------------------------------------------------------------------------

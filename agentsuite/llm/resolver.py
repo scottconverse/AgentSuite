@@ -11,6 +11,7 @@ from agentsuite.llm.base import LLMProvider
 from agentsuite.llm.gemini import GeminiProvider
 from agentsuite.llm.ollama import OllamaProvider
 from agentsuite.llm.openai import OpenAIProvider
+from agentsuite.llm.retry import RetryingLLMProvider
 
 
 class NoProviderConfigured(RuntimeError):
@@ -84,10 +85,10 @@ def resolve_provider(name: str | None = None) -> LLMProvider:
             raise NoProviderConfigured(f"Unknown provider: {chosen}")
         if not _PROVIDER_CHECKS[chosen]():
             raise NoProviderConfigured(f"{_unmet_msg(chosen)} (provider '{chosen}')")
-        return _PROVIDERS[chosen]()
+        return RetryingLLMProvider(_PROVIDERS[chosen]())
     for prov in _AUTO_DETECT_ORDER:
         if _PROVIDER_CHECKS[prov]():
-            return _PROVIDERS[prov]()
+            return RetryingLLMProvider(_PROVIDERS[prov]())
     raise NoProviderConfigured(
         "No provider configured. Set AGENTSUITE_LLM_PROVIDER, "
         "ANTHROPIC_API_KEY, OPENAI_API_KEY, GEMINI_API_KEY (or GOOGLE_API_KEY), "
