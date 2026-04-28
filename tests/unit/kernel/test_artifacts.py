@@ -101,3 +101,32 @@ def test_writer_allows_nested_paths(tmp_path):
     ref = w.write("a/b/c/file.md", "content", kind="spec", stage="spec")
     assert ref.path.exists()
     assert ref.path.read_text(encoding="utf-8") == "content"
+
+
+# ---------------------------------------------------------------------------
+# E3: Additional traversal tests — Windows absolute paths + mixed slashes
+# ---------------------------------------------------------------------------
+
+@pytest.mark.parametrize("bad_path", [
+    # Windows-style absolute paths
+    r"C:\Windows\system32\evil.txt",
+    "C:/Windows/system32/evil.txt",
+    # Mixed-slash traversal
+    "../foo/../../bar",
+    r"..\foo\..\..\bar",
+    # Deeply nested mixed backslash traversal
+    r"subdir\..\..\..\etc\passwd",
+])
+def test_resolve_safe_rejects_windows_and_mixed_slash_paths(tmp_path, bad_path):
+    """_resolve_safe must reject Windows absolute paths and mixed-slash traversals."""
+    w = ArtifactWriter(output_root=tmp_path, run_id="r1")
+    with pytest.raises(ValueError, match="escapes run_dir"):
+        w._resolve_safe(bad_path)
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="Null-byte path semantics differ on Windows")
+def test_resolve_safe_rejects_null_byte_path(tmp_path):
+    """_resolve_safe raises an error for paths containing embedded null bytes."""
+    w = ArtifactWriter(output_root=tmp_path, run_id="r1")
+    with pytest.raises((ValueError, Exception)):
+        w._resolve_safe("valid\x00injection")
