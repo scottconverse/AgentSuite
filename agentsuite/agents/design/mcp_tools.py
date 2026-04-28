@@ -120,11 +120,11 @@ def register_tools(
             ))
         return out
 
-    server.add_tool("design_run", design_run)
-    server.add_tool("design_resume", design_resume)
-    server.add_tool("design_approve", design_approve)
-    server.add_tool("design_get_status", design_get_status)
-    server.add_tool("design_list_runs", design_list_runs)
+    server.add_tool("agentsuite_design_run", design_run)
+    server.add_tool("agentsuite_design_resume", design_resume)
+    server.add_tool("agentsuite_design_approve", design_approve)
+    server.add_tool("agentsuite_design_get_status", design_get_status)
+    server.add_tool("agentsuite_design_list_runs", design_list_runs)
 
     if expose_stages:
         def _stage_tool(stage: Stage) -> Any:
@@ -135,8 +135,8 @@ def register_tools(
                 return _result_from_state(state, run_dir)
             return runner
 
-        server.add_tool("design_intake", _stage_tool("intake"))
-        server.add_tool("design_extract", _stage_tool("extract"))
-        server.add_tool("design_spec", _stage_tool("spec"))
-        server.add_tool("design_execute", _stage_tool("execute"))
-        server.add_tool("design_qa", _stage_tool("qa"))
+        server.add_tool("agentsuite_design_stage_intake", _stage_tool("intake"))
+        server.add_tool("agentsuite_design_stage_extract", _stage_tool("extract"))
+        server.add_tool("agentsuite_design_stage_spec", _stage_tool("spec"))
+        server.add_tool("agentsuite_design_stage_execute", _stage_tool("execute"))
+        server.add_tool("agentsuite_design_stage_qa", _stage_tool("qa"))

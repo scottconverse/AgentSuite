@@ -61,11 +61,11 @@ def test_register_tools_adds_five_default_tools(tmp_path):
         output_root_fn=lambda: tmp_path,
         expose_stages=False,
     )
-    assert "founder_run" in server.tool_names()
-    assert "founder_resume" in server.tool_names()
-    assert "founder_approve" in server.tool_names()
-    assert "founder_get_status" in server.tool_names()
-    assert "founder_list_runs" in server.tool_names()
+    assert "agentsuite_founder_run" in server.tool_names()
+    assert "agentsuite_founder_resume" in server.tool_names()
+    assert "agentsuite_founder_approve" in server.tool_names()
+    assert "agentsuite_founder_get_status" in server.tool_names()
+    assert "agentsuite_founder_list_runs" in server.tool_names()
 
 
 def test_founder_run_returns_awaiting_approval(tmp_path):
@@ -81,7 +81,7 @@ def test_founder_run_returns_awaiting_approval(tmp_path):
         project_slug="pfl",
         run_id="r1",
     )
-    result = server.tools["founder_run"](request)
+    result = server.tools["agentsuite_founder_run"](request)
     assert result.run_id == "r1"
     assert result.status == "awaiting_approval"
     assert result.primary_path.endswith("brand-system.md")
@@ -96,8 +96,8 @@ def test_founder_approve_returns_promoted_paths(tmp_path):
         expose_stages=False,
     )
     request = FounderRunRequest(business_goal="Launch PFL", project_slug="pfl", run_id="r1")
-    server.tools["founder_run"](request)
-    approval = server.tools["founder_approve"](run_id="r1", approver="scott", project_slug="pfl")
+    server.tools["agentsuite_founder_run"](request)
+    approval = server.tools["agentsuite_founder_approve"](run_id="r1", approver="scott", project_slug="pfl")
     assert approval.status == "done"
     assert any("brand-system.md" in p for p in approval.promoted_paths)
 
@@ -111,8 +111,8 @@ def test_founder_list_runs_returns_active_runs(tmp_path):
         expose_stages=False,
     )
     request = FounderRunRequest(business_goal="Launch PFL", project_slug="pfl", run_id="r1")
-    server.tools["founder_run"](request)
-    runs = server.tools["founder_list_runs"](project_slug=None)
+    server.tools["agentsuite_founder_run"](request)
+    runs = server.tools["agentsuite_founder_list_runs"](project_slug=None)
     assert len(runs) == 1
     assert runs[0].run_id == "r1"
 
@@ -126,8 +126,8 @@ def test_founder_get_status_returns_state(tmp_path):
         expose_stages=False,
     )
     request = FounderRunRequest(business_goal="Launch PFL", project_slug="pfl", run_id="r1")
-    server.tools["founder_run"](request)
-    status = server.tools["founder_get_status"](run_id="r1")
+    server.tools["agentsuite_founder_run"](request)
+    status = server.tools["agentsuite_founder_get_status"](run_id="r1")
     assert status.run_id == "r1"
     assert status.stage == "approval"
 
@@ -140,5 +140,5 @@ def test_advanced_stage_tools_added_when_expose_set(tmp_path):
         output_root_fn=lambda: tmp_path,
         expose_stages=True,
     )
-    for stage_tool in ("founder_intake", "founder_extract", "founder_spec", "founder_execute", "founder_qa"):
+    for stage_tool in ("agentsuite_founder_stage_intake", "agentsuite_founder_stage_extract", "agentsuite_founder_stage_spec", "agentsuite_founder_stage_execute", "agentsuite_founder_stage_qa"):
         assert stage_tool in server.tool_names()

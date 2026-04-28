@@ -118,11 +118,11 @@ def register_tools(
             ))
         return out
 
-    server.add_tool("marketing_run", marketing_run)
-    server.add_tool("marketing_resume", marketing_resume)
-    server.add_tool("marketing_approve", marketing_approve)
-    server.add_tool("marketing_get_status", marketing_get_status)
-    server.add_tool("marketing_list_runs", marketing_list_runs)
+    server.add_tool("agentsuite_marketing_run", marketing_run)
+    server.add_tool("agentsuite_marketing_resume", marketing_resume)
+    server.add_tool("agentsuite_marketing_approve", marketing_approve)
+    server.add_tool("agentsuite_marketing_get_status", marketing_get_status)
+    server.add_tool("agentsuite_marketing_list_runs", marketing_list_runs)
 
     if expose_stages:
         def _stage_tool(stage: Stage) -> Any:
@@ -133,8 +133,8 @@ def register_tools(
                 return _result_from_state(state, run_dir)
             return runner
 
-        server.add_tool("marketing_stage_intake", _stage_tool("intake"))
-        server.add_tool("marketing_stage_extract", _stage_tool("extract"))
-        server.add_tool("marketing_stage_spec", _stage_tool("spec"))
-        server.add_tool("marketing_stage_execute", _stage_tool("execute"))
-        server.add_tool("marketing_stage_qa", _stage_tool("qa"))
+        server.add_tool("agentsuite_marketing_stage_intake", _stage_tool("intake"))
+        server.add_tool("agentsuite_marketing_stage_extract", _stage_tool("extract"))
+        server.add_tool("agentsuite_marketing_stage_spec", _stage_tool("spec"))
+        server.add_tool("agentsuite_marketing_stage_execute", _stage_tool("execute"))
+        server.add_tool("agentsuite_marketing_stage_qa", _stage_tool("qa"))
