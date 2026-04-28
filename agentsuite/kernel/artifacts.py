@@ -29,8 +29,14 @@ class ArtifactWriter:
     def _resolve_safe(self, relative_path: str) -> Path:
         """Resolve relative_path to an absolute path within run_dir.
 
-        Raises ValueError if the resolved path escapes run_dir (path traversal guard).
+        Raises ValueError if the resolved path escapes run_dir (path traversal
+        guard) or contains an embedded null byte. The null-byte check runs
+        before any pathlib resolution so the rejection message is consistent
+        across Windows (where ``Path(...)`` itself rejects null bytes with a
+        different message) and POSIX.
         """
+        if "\x00" in relative_path:
+            raise ValueError(f"Artifact path contains null byte: {relative_path!r}")
         full = self.run_dir / relative_path
         full_resolved = full.resolve()
         run_dir_resolved = self.run_dir.resolve()

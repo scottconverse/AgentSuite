@@ -155,9 +155,14 @@ def test_resolve_safe_rejects_windows_and_mixed_slash_paths(tmp_path, bad_path):
         w._resolve_safe(bad_path)
 
 
-@pytest.mark.skipif(sys.platform == "win32", reason="Null-byte path semantics differ on Windows")
 def test_resolve_safe_rejects_null_byte_path(tmp_path):
-    """_resolve_safe raises an error for paths containing embedded null bytes."""
+    """_resolve_safe rejects embedded null bytes with a consistent message on
+    every platform.
+
+    The explicit guard in ``_resolve_safe`` runs before pathlib touches the
+    string, so Windows and POSIX raise the same ValueError with the same
+    "contains null byte" message.
+    """
     w = ArtifactWriter(output_root=tmp_path, run_id="r1")
-    with pytest.raises((ValueError, Exception)):
+    with pytest.raises(ValueError, match="contains null byte"):
         w._resolve_safe("valid\x00injection")

@@ -6,8 +6,27 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 ### Roadmap
 
-- **v0.8.3 (security hygiene)** — `pip-audit` + SBOM (CycloneDX JSON) in release workflow; weekly provider price/deprecation drift CI job; Windows null-byte path test fix or removal (no skip).
-- **v0.9.0 (Sprint 3)** — per-run `cost_summary.json` telemetry + configurable `AGENTSUITE_COST_CAP_USD` default; `RunState.inputs` discriminated union with `RunStateSchemaVersionError` on pre-v0.9 state files (no migration shipped); golden content assertions (`assert_artifact_exact()` + `assert_qa_within_tolerance(rtol=0.05)`); resume-from-failure idempotency test + ADR; clean-install verification on tag push (Ubuntu + Windows); ADR backfill for rubric, RunState, retry policy, MCP naming, cost-cap, no-PyPI decisions.
+- **v0.9.0 (Sprint 3)** — per-run `cost_summary.json` telemetry + configurable `AGENTSUITE_COST_CAP_USD` default raised to $5.00; `RunState.inputs` discriminated union with `RunStateSchemaVersionError` on pre-v0.9 state files (no migration shipped); golden content assertions (`assert_artifact_exact()` + `assert_qa_within_tolerance(rtol=0.05)`); CIO agent `cio_name` + `as_of_date` field fixes; resume-from-failure idempotency test + ADR; clean-install verification on tag push (Ubuntu + Windows); ADR backfill for rubric, RunState, retry policy, MCP naming, cost-cap, no-PyPI decisions.
+- **v0.9.1** — Founder rubric audit one-pager; remaining skip/deselect cleanup.
+- **v0.9.2** — Screenshots + committed `examples/sample-output/founder/` fixture (P4).
+- **v1.0.0-rc1 / v1.0.0** — Compatibility freeze, Discussions seeding, "Why AgentSuite" hook, three good-first-issue tickets, signed tags, public launch.
+
+## [0.8.3] - 2026-04-28
+
+### Added
+
+- **Supply-chain hygiene in `release.yml`** — every tag push now runs `pip-audit --strict` against the freshly-built wheel before publishing, generates a CycloneDX JSON SBOM (`agentsuite-<version>-sbom.cdx.json`), and attaches both the SBOM and the audit report to the GitHub Release. The audit step fails on any reported vulnerability across the installed dependency closure (no severity filter); an explicit `[skip-audit]` token in the commit message of the tagged commit arms a logged one-shot bypass for emergencies.
+- **Weekly provider drift workflow** (`.github/workflows/provider-drift.yml`) — Mondays 09:00 UTC, fetches each LLM provider's live `/models` endpoint and asserts every model name in `agentsuite/llm/pricing.py` is still listed. Drift opens a labelled issue (`provider-drift`) with the JSON report attached, so silent model retirements surface within seven days. Providers without an API key in repo secrets are skipped, not failed. Ollama is excluded — local daemon, no pricing surface.
+- **`scripts/check_provider_drift.py`** — runtime checker invoked by the weekly workflow; can be run locally with the relevant API keys in env.
+
+### Changed
+
+- **`ArtifactWriter._resolve_safe()` now rejects null-byte paths explicitly and consistently across platforms** — the explicit guard runs before pathlib touches the string, so Windows and POSIX raise the same `ValueError("contains null byte: ...")` instead of Windows producing pathlib's "embedded null character" via a different code path.
+- **`release.yml` version-extraction step now strips `\r`** — defensive fix matching the same change shipped in `scripts/verify-release.sh` for v0.8.2; preempts CRLF leakage when `pyproject.toml` carries Windows line endings.
+
+### Fixed
+
+- **`test_resolve_safe_rejects_null_byte_path` no longer skipped on Windows** (Hard Rule 4a) — the platform skip is removed and the assertion tightened to `pytest.raises(ValueError, match="contains null byte")`. Test runs on every platform and verifies the new explicit guard.
 
 ## [0.8.2] - 2026-04-28
 
@@ -215,7 +234,8 @@ Initial release.
 - Per-run cost cap only; per-day cap deferred.
 - Single MCP server with env-gated agent enablement (no per-agent server topology).
 
-[Unreleased]: https://github.com/scottconverse/AgentSuite/compare/v0.8.2...HEAD
+[Unreleased]: https://github.com/scottconverse/AgentSuite/compare/v0.8.3...HEAD
+[0.8.3]: https://github.com/scottconverse/AgentSuite/compare/v0.8.2...v0.8.3
 [0.8.2]: https://github.com/scottconverse/AgentSuite/compare/v0.8.1...v0.8.2
 [0.8.1]: https://github.com/scottconverse/AgentSuite/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/scottconverse/AgentSuite/compare/v0.7.0...v0.8.0

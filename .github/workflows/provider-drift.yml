@@ -1,0 +1,76 @@
+name: provider-drift
+
+# Weekly check that every model in agentsuite/llm/pricing.py is still returned
+# by its provider's /models endpoint. Opens an issue if drift is detected so
+# silent model retirements are caught before users hit "model not found" at
+# runtime.
+
+on:
+  schedule:
+    # Mondays at 09:00 UTC.
+    - cron: "0 9 * * 1"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install runtime deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+      - name: Check provider drift
+        id: check
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY:    ${{ secrets.OPENAI_API_KEY }}
+          GEMINI_API_KEY:    ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          python scripts/check_provider_drift.py
+        continue-on-error: true
+      - name: Upload drift report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: provider-drift-report
+          path: provider-drift-report.json
+      - name: Ensure drift label exists
+        if: steps.check.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh label create provider-drift \
+            --color C0392B \
+            --description "Live provider /models drift detected by weekly check" \
+            --force
+      - name: Open drift issue
+        if: steps.check.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REPORT=$(cat provider-drift-report.json)
+          gh issue create \
+            --title "Provider drift detected ($(date -u +%Y-%m-%d))" \
+            --label "provider-drift" \
+            --body "$(cat <<EOF
+          The weekly provider drift check found one or more models missing from a provider's live \`/models\` endpoint.
+
+          Update \`agentsuite/llm/pricing.py\` and \`Verified:\` dates accordingly. If a model was retired, plan a deprecation path.
+
+          ## Report
+
+          \`\`\`json
+          $REPORT
+          \`\`\`
+
+          Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          EOF
+          )"
