@@ -109,6 +109,7 @@ class BaseAgent(ABC):
                 state.artifacts = writer.refs()
                 state.cost_so_far = cost_tracker.total
                 store.save(state)
+                print(f"✔ {stage} complete", flush=True)
             except Exception:
                 state.cost_so_far = cost_tracker.total
                 store.save(state)
