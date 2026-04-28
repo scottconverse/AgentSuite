@@ -1,5 +1,6 @@
 """Unit tests for kernel.artifacts."""
 import json
+import sys
 
 import pytest
 
@@ -71,6 +72,28 @@ def test_writer_rejects_deeply_nested_traversal(tmp_path):
     w = ArtifactWriter(output_root=tmp_path, run_id="r1")
     with pytest.raises(ValueError, match="escapes run_dir"):
         w.write("subdir/../../../../../../etc/passwd", "bad", kind="spec", stage="spec")
+
+
+# Note: bare absolute paths like "/etc/passwd" resolve differently on Windows
+# (treated as relative to current drive). The parametrize below covers POSIX behavior.
+# The critical guard is the is_relative_to() check which works cross-platform.
+@pytest.mark.parametrize("bad_path", [
+    "../../etc/secret.txt",
+    "subdir/../../../../../../etc/passwd",
+    *(["/etc/passwd", "/absolute/path/file.txt"] if sys.platform != "win32" else []),
+])
+def test_resolve_safe_rejects_bad_paths(tmp_path, bad_path):
+    """_resolve_safe raises ValueError for traversal and absolute-path attacks."""
+    w = ArtifactWriter(output_root=tmp_path, run_id="r1")
+    with pytest.raises(ValueError, match="escapes run_dir"):
+        w._resolve_safe(bad_path)
+
+
+def test_resolve_safe_allows_legitimate_paths(tmp_path):
+    """_resolve_safe returns the resolved path for safe relative paths."""
+    w = ArtifactWriter(output_root=tmp_path, run_id="r1")
+    result = w._resolve_safe("subdir/file.md")
+    assert result == (w.run_dir / "subdir" / "file.md").resolve()
 
 
 def test_writer_allows_nested_paths(tmp_path):
