@@ -1,17 +1,18 @@
 """Abstract base agent with persisted five-stage pipeline (intake, extract, spec, execute, qa) with a separate approval gate."""
 from __future__ import annotations
 
+import json
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, cast
 
 from agentsuite.kernel.approval import ApprovalGate
 from agentsuite.kernel.artifacts import ArtifactWriter
 from agentsuite.kernel.cost import CostTracker
 from agentsuite.kernel.qa import QARubric
-from agentsuite.kernel.schema import AgentRequest, RunState, Stage
+from agentsuite.kernel.schema import AgentRequest, Cost, RunState, Stage
 from agentsuite.kernel.state_store import StateStore
 
 _log = logging.getLogger(__name__)
@@ -106,9 +107,31 @@ class BaseAgent(ABC):
             return state
         handlers = self.stage_handlers()
         cost_tracker = CostTracker(run_id=state.run_id, agent=state.agent)
+        cost_summary_path = writer.run_dir / "cost_summary.json"
+        # Resume idempotency (ADR-0007): when resuming a previously-crashed
+        # run, carry forward state.cost_so_far so cap enforcement reflects
+        # multi-attempt total spend, and restore per-stage breakdown from
+        # the prior cost_summary.json so the final report shows the full
+        # history rather than just the resumed-segment costs. Failures to
+        # parse the prior file are non-fatal: the carried total is still
+        # correct from state.cost_so_far.
+        if state.cost_so_far.usd > 0 or state.cost_so_far.input_tokens > 0:
+            cost_tracker.total = state.cost_so_far
+            if cost_summary_path.exists():
+                try:
+                    prior = json.loads(cost_summary_path.read_text(encoding="utf-8"))
+                    for entry in prior.get("stages", []):
+                        stage_name = cast(Stage, entry["stage"])
+                        cost_tracker.per_stage[stage_name] = Cost(
+                            input_tokens=entry["input_tokens"],
+                            output_tokens=entry["output_tokens"],
+                            usd=entry["cost_usd"],
+                            model=entry.get("model"),
+                        )
+                except (OSError, json.JSONDecodeError, KeyError, TypeError):
+                    pass
         ctx = StageContext(writer=writer, cost_tracker=cost_tracker, edits=edits)
         start_idx = PIPELINE_ORDER.index(state.stage) if state.stage in PIPELINE_ORDER else 0
-        cost_summary_path = writer.run_dir / "cost_summary.json"
         for stage in PIPELINE_ORDER[start_idx:]:
             if stage not in handlers:
                 raise NotImplementedError(f"Agent {self.name} missing handler for stage '{stage}'")

@@ -36,6 +36,14 @@ cap budget reflects total cost across both run attempts.
   `cost_summary.json` best-effort on exception so the operator sees the
   partial spend. There is no per-call rollback — that would require
   transactional LLM APIs, which providers do not offer.
+- **The crashed stage re-bills on resume.** "Stages 1–N not re-charged"
+  applies to stages that completed before the crashed stage. The crashed
+  stage itself runs from the start on resume, so any LLM calls it made
+  before the crash are paid AGAIN. This is the price of stage-atomic
+  resume; the alternative (in-stage checkpointing) would require the
+  kernel to know each agent's internal sub-step shape, breaking the
+  abstraction. The cap budget reflects total spend including the
+  re-billed crashed stage.
 - The integration test for this ADR lives in
   `tests/integration/test_resume_idempotency.py`. Bumping the schema in
   a way that breaks the test means re-litigating this ADR.
