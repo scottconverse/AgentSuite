@@ -28,7 +28,7 @@ class OpenAIProvider:
         self.client = client
 
     def default_model(self) -> str:
-        return "gpt-4.1"
+        return "gpt-5.4"
 
     def complete(self, request: LLMRequest) -> LLMResponse:
         model = request.model or self.default_model()

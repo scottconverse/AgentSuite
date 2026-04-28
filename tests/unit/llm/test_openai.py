@@ -7,7 +7,7 @@ from agentsuite.llm.base import LLMRequest
 from agentsuite.llm.openai import OpenAIProvider, _PRICING
 
 
-_DEFAULT_MODEL = "gpt-4.1"
+_DEFAULT_MODEL = "gpt-5.4"
 
 
 def _stub_client(text: str = "Hi", in_tokens: int = 10, out_tokens: int = 2) -> MagicMock:
@@ -43,6 +43,6 @@ def test_complete_returns_response_with_usage():
 def test_complete_uses_request_model_override():
     client = _stub_client()
     p = OpenAIProvider(client=client)
-    p.complete(LLMRequest(prompt="x", model="gpt-4.1"))
+    p.complete(LLMRequest(prompt="x", model="gpt-5.5"))
     call_kwargs = client.chat.completions.create.call_args.kwargs
-    assert call_kwargs["model"] == "gpt-4.1"
+    assert call_kwargs["model"] == "gpt-5.5"
