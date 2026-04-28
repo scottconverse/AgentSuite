@@ -28,8 +28,8 @@ done
 ok "all 6 doc artifacts present"
 
 step "2. Version sync check"
-PYPROJECT_VERSION=$(grep -E '^version = ' pyproject.toml | head -1 | sed -E 's/version = "(.*)"/\1/')
-VERSION_PY=$(grep -E '^__version__' agentsuite/__version__.py | sed -E 's/__version__ = "(.*)"/\1/')
+PYPROJECT_VERSION=$(grep -E '^version = ' pyproject.toml | head -1 | sed -E 's/version = "(.*)"/\1/' | tr -d '\r')
+VERSION_PY=$(grep -E '^__version__' agentsuite/__version__.py | sed -E 's/__version__ = "(.*)"/\1/' | tr -d '\r')
 [ "$PYPROJECT_VERSION" = "$VERSION_PY" ] || fail "version mismatch: pyproject=$PYPROJECT_VERSION, __version__=$VERSION_PY"
 ok "version aligned: $PYPROJECT_VERSION"
 

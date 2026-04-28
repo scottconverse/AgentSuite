@@ -4,6 +4,35 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 ## [Unreleased]
 
+### Roadmap
+
+- **v0.8.3 (security hygiene)** — `pip-audit` + SBOM (CycloneDX JSON) in release workflow; weekly provider price/deprecation drift CI job; Windows null-byte path test fix or removal (no skip).
+- **v0.9.0 (Sprint 3)** — per-run `cost_summary.json` telemetry + configurable `AGENTSUITE_COST_CAP_USD` default; `RunState.inputs` discriminated union with `RunStateSchemaVersionError` on pre-v0.9 state files (no migration shipped); golden content assertions (`assert_artifact_exact()` + `assert_qa_within_tolerance(rtol=0.05)`); resume-from-failure idempotency test + ADR; clean-install verification on tag push (Ubuntu + Windows); ADR backfill for rubric, RunState, retry policy, MCP naming, cost-cap, no-PyPI decisions.
+
+## [0.8.2] - 2026-04-28
+
+### ⚠ BREAKING
+
+- **MCP tool names standardized to `agentsuite_<agent>_<verb>` (#37)** — primary tools renamed (e.g. `founder_run` → `agentsuite_founder_run`); stage tools renamed `agentsuite_<agent>_stage_<stage>` (e.g. `founder_stage_intake` → `agentsuite_founder_stage_intake`). Any existing MCP host configuration referencing the old names must be updated. No alias shim is shipped — given the pre-1.0 surface and no known external adopters at rename time, the rename ships clean.
+
+### Changed
+
+- **`mcp_server.py` dispatch refactored to a registry dict (#36)** — replaced 7-arm `if/elif` with `_MCP_MODULES: dict[str, str]` + `importlib.import_module()`. New agents can be added by registering a module path; no `mcp_server.py` edit required. The dispatch lambda now narrows `except Exception` to `except UnknownAgent`, surfacing real errors instead of swallowing them.
+- **All `LLMProvider` instances now wrapped in `RetryingLLMProvider` (#38)** — `resolve_provider()` returns a tenacity-backed retry/timeout wrapper around `provider.complete()`. Retries on transient failures with exponential backoff (`stop_any(stop_after_attempt(N), stop_after_delay(T))`); does not retry on `ProviderNotInstalled`, `KeyboardInterrupt`, or `SystemExit`. Tunable via `AGENTSUITE_LLM_MAX_ATTEMPTS` (default 3) and `AGENTSUITE_LLM_TIMEOUT_SECS` (default 120.0). `tenacity>=8.2,<10` added to base dependencies.
+
+### Added
+
+- **6 new unit tests in `tests/unit/llm/test_retry.py`** — pass-through, name/model forwarding, retry-on-transient, give-up-after-max, no-retry-on-`ProviderNotInstalled`, max-attempts env-var honored.
+- **`test_agent_without_mcp_module_is_skipped`** in `tests/unit/test_mcp_server.py` — ensures registry-driven dispatch tolerates unregistered agents.
+
+### Dependencies
+
+- `softprops/action-gh-release` 2 → 3 (#31)
+- `actions/setup-python` 5 → 6 (#32)
+- `actions/checkout` 4 → 6 (#33)
+- `pillow` `<12` → `<13` (dev) (#34)
+- `openai` `<2` → `<3` (dev) (#35)
+
 ## [0.8.1] - 2026-04-27
 
 ### Added
@@ -186,9 +215,10 @@ Initial release.
 - Per-run cost cap only; per-day cap deferred.
 - Single MCP server with env-gated agent enablement (no per-agent server topology).
 
-[Unreleased]: https://github.com/scottconverse/AgentSuite/compare/v0.8.1...HEAD
-[0.8.1]: https://github.com/scottconverse/AgentSuite/compare/v0.7.0...v0.8.1
-[0.8.0]: https://github.com/scottconverse/AgentSuite/compare/v0.7.0...v0.8.1
+[Unreleased]: https://github.com/scottconverse/AgentSuite/compare/v0.8.2...HEAD
+[0.8.2]: https://github.com/scottconverse/AgentSuite/compare/v0.8.1...v0.8.2
+[0.8.1]: https://github.com/scottconverse/AgentSuite/compare/v0.8.0...v0.8.1
+[0.8.0]: https://github.com/scottconverse/AgentSuite/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/scottconverse/AgentSuite/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/scottconverse/AgentSuite/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/scottconverse/AgentSuite/compare/v0.4.0...v0.5.0
