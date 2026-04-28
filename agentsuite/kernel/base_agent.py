@@ -1,6 +1,7 @@
 """Abstract base agent with persisted five-stage pipeline (intake, extract, spec, execute, qa) with a separate approval gate."""
 from __future__ import annotations
 
+import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
@@ -13,6 +14,7 @@ from agentsuite.kernel.qa import QARubric
 from agentsuite.kernel.schema import AgentRequest, RunState, Stage
 from agentsuite.kernel.state_store import StateStore
 
+_log = logging.getLogger(__name__)
 
 PIPELINE_ORDER: list[Stage] = ["intake", "extract", "spec", "execute", "qa"]
 
@@ -109,7 +111,7 @@ class BaseAgent(ABC):
                 state.artifacts = writer.refs()
                 state.cost_so_far = cost_tracker.total
                 store.save(state)
-                print(f"✔ {stage} complete", flush=True)
+                _log.debug("✔ %s complete", stage)
             except Exception:
                 state.cost_so_far = cost_tracker.total
                 store.save(state)
