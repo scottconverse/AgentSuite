@@ -62,6 +62,27 @@ def test_promote_copies_to_kernel_dir(tmp_path):
     assert kernel_path.read_text(encoding="utf-8") == "promoted"
 
 
+def test_promote_leaves_no_staging_dir(tmp_path):
+    """Atomic promote must clean up its staging dir on success."""
+    w = ArtifactWriter(output_root=tmp_path, run_id="r1")
+    w.write("brand-system.md", "x", kind="spec", stage="spec")
+    w.promote(project_slug="myproject")
+    staging = tmp_path / "_kernel" / ".myproject.promoting"
+    assert not staging.exists(), f"Staging dir not cleaned up: {staging}"
+
+
+def test_promote_skips_underscore_files(tmp_path):
+    """_state.json and _meta.json must not be promoted to _kernel."""
+    w = ArtifactWriter(output_root=tmp_path, run_id="r1")
+    w.write("brand-system.md", "artifact", kind="spec", stage="spec")
+    # Manually create an underscore file in run_dir (simulate _state.json)
+    (w.run_dir / "_state.json").write_text("{}", encoding="utf-8")
+    promoted = w.promote(project_slug="myproject")
+    promoted_names = [p.name for p in promoted]
+    assert "_state.json" not in promoted_names
+    assert "brand-system.md" in promoted_names
+
+
 def test_writer_rejects_path_traversal(tmp_path):
     w = ArtifactWriter(output_root=tmp_path, run_id="r1")
     with pytest.raises(ValueError, match="escapes run_dir"):

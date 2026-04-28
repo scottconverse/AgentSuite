@@ -103,10 +103,16 @@ class ArtifactWriter:
         self._refs.append(ref)
 
     def promote(self, project_slug: str) -> list[Path]:
-        """Copy run artifacts into ``_kernel/<project_slug>/`` for downstream agents.
+        """Atomically copy run artifacts into ``_kernel/<project_slug>/``.
 
         Skips files starting with underscore (``_state.json``, ``_meta.json``)
         since those are run-internal bookkeeping, not consumable artifacts.
+
+        Atomicity guarantee: all artifacts are staged into a sibling temp
+        directory (``._<slug>.promoting``) before the final rename. If the
+        process dies mid-copy, the existing ``_kernel/<project_slug>/`` is
+        untouched; only the temp staging dir may remain and can be safely
+        deleted on retry.
 
         Args:
             project_slug: Project identifier (e.g. "patentforgelocal").
@@ -114,18 +120,34 @@ class ArtifactWriter:
         Returns:
             List of promoted artifact paths in the _kernel directory.
         """
-        target = self.output_root / "_kernel" / project_slug
-        target.mkdir(parents=True, exist_ok=True)
-        promoted: list[Path] = []
-        for entry in self.run_dir.iterdir():
-            if entry.name.startswith("_"):
-                continue  # skip _state.json, _meta.json, etc.
-            dest = target / entry.name
-            if entry.is_dir():
-                if dest.exists():
-                    shutil.rmtree(dest)
-                shutil.copytree(entry, dest)
-            else:
-                shutil.copy2(entry, dest)
-            promoted.append(dest)
-        return promoted
+        kernel_dir = self.output_root / "_kernel"
+        kernel_dir.mkdir(parents=True, exist_ok=True)
+        target = kernel_dir / project_slug
+        staging = kernel_dir / f".{project_slug}.promoting"
+
+        # Clean any stale staging dir from a previous failed promote
+        if staging.exists():
+            shutil.rmtree(staging)
+        staging.mkdir(parents=True, exist_ok=True)
+
+        promoted_names: list[str] = []
+        try:
+            for entry in self.run_dir.iterdir():
+                if entry.name.startswith("_"):
+                    continue  # skip _state.json, _meta.json, etc.
+                dest = staging / entry.name
+                if entry.is_dir():
+                    shutil.copytree(entry, dest)
+                else:
+                    shutil.copy2(entry, dest)
+                promoted_names.append(entry.name)
+        except Exception:
+            shutil.rmtree(staging, ignore_errors=True)
+            raise
+
+        # Swap staging into place — remove old target first, then rename
+        if target.exists():
+            shutil.rmtree(target)
+        staging.rename(target)
+
+        return [target / name for name in promoted_names]
