@@ -6,20 +6,14 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 ## [0.8.0] - 2026-04-27
 
+> **Note:** v0.7.1 was prepared in code but never tagged or released as a standalone version; its contents shipped as part of v0.8.0.
+
 ### Added
 - **Public API surface** — `from agentsuite import FounderAgent, DesignAgent, ...` now works from the top-level package. All 7 agent classes, kernel types (`BaseAgent`, `AgentRequest`, `RunState`, `ArtifactWriter`), registry (`AgentRegistry`, `default_registry`), and `ProviderNotInstalled` re-exported from `agentsuite/__init__.py`.
 - **Registry-driven CLI dispatcher** — `AgentCLISpec` dataclass in `agentsuite.kernel.base_agent`. Each agent module exposes `build_cli_spec() -> AgentCLISpec`. `cli.py` now iterates agent modules and generates Typer subcommands generically — adding a new agent no longer requires touching `cli.py`.
 - **Founder rubric expanded to 9 dimensions** — added `constraint_adherence` (strategy respects stated budget, timeline, and resource constraints) and `completeness` (all spec artifacts populated with substantive content). Now consistent with all other agents.
 - **Architecture diagram in README** — Mermaid `flowchart LR` diagram of the 5-stage pipeline with QA gate and approval branch.
 - **Sample output on landing page** — CLI output example added to `docs/index.html`.
-
-### Changed
-- **LLM SDK dependencies are now optional extras** — `pip install agentsuite` installs only the core library (pydantic, typer, httpx, jinja2). Provider SDKs are opt-in: `pip install agentsuite[anthropic]`, `agentsuite[openai]`, `agentsuite[gemini]`, `agentsuite[ollama]`, `agentsuite[mcp]`, `agentsuite[image]`, or `agentsuite[all]`.
-- **`approve` commands normalized** — all 7 agents now return `{"run_id", "status", "approved_by"}` JSON. Previously marketing, engineering, product, trust-risk, and cio returned plain text.
-
-## [0.7.1] - 2026-04-27 (not released as standalone tag; changes included in v0.8.0)
-
-### Added
 - **CI wheel-smoke job** — builds the wheel, installs in a fresh venv (no extras), and verifies all 7 `prompt_loader` imports plus `agentsuite --help` and `agentsuite-mcp --help`. Catches missing package-data and broken entry points before users do.
 - **Branch protection on `main`** — all 5 CI checks required: `lint / ruff-mypy`, `test / cleanroom`, `test / unit-integration-golden (3.11)`, `test / unit-integration-golden (3.12)`, `test / wheel-smoke`. Force-push blocked.
 - **`AgentRegistry.registered_names()`** — new public method returning sorted list of all registered agent names. Used by `cli.py` and `agentsuite agents` command.
@@ -28,6 +22,10 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 - **`HardCapExceeded` propagation test** — integration test verifying the exception propagates correctly through `_drive()`.
 - **Golden test JSON structure assertions** — all 7 agent golden tests now assert `qa_scores.json` has `scores/average/passed/requires_revision` keys and `consistency_report.json` has `mismatches`.
 - **`ProviderNotInstalled(ImportError)`** — new exception class in `agentsuite.llm.base`. Raised by all provider constructors when the optional SDK is missing, with a `pip install agentsuite[extra]` hint.
+
+### Changed
+- **LLM SDK dependencies are now optional extras** — `pip install agentsuite` installs only the core library (pydantic, typer, httpx, jinja2). Provider SDKs are opt-in: `pip install agentsuite[anthropic]`, `agentsuite[openai]`, `agentsuite[gemini]`, `agentsuite[ollama]`, `agentsuite[mcp]`, `agentsuite[image]`, or `agentsuite[all]`.
+- **`approve` commands normalized** — all 7 agents now return `{"run_id", "status", "approved_by"}` JSON. Previously marketing, engineering, product, trust-risk, and cio returned plain text.
 
 ### Fixed
 - **Path traversal guard in `ArtifactWriter.write()`** — raises `ValueError` when a relative path escapes the run directory. Prevents `../../etc/passwd`-style writes.
@@ -161,9 +159,9 @@ Initial release.
 - Per-run cost cap only; per-day cap deferred.
 - Single MCP server with env-gated agent enablement (no per-agent server topology).
 
-[Unreleased]: https://github.com/scottconverse/AgentSuite/compare/v0.8.0...HEAD
-[0.8.0]: https://github.com/scottconverse/AgentSuite/compare/v0.7.0...v0.8.0
-[0.7.1]: https://github.com/scottconverse/AgentSuite/compare/v0.7.0...v0.8.0
+[Unreleased]: https://github.com/scottconverse/AgentSuite/compare/v0.8.1...HEAD
+[0.8.1]: https://github.com/scottconverse/AgentSuite/compare/v0.7.0...v0.8.1
+[0.8.0]: https://github.com/scottconverse/AgentSuite/compare/v0.7.0...v0.8.1
 [0.7.0]: https://github.com/scottconverse/AgentSuite/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/scottconverse/AgentSuite/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/scottconverse/AgentSuite/compare/v0.4.0...v0.5.0
