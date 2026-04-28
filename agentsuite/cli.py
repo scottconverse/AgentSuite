@@ -4,6 +4,7 @@ from __future__ import annotations
 import importlib
 import json
 import os
+import traceback
 from pathlib import Path
 from typing import Any, Optional
 
@@ -15,6 +16,18 @@ from agentsuite.llm.resolver import NoProviderConfigured, resolve_provider
 
 
 app = typer.Typer(help="AgentSuite — reasoning agents for vague intent → precise artifacts")
+
+# Module-level flag toggled by the --debug callback so inner helpers can read it.
+_debug_mode: bool = False
+
+
+@app.callback()
+def _global_options(
+    debug: bool = typer.Option(False, "--debug", help="Show full traceback on errors."),
+) -> None:
+    """Global options applied to every subcommand."""
+    global _debug_mode
+    _debug_mode = debug
 
 
 def _output_root() -> Path:
@@ -38,16 +51,61 @@ def _resolve_llm_for_cli() -> Any:
         raise typer.Exit(1)
 
 
+def _resolve_latest_run_id(agent_name: str) -> str:
+    """Return the run_id of the most recently modified run for *agent_name*.
+
+    Raises ``typer.Exit(1)`` (with an error message) if no matching run is found.
+    """
+    runs_dir = _output_root() / "runs"
+    if not runs_dir.exists():
+        typer.echo("Error: no runs directory found — nothing to approve.", err=True)
+        raise typer.Exit(1)
+    best_run_id: str | None = None
+    best_mtime: float = -1.0
+    for d in runs_dir.iterdir():
+        if not d.is_dir():
+            continue
+        state = StateStore(run_dir=d).load()
+        if state is None or state.agent != agent_name:
+            continue
+        mtime = d.stat().st_mtime
+        if mtime > best_mtime:
+            best_mtime = mtime
+            best_run_id = state.run_id
+    if best_run_id is None:
+        typer.echo(f"Error: no runs found for agent '{agent_name}'.", err=True)
+        raise typer.Exit(1)
+    return best_run_id
+
+
 def _make_approve_fn(agent_class: type) -> Any:
     """Generate a generic approve command for any agent."""
+    # Capture the agent name at registration time for --latest resolution.
+    agent_name_for_latest: str = getattr(agent_class, "name", "")
+
     def approve_cmd(
-        run_id: str = typer.Option(..., help="Run id to approve"),
+        run_id: Optional[str] = typer.Option(None, help="Run id to approve (omit with --latest)"),
+        latest: bool = typer.Option(False, "--latest", help="Approve the most recently created run."),
         approver: str = typer.Option(..., help="Approver identity"),
         project_slug: str = typer.Option(..., help="Slug for `_kernel/<slug>/` promotion"),
     ) -> None:
         """Approve a completed run and promote artifacts to ``_kernel/``."""
-        agent = agent_class(output_root=_output_root(), llm=_resolve_llm_for_cli())
-        state = agent.approve(run_id=run_id, approver=approver, project_slug=project_slug)
+        if latest:
+            resolved_run_id = _resolve_latest_run_id(agent_name_for_latest)
+        elif run_id is not None:
+            resolved_run_id = run_id
+        else:
+            typer.echo("Error: provide --run-id <id> or --latest.", err=True)
+            raise typer.Exit(1)
+        try:
+            agent = agent_class(output_root=_output_root(), llm=_resolve_llm_for_cli())
+            state = agent.approve(run_id=resolved_run_id, approver=approver, project_slug=project_slug)
+        except Exception as exc:
+            if _debug_mode:
+                traceback.print_exc()
+            else:
+                typer.echo(f"Error: {exc}", err=True)
+            raise typer.Exit(1)
         typer.echo(json.dumps({
             "run_id": state.run_id,
             "status": "done",

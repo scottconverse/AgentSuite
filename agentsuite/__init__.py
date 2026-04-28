@@ -13,6 +13,7 @@ from agentsuite.kernel.artifacts import ArtifactWriter
 from agentsuite.kernel.base_agent import BaseAgent
 from agentsuite.kernel.schema import AgentRequest, RunState
 from agentsuite.llm.base import LLMProvider, ProviderNotInstalled
+from agentsuite.llm.resolver import NoProviderConfigured, resolve_provider
 
 __all__ = [
     "__version__",
@@ -26,9 +27,11 @@ __all__ = [
     "FounderAgent",
     "LLMProvider",
     "MarketingAgent",
+    "NoProviderConfigured",
     "ProductAgent",
     "ProviderNotInstalled",
     "RunState",
     "TrustRiskAgent",
     "default_registry",
+    "resolve_provider",
 ]
