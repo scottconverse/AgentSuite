@@ -34,18 +34,21 @@ jobs:
           python -m venv .audit-venv
           .audit-venv/bin/pip install --upgrade pip
           .audit-venv/bin/pip install dist/*.whl
-      - name: Run pip-audit (HIGH/CRITICAL gate)
+      - name: Run pip-audit (any vulnerability fails)
         env:
-          # Allow override for emergencies via tag annotation containing [skip-audit].
-          # Standard releases do NOT use this — fail loudly if a vulnerable transitive
-          # dep is shipped.
+          # Allow override for emergencies via the commit message of the tagged
+          # commit. Standard releases do NOT use this — fail loudly if a
+          # vulnerable transitive dep is shipped.
           SKIP_AUDIT: ${{ contains(github.event.head_commit.message, '[skip-audit]') }}
         run: |
           if [ "$SKIP_AUDIT" = "true" ]; then
             echo "::warning::pip-audit skipped via [skip-audit] override"
             exit 0
           fi
-          .audit-venv/bin/pip-audit \
+          # pip-audit is installed in the system Python (outer venv) — call it
+          # directly and point --requirement at the freeze of .audit-venv so the
+          # audit covers exactly the dependencies the published wheel pulls in.
+          pip-audit \
             --strict \
             --vulnerability-service osv \
             --requirement <(.audit-venv/bin/pip freeze) \
@@ -54,7 +57,10 @@ jobs:
       - name: Generate SBOM (CycloneDX JSON)
         run: |
           PYPROJECT_VERSION=$(grep -E '^version = ' pyproject.toml | head -1 | sed -E 's/version = "(.*)"/\1/' | tr -d '\r')
-          .audit-venv/bin/cyclonedx-py environment \
+          # cyclonedx-py is installed in the system Python — call directly and
+          # point at the .audit-venv interpreter so the SBOM lists the wheel's
+          # actual dependency closure.
+          cyclonedx-py environment \
             --of json \
             --output-file "dist/agentsuite-${PYPROJECT_VERSION}-sbom.cdx.json" \
             .audit-venv/bin/python
