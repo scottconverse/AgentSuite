@@ -63,3 +63,20 @@ def test_design_agent_class_accessible_via_registry(monkeypatch):
     reg.register("design", DesignAgent)
     cls = reg.get_class("design")
     assert cls is DesignAgent
+
+
+def test_register_rejects_duplicate_name():
+    """register() raises ValueError when the same name is registered twice."""
+    reg = AgentRegistry()
+    reg.register("founder", object)  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="already registered"):
+        reg.register("founder", object)  # type: ignore[arg-type]
+
+
+def test_all_seven_default_agents_register_without_error():
+    """bootstrap registry registers all 7 agents without hitting the duplicate guard."""
+    from agentsuite.agents.registry import _bootstrap_default_registry
+    reg = _bootstrap_default_registry()
+    assert set(reg.registered_names()) == {
+        "founder", "design", "product", "engineering", "marketing", "trust_risk", "cio"
+    }
