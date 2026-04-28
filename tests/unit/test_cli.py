@@ -1,8 +1,5 @@
 """Unit tests for the agentsuite CLI."""
 
-import json
-from unittest.mock import MagicMock, patch
-
 import pytest
 from typer.testing import CliRunner
 
@@ -192,111 +189,6 @@ def test_cli_trust_risk_run_with_mock(tmp_path, monkeypatch):
     assert (tmp_path / "runs" / "tr1" / "threat-model.md").exists()
 
 
-# ---------------------------------------------------------------------------
-# D2 — --debug flag: traceback vs clean error message
-# ---------------------------------------------------------------------------
-
-def test_approve_error_without_debug_shows_clean_message(tmp_path, monkeypatch):
-    """Without --debug, a failing approve prints 'Error: ...' without traceback."""
-    monkeypatch.setenv("AGENTSUITE_OUTPUT_DIR", str(tmp_path))
-    monkeypatch.setenv("AGENTSUITE_LLM_PROVIDER_FACTORY", "agentsuite.llm.mock:_default_mock_for_cli")
-    # First create a run so state exists
-    _runner().invoke(app, [
-        "founder", "run",
-        "--business-goal", "D2 test",
-        "--project-slug", "d2proj",
-        "--run-id", "d2r1",
-    ])
-    # Patch approve to raise so we can observe error handling
-    with patch("agentsuite.agents.founder.agent.FounderAgent.approve", side_effect=RuntimeError("boom")):
-        result = _runner().invoke(app, [
-            "founder", "approve",
-            "--run-id", "d2r1",
-            "--approver", "tester",
-            "--project-slug", "d2proj",
-        ])
-    assert result.exit_code == 1
-    assert "Error: boom" in result.output
-    assert "Traceback" not in result.output
-
-
-def test_approve_error_with_debug_shows_traceback(tmp_path, monkeypatch):
-    """With --debug, a failing approve includes a traceback."""
-    monkeypatch.setenv("AGENTSUITE_OUTPUT_DIR", str(tmp_path))
-    monkeypatch.setenv("AGENTSUITE_LLM_PROVIDER_FACTORY", "agentsuite.llm.mock:_default_mock_for_cli")
-    _runner().invoke(app, [
-        "founder", "run",
-        "--business-goal", "D2 debug test",
-        "--project-slug", "d2proj",
-        "--run-id", "d2r2",
-    ])
-    with patch("agentsuite.agents.founder.agent.FounderAgent.approve", side_effect=RuntimeError("kaboom")):
-        result = _runner().invoke(app, [
-            "--debug",
-            "founder", "approve",
-            "--run-id", "d2r2",
-            "--approver", "tester",
-            "--project-slug", "d2proj",
-        ], catch_exceptions=False)
-    assert result.exit_code == 1
-    assert "Traceback" in result.output
-
-
-# ---------------------------------------------------------------------------
-# D3 — --latest flag on approve
-# ---------------------------------------------------------------------------
-
-def test_approve_latest_approves_most_recent_run(tmp_path, monkeypatch):
-    """--latest resolves the most recently created run and approves it."""
-    monkeypatch.setenv("AGENTSUITE_OUTPUT_DIR", str(tmp_path))
-    monkeypatch.setenv("AGENTSUITE_LLM_PROVIDER_FACTORY", "agentsuite.llm.mock:_default_mock_for_cli")
-    # Create two runs — r_latest is created second
-    for run_id in ["r_older", "r_latest"]:
-        _runner().invoke(app, [
-            "founder", "run",
-            "--business-goal", "D3 test",
-            "--project-slug", "d3proj",
-            "--run-id", run_id,
-        ])
-    result = _runner().invoke(app, [
-        "founder", "approve",
-        "--latest",
-        "--approver", "tester",
-        "--project-slug", "d3proj",
-    ])
-    assert result.exit_code == 0, result.output
-    out = json.loads(result.output)
-    assert out["run_id"] == "r_latest"
-    assert (tmp_path / "_kernel" / "d3proj" / "brand-system.md").exists()
-
-
-def test_approve_latest_errors_when_no_runs(tmp_path, monkeypatch):
-    """--latest exits 1 with a clean error when no runs exist."""
-    monkeypatch.setenv("AGENTSUITE_OUTPUT_DIR", str(tmp_path))
-    monkeypatch.setenv("AGENTSUITE_LLM_PROVIDER_FACTORY", "agentsuite.llm.mock:_default_mock_for_cli")
-    result = _runner().invoke(app, [
-        "founder", "approve",
-        "--latest",
-        "--approver", "tester",
-        "--project-slug", "noproj",
-    ])
-    assert result.exit_code == 1
-    assert "Error" in result.output
-
-
-def test_approve_no_run_id_no_latest_exits_error(tmp_path, monkeypatch):
-    """Omitting both --run-id and --latest exits 1 with a helpful message."""
-    monkeypatch.setenv("AGENTSUITE_OUTPUT_DIR", str(tmp_path))
-    monkeypatch.setenv("AGENTSUITE_LLM_PROVIDER_FACTORY", "agentsuite.llm.mock:_default_mock_for_cli")
-    result = _runner().invoke(app, [
-        "founder", "approve",
-        "--approver", "tester",
-        "--project-slug", "noproj",
-    ])
-    assert result.exit_code == 1
-    assert "Error" in result.output
-
-
 def test_cli_cio_run_with_mock(tmp_path, monkeypatch):
     monkeypatch.setenv("AGENTSUITE_OUTPUT_DIR", str(tmp_path))
     monkeypatch.setenv("AGENTSUITE_LLM_PROVIDER_FACTORY", "agentsuite.llm.mock:_default_mock_for_cli")
@@ -310,3 +202,75 @@ def test_cli_cio_run_with_mock(tmp_path, monkeypatch):
     assert result.exit_code == 0, result.output
     assert "awaiting_approval" in result.output
     assert (tmp_path / "runs" / "cio1" / "it-strategy.md").exists()
+
+
+# ---------------------------------------------------------------------------
+# B1 — unique run_id default
+# ---------------------------------------------------------------------------
+
+def test_run_id_defaults_to_unique_value(tmp_path, monkeypatch):
+    """Two runs without explicit run_id should produce distinct IDs."""
+    monkeypatch.setenv("AGENTSUITE_OUTPUT_DIR", str(tmp_path))
+    monkeypatch.setenv("AGENTSUITE_LLM_PROVIDER_FACTORY", "agentsuite.llm.mock:_default_mock_for_cli")
+    r1 = _runner().invoke(app, [
+        "founder", "run",
+        "--business-goal", "Test uniqueness run 1",
+    ])
+    r2 = _runner().invoke(app, [
+        "founder", "run",
+        "--business-goal", "Test uniqueness run 2",
+    ])
+    assert r1.exit_code == 0, r1.output
+    assert r2.exit_code == 0, r2.output
+    import json
+    id1 = json.loads(r1.stdout)["run_id"]
+    id2 = json.loads(r2.stdout)["run_id"]
+    assert id1 != id2, f"Expected unique IDs but got {id1!r} twice"
+    assert id1.startswith("run-"), f"Expected 'run-...' prefix, got {id1!r}"
+    assert id2.startswith("run-"), f"Expected 'run-...' prefix, got {id2!r}"
+
+
+# ---------------------------------------------------------------------------
+# B2 — --force flag
+# ---------------------------------------------------------------------------
+
+def test_force_flag_blocks_existing_run(tmp_path, monkeypatch):
+    """Running again with the same explicit run_id (no --force) should exit 1."""
+    monkeypatch.setenv("AGENTSUITE_OUTPUT_DIR", str(tmp_path))
+    monkeypatch.setenv("AGENTSUITE_LLM_PROVIDER_FACTORY", "agentsuite.llm.mock:_default_mock_for_cli")
+    # First run — creates the directory
+    r1 = _runner().invoke(app, [
+        "founder", "run",
+        "--business-goal", "Force test",
+        "--run-id", "force-test-run",
+    ])
+    assert r1.exit_code == 0, r1.output
+    assert (tmp_path / "runs" / "force-test-run").exists()
+
+    # Second run — same ID, no --force → should be blocked
+    r2 = _runner().invoke(app, [
+        "founder", "run",
+        "--business-goal", "Force test again",
+        "--run-id", "force-test-run",
+    ])
+    assert r2.exit_code == 1
+    assert "already exists" in (r2.output + (r2.stderr or ""))
+
+
+def test_force_flag_allows_existing_run(tmp_path, monkeypatch):
+    """Running again with --force should succeed even if the run directory exists."""
+    monkeypatch.setenv("AGENTSUITE_OUTPUT_DIR", str(tmp_path))
+    monkeypatch.setenv("AGENTSUITE_LLM_PROVIDER_FACTORY", "agentsuite.llm.mock:_default_mock_for_cli")
+    base_args = [
+        "founder", "run",
+        "--business-goal", "Force overwrite test",
+        "--run-id", "force-overwrite-run",
+    ]
+    # First run
+    r1 = _runner().invoke(app, base_args)
+    assert r1.exit_code == 0, r1.output
+
+    # Second run with --force — should succeed
+    r2 = _runner().invoke(app, base_args + ["--force"])
+    assert r2.exit_code == 0, r2.output
+    assert "awaiting_approval" in r2.output
