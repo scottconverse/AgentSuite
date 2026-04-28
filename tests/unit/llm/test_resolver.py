@@ -125,3 +125,94 @@ def test_resolver_accepts_google_api_key_alias(monkeypatch):
     monkeypatch.setenv("GOOGLE_API_KEY", "fake")
     p = resolve_provider("gemini")
     assert isinstance(p, GeminiProvider)
+
+
+# ---------------------------------------------------------------------------
+# C3: ProviderNotInstalled (NoProviderConfigured) message quality tests
+# Each test verifies that when a named provider's prerequisite is missing,
+# the raised NoProviderConfigured exception carries a message that includes
+# both the provider name and an actionable install/setup hint.
+# ---------------------------------------------------------------------------
+
+_PROVIDER_MISSING_PARAMS = [
+    pytest.param(
+        "anthropic",
+        {"ANTHROPIC_API_KEY": None},
+        {},
+        "ANTHROPIC_API_KEY",
+        id="anthropic-missing-key",
+    ),
+    pytest.param(
+        "openai",
+        {"OPENAI_API_KEY": None},
+        {},
+        "OPENAI_API_KEY",
+        id="openai-missing-key",
+    ),
+    pytest.param(
+        "gemini",
+        {"GEMINI_API_KEY": None, "GOOGLE_API_KEY": None},
+        {},
+        "GEMINI_API_KEY",
+        id="gemini-missing-key",
+    ),
+    pytest.param(
+        "ollama",
+        {},
+        {"agentsuite.llm.resolver._ollama_daemon_running": lambda: False},
+        "localhost:11434",
+        id="ollama-daemon-not-running",
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "provider,unset_envs,patches,expected_hint",
+    _PROVIDER_MISSING_PARAMS,
+)
+def test_no_provider_configured_message_contains_provider_name(
+    monkeypatch, provider, unset_envs, patches, expected_hint
+):
+    """NoProviderConfigured message must contain the provider name when prerequisite is absent."""
+    monkeypatch.delenv("AGENTSUITE_LLM_PROVIDER", raising=False)
+    for key, val in unset_envs.items():
+        if val is None:
+            monkeypatch.delenv(key, raising=False)
+        else:
+            monkeypatch.setenv(key, val)
+    for target, replacement in patches.items():
+        monkeypatch.setattr(target, replacement)
+
+    with pytest.raises(NoProviderConfigured) as exc_info:
+        resolve_provider(provider)
+
+    msg = str(exc_info.value)
+    assert provider in msg, (
+        f"Expected provider name '{provider}' in error message, got: {msg!r}"
+    )
+
+
+@pytest.mark.parametrize(
+    "provider,unset_envs,patches,expected_hint",
+    _PROVIDER_MISSING_PARAMS,
+)
+def test_no_provider_configured_message_contains_actionable_hint(
+    monkeypatch, provider, unset_envs, patches, expected_hint
+):
+    """NoProviderConfigured message must contain an actionable setup hint."""
+    monkeypatch.delenv("AGENTSUITE_LLM_PROVIDER", raising=False)
+    for key, val in unset_envs.items():
+        if val is None:
+            monkeypatch.delenv(key, raising=False)
+        else:
+            monkeypatch.setenv(key, val)
+    for target, replacement in patches.items():
+        monkeypatch.setattr(target, replacement)
+
+    with pytest.raises(NoProviderConfigured) as exc_info:
+        resolve_provider(provider)
+
+    msg = str(exc_info.value)
+    assert expected_hint in msg, (
+        f"Expected hint '{expected_hint}' in error message, got: {msg!r}"
+    )
