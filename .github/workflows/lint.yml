@@ -38,7 +38,7 @@ jobs:
             exit 1
           fi
           echo "All 6 required doc artifacts present."
-      - name: Version consistency (pyproject ↔ CHANGELOG)
+      - name: Version consistency (pyproject ↔ CHANGELOG ↔ README)
         run: |
           PKG=$(grep -E '^version = ' pyproject.toml | head -1 | sed -E 's/version = "(.*)"/\1/')
           echo "Package version: $PKG"
@@ -47,3 +47,8 @@ jobs:
             exit 1
           fi
           echo "CHANGELOG entry for $PKG found."
+          if ! grep -qF "**v${PKG}**" README.md; then
+            echo "README.md header does not reference version $PKG (expected '**v${PKG}**')"
+            exit 1
+          fi
+          echo "README header references $PKG."
