@@ -225,8 +225,8 @@ def register_tools(
                 return _result_from_state(state, run_dir)
             return runner
 
-        server.add_tool("trust_risk_stage_intake", _stage_tool("intake"))
-        server.add_tool("trust_risk_stage_extract", _stage_tool("extract"))
-        server.add_tool("trust_risk_stage_spec", _stage_tool("spec"))
-        server.add_tool("trust_risk_stage_execute", _stage_tool("execute"))
-        server.add_tool("trust_risk_stage_qa", _stage_tool("qa"))
+        server.add_tool("agentsuite_trust_risk_stage_intake", _stage_tool("intake"))
+        server.add_tool("agentsuite_trust_risk_stage_extract", _stage_tool("extract"))
+        server.add_tool("agentsuite_trust_risk_stage_spec", _stage_tool("spec"))
+        server.add_tool("agentsuite_trust_risk_stage_execute", _stage_tool("execute"))
+        server.add_tool("agentsuite_trust_risk_stage_qa", _stage_tool("qa"))

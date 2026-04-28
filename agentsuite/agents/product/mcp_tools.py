@@ -121,11 +121,11 @@ def register_tools(
             ))
         return out
 
-    server.add_tool("product_run", product_run)
-    server.add_tool("product_resume", product_resume)
-    server.add_tool("product_approve", product_approve)
-    server.add_tool("product_get_status", product_get_status)
-    server.add_tool("product_list_runs", product_list_runs)
+    server.add_tool("agentsuite_product_run", product_run)
+    server.add_tool("agentsuite_product_resume", product_resume)
+    server.add_tool("agentsuite_product_approve", product_approve)
+    server.add_tool("agentsuite_product_get_status", product_get_status)
+    server.add_tool("agentsuite_product_list_runs", product_list_runs)
 
     if expose_stages:
         def _stage_tool(stage: Stage) -> Any:
@@ -136,8 +136,8 @@ def register_tools(
                 return _result_from_state(state, run_dir)
             return runner
 
-        server.add_tool("product_run_intake", _stage_tool("intake"))
-        server.add_tool("product_run_extract", _stage_tool("extract"))
-        server.add_tool("product_run_spec", _stage_tool("spec"))
-        server.add_tool("product_run_execute", _stage_tool("execute"))
-        server.add_tool("product_run_qa", _stage_tool("qa"))
+        server.add_tool("agentsuite_product_stage_intake", _stage_tool("intake"))
+        server.add_tool("agentsuite_product_stage_extract", _stage_tool("extract"))
+        server.add_tool("agentsuite_product_stage_spec", _stage_tool("spec"))
+        server.add_tool("agentsuite_product_stage_execute", _stage_tool("execute"))
+        server.add_tool("agentsuite_product_stage_qa", _stage_tool("qa"))

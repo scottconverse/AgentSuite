@@ -118,11 +118,11 @@ def register_tools(
             ))
         return out
 
-    server.add_tool("engineering_run", engineering_run)
-    server.add_tool("engineering_resume", engineering_resume)
-    server.add_tool("engineering_approve", engineering_approve)
-    server.add_tool("engineering_get_status", engineering_get_status)
-    server.add_tool("engineering_list_runs", engineering_list_runs)
+    server.add_tool("agentsuite_engineering_run", engineering_run)
+    server.add_tool("agentsuite_engineering_resume", engineering_resume)
+    server.add_tool("agentsuite_engineering_approve", engineering_approve)
+    server.add_tool("agentsuite_engineering_get_status", engineering_get_status)
+    server.add_tool("agentsuite_engineering_list_runs", engineering_list_runs)
 
     if expose_stages:
         def _stage_tool(stage: Stage) -> Any:
@@ -133,8 +133,8 @@ def register_tools(
                 return _result_from_state(state, run_dir)
             return runner
 
-        server.add_tool("engineering_stage_intake", _stage_tool("intake"))
-        server.add_tool("engineering_stage_extract", _stage_tool("extract"))
-        server.add_tool("engineering_stage_spec", _stage_tool("spec"))
-        server.add_tool("engineering_stage_execute", _stage_tool("execute"))
-        server.add_tool("engineering_stage_qa", _stage_tool("qa"))
+        server.add_tool("agentsuite_engineering_stage_intake", _stage_tool("intake"))
+        server.add_tool("agentsuite_engineering_stage_extract", _stage_tool("extract"))
+        server.add_tool("agentsuite_engineering_stage_spec", _stage_tool("spec"))
+        server.add_tool("agentsuite_engineering_stage_execute", _stage_tool("execute"))
+        server.add_tool("agentsuite_engineering_stage_qa", _stage_tool("qa"))

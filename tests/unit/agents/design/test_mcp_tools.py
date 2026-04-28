@@ -59,7 +59,7 @@ def test_register_tools_adds_five_default_tools(tmp_path: Path) -> None:
         output_root_fn=lambda: tmp_path,
         expose_stages=False,
     )
-    for name in ["design_run", "design_resume", "design_approve", "design_get_status", "design_list_runs"]:
+    for name in ["agentsuite_design_run", "agentsuite_design_resume", "agentsuite_design_approve", "agentsuite_design_get_status", "agentsuite_design_list_runs"]:
         assert name in server.tool_names()
 
 
@@ -72,7 +72,7 @@ def test_register_tools_expose_stages_adds_ten_tools(tmp_path: Path) -> None:
         expose_stages=True,
     )
     assert len(server.tools) == 10
-    for name in ["design_intake", "design_extract", "design_spec", "design_execute", "design_qa"]:
+    for name in ["agentsuite_design_stage_intake", "agentsuite_design_stage_extract", "agentsuite_design_stage_spec", "agentsuite_design_stage_execute", "agentsuite_design_stage_qa"]:
         assert name in server.tool_names()
 
 
@@ -90,7 +90,7 @@ def test_design_run_returns_awaiting_approval(tmp_path: Path) -> None:
         channel="web",
         run_id="mcp-r1",
     )
-    result = server.tools["design_run"](request)
+    result = server.tools["agentsuite_design_run"](request)
     assert result.status == "awaiting_approval"
     assert result.run_id == "mcp-r1"
 
@@ -103,7 +103,7 @@ def test_design_list_runs_empty_when_no_runs(tmp_path: Path) -> None:
         output_root_fn=lambda: tmp_path,
         expose_stages=False,
     )
-    runs = server.tools["design_list_runs"]()
+    runs = server.tools["agentsuite_design_list_runs"]()
     assert runs == []
 
 
@@ -116,4 +116,4 @@ def test_design_get_status_raises_on_missing_run(tmp_path: Path) -> None:
         expose_stages=False,
     )
     with pytest.raises(FileNotFoundError):
-        server.tools["design_get_status"]("nonexistent-run")
+        server.tools["agentsuite_design_get_status"]("nonexistent-run")

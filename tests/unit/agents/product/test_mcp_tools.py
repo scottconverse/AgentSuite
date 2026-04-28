@@ -28,7 +28,7 @@ def test_product_mcp_tools_registered() -> None:
     os.environ["AGENTSUITE_ENABLED_AGENTS"] = "product"
 
     server = build_server()
-    assert "product_run" in server.tool_names()
+    assert "agentsuite_product_run" in server.tool_names()
 
     # Restore
     reg_module._DEFAULT_REGISTRY = None
@@ -92,7 +92,7 @@ def test_product_list_runs_filters_by_agent(tmp_path: Path) -> None:
         expose_stages=False,
     )
 
-    runs = server.tools["product_list_runs"]()
+    runs = server.tools["agentsuite_product_list_runs"]()
     assert len(runs) == 1
     assert runs[0].run_id == "run-product-001"
     assert runs[0].agent == "product"

@@ -124,11 +124,11 @@ def register_tools(
             ))
         return out
 
-    server.add_tool("founder_run", founder_run)
-    server.add_tool("founder_resume", founder_resume)
-    server.add_tool("founder_approve", founder_approve)
-    server.add_tool("founder_get_status", founder_get_status)
-    server.add_tool("founder_list_runs", founder_list_runs)
+    server.add_tool("agentsuite_founder_run", founder_run)
+    server.add_tool("agentsuite_founder_resume", founder_resume)
+    server.add_tool("agentsuite_founder_approve", founder_approve)
+    server.add_tool("agentsuite_founder_get_status", founder_get_status)
+    server.add_tool("agentsuite_founder_list_runs", founder_list_runs)
 
     if expose_stages:
         def _stage_tool(stage: Stage):  # type: ignore[no-untyped-def]
@@ -140,8 +140,8 @@ def register_tools(
 
             return runner
 
-        server.add_tool("founder_intake", _stage_tool("intake"))
-        server.add_tool("founder_extract", _stage_tool("extract"))
-        server.add_tool("founder_spec", _stage_tool("spec"))
-        server.add_tool("founder_execute", _stage_tool("execute"))
-        server.add_tool("founder_qa", _stage_tool("qa"))
+        server.add_tool("agentsuite_founder_stage_intake", _stage_tool("intake"))
+        server.add_tool("agentsuite_founder_stage_extract", _stage_tool("extract"))
+        server.add_tool("agentsuite_founder_stage_spec", _stage_tool("spec"))
+        server.add_tool("agentsuite_founder_stage_execute", _stage_tool("execute"))
+        server.add_tool("agentsuite_founder_stage_qa", _stage_tool("qa"))

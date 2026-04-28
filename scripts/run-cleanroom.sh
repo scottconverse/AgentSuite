@@ -93,7 +93,7 @@ done
 [ "$MISSING" -eq 0 ] || { echo "==> CLEANROOM FAIL: $MISSING artifact(s) missing"; exit 1; }
 
 # MCP smoke
-"$VENV_BIN/python" -c "from agentsuite.mcp_server import build_server; s = build_server(); assert 'founder_run' in s.tool_names()"
+"$VENV_BIN/python" -c "from agentsuite.mcp_server import build_server; s = build_server(); assert 'agentsuite_founder_run' in s.tool_names()"
 
 # Approve to test promotion
 "$VENV_BIN/agentsuite" founder approve --run-id cleanroom-r1 --approver cleanroom --project-slug pfl-cleanroom
