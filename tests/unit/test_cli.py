@@ -223,8 +223,14 @@ def test_run_id_defaults_to_unique_value(tmp_path, monkeypatch):
     assert r1.exit_code == 0, r1.output
     assert r2.exit_code == 0, r2.output
     import json
-    id1 = json.loads(r1.stdout)["run_id"]
-    id2 = json.loads(r2.stdout)["run_id"]
+
+    def _extract_json(output: str) -> dict:
+        """Extract the trailing JSON block from output that may include progress lines."""
+        idx = output.index("{")
+        return json.loads(output[idx:])
+
+    id1 = _extract_json(r1.output)["run_id"]
+    id2 = _extract_json(r2.output)["run_id"]
     assert id1 != id2, f"Expected unique IDs but got {id1!r} twice"
     assert id1.startswith("run-"), f"Expected 'run-...' prefix, got {id1!r}"
     assert id2.startswith("run-"), f"Expected 'run-...' prefix, got {id2!r}"

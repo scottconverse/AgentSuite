@@ -108,17 +108,27 @@ def test_writer_allows_nested_paths(tmp_path):
 # ---------------------------------------------------------------------------
 
 @pytest.mark.parametrize("bad_path", [
+    # Mixed-slash traversal using forward slashes (platform-agnostic)
+    "../foo/../../bar",
+])
+def test_resolve_safe_rejects_forward_slash_traversal(tmp_path, bad_path):
+    """_resolve_safe must reject standard forward-slash traversal paths."""
+    w = ArtifactWriter(output_root=tmp_path, run_id="r1")
+    with pytest.raises(ValueError, match="escapes run_dir"):
+        w._resolve_safe(bad_path)
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="Backslash path separators only on Windows")
+@pytest.mark.parametrize("bad_path", [
     # Windows-style absolute paths
     r"C:\Windows\system32\evil.txt",
     "C:/Windows/system32/evil.txt",
-    # Mixed-slash traversal
-    "../foo/../../bar",
+    # Mixed-backslash traversal
     r"..\foo\..\..\bar",
-    # Deeply nested mixed backslash traversal
     r"subdir\..\..\..\etc\passwd",
 ])
 def test_resolve_safe_rejects_windows_and_mixed_slash_paths(tmp_path, bad_path):
-    """_resolve_safe must reject Windows absolute paths and mixed-slash traversals."""
+    """_resolve_safe must reject Windows absolute paths and backslash traversals (Windows only)."""
     w = ArtifactWriter(output_root=tmp_path, run_id="r1")
     with pytest.raises(ValueError, match="escapes run_dir"):
         w._resolve_safe(bad_path)
