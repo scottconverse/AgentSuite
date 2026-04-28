@@ -1,0 +1,21 @@
+# CODEOWNERS — require review on changes to critical directories.
+# Syntax: <pattern> <owner> [<owner> ...]
+# Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything not matched below
+*                          @scottconverse
+
+# Core kernel — state machine, artifacts, approval gate, schema
+agentsuite/kernel/         @scottconverse
+
+# LLM adapters and pricing tables — pricing errors have real $ impact
+agentsuite/llm/            @scottconverse
+
+# Agent implementations — business logic per role
+agentsuite/agents/         @scottconverse
+
+# Package manifest and dependency pins
+pyproject.toml             @scottconverse
+
+# CI workflows
+.github/workflows/         @scottconverse
