@@ -1,6 +1,7 @@
 """AgentSuite MCP server entry point."""
 from __future__ import annotations
 
+import importlib
 import logging
 import os
 from pathlib import Path
@@ -9,8 +10,20 @@ from typing import TYPE_CHECKING, Any, Callable
 if TYPE_CHECKING:
     from mcp.server.fastmcp import FastMCP
 
-from agentsuite.agents.registry import default_registry
+from agentsuite.agents.registry import UnknownAgent, default_registry
 from agentsuite.mcp_models import RunSummary
+
+# Registry mapping agent name → dotted module path for its MCP tools.
+# To add a new agent: register it here — no other changes needed in this file.
+_MCP_MODULES: dict[str, str] = {
+    "founder":     "agentsuite.agents.founder.mcp_tools",
+    "design":      "agentsuite.agents.design.mcp_tools",
+    "product":     "agentsuite.agents.product.mcp_tools",
+    "engineering": "agentsuite.agents.engineering.mcp_tools",
+    "marketing":   "agentsuite.agents.marketing.mcp_tools",
+    "trust_risk":  "agentsuite.agents.trust_risk.mcp_tools",
+    "cio":         "agentsuite.agents.cio.mcp_tools",
+}
 
 _log = logging.getLogger(__name__)
 
@@ -64,72 +77,20 @@ def build_server() -> _ServerWrapper:
     for name in enabled:
         try:
             agent_class = registry.get_class(name)
-        except Exception as e:
-            _log.warning("Skipping agent %s: failed to load — %r", name, e)
+        except UnknownAgent as e:
+            _log.warning("Skipping agent %s: not registered — %r", name, e)
             continue
-        if name == "founder":
-            from agentsuite.agents.founder import mcp_tools as founder_mcp
-
-            founder_mcp.register_tools(
-                server,
-                agent_class=lambda cls=agent_class: cls(output_root=_output_root()),  # type: ignore[misc]
-                output_root_fn=_output_root,
-                expose_stages=_expose_stages(),
-            )
-        elif name == "design":
-            from agentsuite.agents.design import mcp_tools as design_mcp
-
-            design_mcp.register_tools(
-                server,
-                agent_class=lambda cls=agent_class: cls(output_root=_output_root()),  # type: ignore[misc]
-                output_root_fn=_output_root,
-                expose_stages=_expose_stages(),
-            )
-        elif name == "product":
-            from agentsuite.agents.product import mcp_tools as product_mcp
-
-            product_mcp.register_tools(
-                server,
-                agent_class=lambda cls=agent_class: cls(output_root=_output_root()),  # type: ignore[misc]
-                output_root_fn=_output_root,
-                expose_stages=_expose_stages(),
-            )
-        elif name == "engineering":
-            from agentsuite.agents.engineering import mcp_tools as engineering_mcp
-
-            engineering_mcp.register_tools(
-                server,
-                agent_class=lambda cls=agent_class: cls(output_root=_output_root()),  # type: ignore[misc]
-                output_root_fn=_output_root,
-                expose_stages=_expose_stages(),
-            )
-        elif name == "marketing":
-            from agentsuite.agents.marketing import mcp_tools as marketing_mcp
-
-            marketing_mcp.register_tools(
-                server,
-                agent_class=lambda cls=agent_class: cls(output_root=_output_root()),  # type: ignore[misc]
-                output_root_fn=_output_root,
-                expose_stages=_expose_stages(),
-            )
-        elif name == "trust_risk":
-            from agentsuite.agents.trust_risk import mcp_tools as trust_risk_mcp
-
-            trust_risk_mcp.register_tools(
-                server,
-                agent_class=lambda cls=agent_class: cls(output_root=_output_root()),  # type: ignore[misc]
-                output_root_fn=_output_root,
-                expose_stages=_expose_stages(),
-            )
-        elif name == "cio":
-            from agentsuite.agents.cio import mcp_tools as cio_mcp
-
-            cio_mcp.register_tools(
-                server,
-                agent_class=lambda cls=agent_class: cls(output_root=_output_root()),  # type: ignore[misc]
-                output_root_fn=_output_root,
-                expose_stages=_expose_stages(),
-            )
+        module_path = _MCP_MODULES.get(name)
+        if module_path is None:
+            _log.warning("Skipping agent %s: no MCP tools module in _MCP_MODULES", name)
+            continue
+        mcp_module = importlib.import_module(module_path)
+        mcp_module.register_tools(
+            server,
+            agent_class=lambda cls=agent_class: cls(output_root=_output_root()),
+            output_root_fn=_output_root,
+            expose_stages=_expose_stages(),
+        )
 
     # Cross-agent shared tools
     def agentsuite_list_agents() -> dict[str, Any]:

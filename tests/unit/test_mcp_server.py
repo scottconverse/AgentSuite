@@ -49,6 +49,23 @@ def test_only_enabled_agents_get_tools(monkeypatch, tmp_path):
     assert not any(t.startswith("product_") for t in tool_names)
 
 
+def test_agent_without_mcp_module_is_skipped(monkeypatch, tmp_path):
+    """An enabled agent absent from _MCP_MODULES is skipped without crashing."""
+    import agentsuite.mcp_server as ms
+
+    monkeypatch.setenv("AGENTSUITE_ENABLED_AGENTS", "founder")
+    monkeypatch.setenv("AGENTSUITE_OUTPUT_DIR", str(tmp_path))
+    # Remove founder from the dispatch table so it hits the "no module" path
+    original = ms._MCP_MODULES.copy()
+    monkeypatch.setattr(ms, "_MCP_MODULES", {})
+    server = build_server()
+    ms._MCP_MODULES.update(original)  # restore (monkeypatch handles it, but be safe)
+    # Only the cross-agent tools should be registered
+    tool_names = server.tool_names()
+    assert not any(t.startswith("founder_") for t in tool_names)
+    assert "agentsuite_list_agents" in tool_names
+
+
 def test_founder_get_status_tool_handles_missing_run(monkeypatch, tmp_path):
     """founder_get_status raises FileNotFoundError for a run_id that doesn't exist."""
     import pytest
