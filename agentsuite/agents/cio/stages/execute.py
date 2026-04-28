@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import date, datetime, timezone
 from typing import Any, cast
 
 from agentsuite.agents.cio.input_schema import CIOAgentInput
@@ -12,16 +12,26 @@ from agentsuite.kernel.base_agent import StageContext
 from agentsuite.kernel.schema import RunState
 
 
-def _current_quarter() -> str:
-    now = datetime.now()
-    q = (now.month - 1) // 3 + 1
-    return f"Q{q} {now.year}"
+def _resolve_as_of(inp: CIOAgentInput) -> date:
+    """Return ``inp.as_of_date`` if set, else today's UTC date.
+
+    Centralizing here keeps the date source explicit and testable: callers
+    can pass an ``as_of_date`` for reproducibility (golden-tests, backdated
+    reports) and production runs continue to default to "now".
+    """
+    if inp.as_of_date is not None:
+        return inp.as_of_date
+    return datetime.now(tz=timezone.utc).date()
 
 
-def _next_quarter() -> str:
-    now = datetime.now()
-    q = (now.month - 1) // 3 + 1
-    year = now.year
+def _current_quarter(as_of: date) -> str:
+    q = (as_of.month - 1) // 3 + 1
+    return f"Q{q} {as_of.year}"
+
+
+def _next_quarter(as_of: date) -> str:
+    q = (as_of.month - 1) // 3 + 1
+    year = as_of.year
     if q == 4:
         q, year = 1, year + 1
     else:
@@ -29,23 +39,23 @@ def _next_quarter() -> str:
     return f"Q{q} {year}"
 
 
-def _current_fiscal_year() -> str:
-    return f"FY{datetime.now().year}"
+def _current_fiscal_year(as_of: date) -> str:
+    return f"FY{as_of.year}"
 
 
-def _fiscal_year_range() -> str:
-    year = datetime.now().year
-    return f"FY{year}–FY{year + 2}"
+def _fiscal_year_range(as_of: date) -> str:
+    return f"FY{as_of.year}–FY{as_of.year + 2}"
 
 
 def _values_from_input(inp: CIOAgentInput, extracted: dict[str, Any]) -> dict[str, object]:
     vendor_landscape = extracted.get("vendor_landscape", [])
     vendor_name = vendor_landscape[0] if vendor_landscape else "Primary Vendor"
     cio_name = inp.cio_name
-    current_q = _current_quarter()
-    next_q = _next_quarter()
-    fy = _current_fiscal_year()
-    fy_range = _fiscal_year_range()
+    as_of = _resolve_as_of(inp)
+    current_q = _current_quarter(as_of)
+    next_q = _next_quarter(as_of)
+    fy = _current_fiscal_year(as_of)
+    fy_range = _fiscal_year_range(as_of)
     return {
         "organization_name": inp.organization_name,
         "strategic_priorities": inp.strategic_priorities,
