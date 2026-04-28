@@ -1,8 +1,11 @@
 """FounderAgent — wires the kernel BaseAgent to founder stage handlers."""
 from __future__ import annotations
 
+import os
+from datetime import datetime
 from pathlib import Path
 from typing import Any
+from uuid import uuid4
 
 from agentsuite.agents.founder.rubric import FOUNDER_RUBRIC
 from agentsuite.agents.founder.stages.execute import execute_stage
@@ -71,7 +74,8 @@ def build_cli_spec() -> AgentCLISpec:
         business_goal: str = typer.Option(..., help="Required business goal"),
         project_slug: str | None = typer.Option(None, help="Stable slug for `_kernel/` promotion"),
         inputs_dir: Path | None = typer.Option(None, help="Directory of source materials"),
-        run_id: str | None = typer.Option(None, help="Caller-provided run id"),
+        run_id: str | None = typer.Option(None, help="Run ID (default: auto-generated timestamp+uuid)"),
+        force: bool = typer.Option(False, "--force", help="Overwrite existing run directory if it exists"),
     ) -> None:
         """Run the Founder agent end-to-end up to the approval gate."""
         from agentsuite.agents.founder.input_schema import FounderAgentInput
@@ -88,7 +92,11 @@ def build_cli_spec() -> AgentCLISpec:
             inputs_dir=inputs_dir,
             constraints=Constraints(),
         )
-        rid = run_id or "run-cli"
+        rid = run_id or f"run-{datetime.now().strftime('%Y%m%dT%H%M%S')}-{uuid4().hex[:6]}"
+        run_dir = Path(os.environ.get("AGENTSUITE_OUTPUT_DIR", ".agentsuite")) / "runs" / rid
+        if run_dir.exists() and not force:
+            typer.echo(f"Error: run '{rid}' already exists. Use --force to overwrite.", err=True)
+            raise typer.Exit(1)
         state = agent.run(request=inp, run_id=rid)
         typer.echo(json.dumps({
             "run_id": state.run_id,

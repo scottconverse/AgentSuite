@@ -202,3 +202,75 @@ def test_cli_cio_run_with_mock(tmp_path, monkeypatch):
     assert result.exit_code == 0, result.output
     assert "awaiting_approval" in result.output
     assert (tmp_path / "runs" / "cio1" / "it-strategy.md").exists()
+
+
+# ---------------------------------------------------------------------------
+# B1 — unique run_id default
+# ---------------------------------------------------------------------------
+
+def test_run_id_defaults_to_unique_value(tmp_path, monkeypatch):
+    """Two runs without explicit run_id should produce distinct IDs."""
+    monkeypatch.setenv("AGENTSUITE_OUTPUT_DIR", str(tmp_path))
+    monkeypatch.setenv("AGENTSUITE_LLM_PROVIDER_FACTORY", "agentsuite.llm.mock:_default_mock_for_cli")
+    r1 = _runner().invoke(app, [
+        "founder", "run",
+        "--business-goal", "Test uniqueness run 1",
+    ])
+    r2 = _runner().invoke(app, [
+        "founder", "run",
+        "--business-goal", "Test uniqueness run 2",
+    ])
+    assert r1.exit_code == 0, r1.output
+    assert r2.exit_code == 0, r2.output
+    import json
+    id1 = json.loads(r1.stdout)["run_id"]
+    id2 = json.loads(r2.stdout)["run_id"]
+    assert id1 != id2, f"Expected unique IDs but got {id1!r} twice"
+    assert id1.startswith("run-"), f"Expected 'run-...' prefix, got {id1!r}"
+    assert id2.startswith("run-"), f"Expected 'run-...' prefix, got {id2!r}"
+
+
+# ---------------------------------------------------------------------------
+# B2 — --force flag
+# ---------------------------------------------------------------------------
+
+def test_force_flag_blocks_existing_run(tmp_path, monkeypatch):
+    """Running again with the same explicit run_id (no --force) should exit 1."""
+    monkeypatch.setenv("AGENTSUITE_OUTPUT_DIR", str(tmp_path))
+    monkeypatch.setenv("AGENTSUITE_LLM_PROVIDER_FACTORY", "agentsuite.llm.mock:_default_mock_for_cli")
+    # First run — creates the directory
+    r1 = _runner().invoke(app, [
+        "founder", "run",
+        "--business-goal", "Force test",
+        "--run-id", "force-test-run",
+    ])
+    assert r1.exit_code == 0, r1.output
+    assert (tmp_path / "runs" / "force-test-run").exists()
+
+    # Second run — same ID, no --force → should be blocked
+    r2 = _runner().invoke(app, [
+        "founder", "run",
+        "--business-goal", "Force test again",
+        "--run-id", "force-test-run",
+    ])
+    assert r2.exit_code == 1
+    assert "already exists" in (r2.output + (r2.stderr or ""))
+
+
+def test_force_flag_allows_existing_run(tmp_path, monkeypatch):
+    """Running again with --force should succeed even if the run directory exists."""
+    monkeypatch.setenv("AGENTSUITE_OUTPUT_DIR", str(tmp_path))
+    monkeypatch.setenv("AGENTSUITE_LLM_PROVIDER_FACTORY", "agentsuite.llm.mock:_default_mock_for_cli")
+    base_args = [
+        "founder", "run",
+        "--business-goal", "Force overwrite test",
+        "--run-id", "force-overwrite-run",
+    ]
+    # First run
+    r1 = _runner().invoke(app, base_args)
+    assert r1.exit_code == 0, r1.output
+
+    # Second run with --force — should succeed
+    r2 = _runner().invoke(app, base_args + ["--force"])
+    assert r2.exit_code == 0, r2.output
+    assert "awaiting_approval" in r2.output

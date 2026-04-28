@@ -1,8 +1,11 @@
 """CIOAgent — wires the kernel BaseAgent to CIO stage handlers."""
 from __future__ import annotations
 
+import os
+from datetime import datetime
 from pathlib import Path
 from typing import Any
+from uuid import uuid4
 
 from agentsuite.agents.cio.rubric import CIO_RUBRIC
 from agentsuite.agents.cio.stages.execute import execute_stage
@@ -84,7 +87,8 @@ def build_cli_spec() -> AgentCLISpec:
         digital_initiatives: str = typer.Option("", help="Active or planned digital transformation programs"),
         regulatory_environment: str = typer.Option("", help="e.g. 'HIPAA, SOX, FedRAMP'"),
         it_docs_dir: Path | None = typer.Option(None, help="Dir with existing IT strategy, roadmap, or architecture docs"),
-        run_id: str | None = typer.Option(None, help="Run ID (auto-generated if omitted)"),
+        run_id: str | None = typer.Option(None, help="Run ID (default: auto-generated timestamp+uuid)"),
+        force: bool = typer.Option(False, "--force", help="Overwrite existing run directory if it exists"),
     ) -> None:
         """Run the CIO Agent pipeline."""
         from agentsuite.agents.cio.input_schema import CIOAgentInput
@@ -104,7 +108,12 @@ def build_cli_spec() -> AgentCLISpec:
             existing_it_docs=existing_it_docs,
         )
         agent = CIOAgent(output_root=_output_root(), llm=_resolve_llm_for_cli())
-        result = agent.run(request=inp, run_id=run_id or "run-cli")
+        rid = run_id or f"run-{datetime.now().strftime('%Y%m%dT%H%M%S')}-{uuid4().hex[:6]}"
+        run_dir = Path(os.environ.get("AGENTSUITE_OUTPUT_DIR", ".agentsuite")) / "runs" / rid
+        if run_dir.exists() and not force:
+            typer.echo(f"Error: run '{rid}' already exists. Use --force to overwrite.", err=True)
+            raise typer.Exit(1)
+        result = agent.run(request=inp, run_id=rid)
         typer.echo(json.dumps({
             "run_id": result.run_id,
             "status": "awaiting_approval" if result.stage == "approval" else result.stage,
