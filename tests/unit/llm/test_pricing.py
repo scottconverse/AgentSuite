@@ -13,9 +13,9 @@ def test_anthropic_pricing_has_known_models():
 
 
 def test_openai_pricing_has_known_models():
-    assert "gpt-5" in OPENAI_PRICING
-    assert "gpt-4.1" in OPENAI_PRICING
-    assert "gpt-4o-mini" in OPENAI_PRICING
+    assert "gpt-5.4" in OPENAI_PRICING
+    assert "gpt-5.5" in OPENAI_PRICING
+    assert "gpt-5.4-mini" in OPENAI_PRICING
 
 
 def test_gemini_pricing_has_known_models():
