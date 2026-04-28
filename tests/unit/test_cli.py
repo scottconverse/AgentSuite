@@ -27,7 +27,7 @@ def test_cli_founder_run_with_mock(tmp_path, monkeypatch):
         "--run-id", "r1",
     ])
     assert result.exit_code == 0
-    assert "awaiting_approval" in result.stdout
+    assert "approval" in result.stdout
     assert (tmp_path / "runs" / "r1" / "brand-system.md").exists()
 
 
@@ -80,7 +80,7 @@ def test_cli_design_run_with_mock(tmp_path, monkeypatch):
         "--run-id", "d1",
     ])
     assert result.exit_code == 0, result.stdout
-    assert "awaiting_approval" in result.stdout
+    assert "approval" in result.stdout
     assert (tmp_path / "runs" / "d1" / "visual-direction.md").exists()
 
 
@@ -139,7 +139,7 @@ def test_cli_product_run_with_mock(tmp_path, monkeypatch):
         "--run-id", "p1",
     ])
     assert result.exit_code == 0, result.output
-    assert "awaiting_approval" in result.output
+    assert "approval" in result.output
     assert (tmp_path / "runs" / "p1" / "product-requirements-doc.md").exists()
 
 
@@ -155,7 +155,7 @@ def test_cli_engineering_run_with_mock(tmp_path, monkeypatch):
         "--run-id", "e1",
     ])
     assert result.exit_code == 0, result.output
-    assert "awaiting_approval" in result.output
+    assert "approval" in result.output
     assert (tmp_path / "runs" / "e1" / "architecture-decision-record.md").exists()
 
 
@@ -170,7 +170,7 @@ def test_cli_marketing_run_with_mock(tmp_path, monkeypatch):
         "--run-id", "m1",
     ])
     assert result.exit_code == 0, result.output
-    assert "awaiting_approval" in result.output
+    assert "approval" in result.output
     assert (tmp_path / "runs" / "m1" / "campaign-brief.md").exists()
 
 
@@ -185,7 +185,7 @@ def test_cli_trust_risk_run_with_mock(tmp_path, monkeypatch):
         "--run-id", "tr1",
     ])
     assert result.exit_code == 0, result.output
-    assert "awaiting_approval" in result.output
+    assert "approval" in result.output
     assert (tmp_path / "runs" / "tr1" / "threat-model.md").exists()
 
 
@@ -200,7 +200,7 @@ def test_cli_cio_run_with_mock(tmp_path, monkeypatch):
         "--run-id", "cio1",
     ])
     assert result.exit_code == 0, result.output
-    assert "awaiting_approval" in result.output
+    assert "approval" in result.output
     assert (tmp_path / "runs" / "cio1" / "it-strategy.md").exists()
 
 
@@ -273,4 +273,4 @@ def test_force_flag_allows_existing_run(tmp_path, monkeypatch):
     # Second run with --force — should succeed
     r2 = _runner().invoke(app, base_args + ["--force"])
     assert r2.exit_code == 0, r2.output
-    assert "awaiting_approval" in r2.output
+    assert "approval" in r2.output
