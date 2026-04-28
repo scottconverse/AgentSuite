@@ -22,3 +22,28 @@ jobs:
         run: ruff check .
       - name: mypy
         run: mypy agentsuite
+
+  docs-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Required doc artifacts exist
+        run: |
+          missing=()
+          for f in README.md CHANGELOG.md CONTRIBUTING.md LICENSE .gitignore docs/index.html; do
+            [ -f "$f" ] || missing+=("$f")
+          done
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "Missing required doc artifacts: ${missing[*]}"
+            exit 1
+          fi
+          echo "All 6 required doc artifacts present."
+      - name: Version consistency (pyproject ↔ CHANGELOG)
+        run: |
+          PKG=$(grep -E '^version = ' pyproject.toml | head -1 | sed -E 's/version = "(.*)"/\1/')
+          echo "Package version: $PKG"
+          if ! grep -qF "[$PKG]" CHANGELOG.md; then
+            echo "CHANGELOG.md has no entry for version $PKG"
+            exit 1
+          fi
+          echo "CHANGELOG entry for $PKG found."
