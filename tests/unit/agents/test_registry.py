@@ -7,25 +7,39 @@ from agentsuite.agents.registry import AgentRegistry, UnknownAgent
 def test_registry_lists_only_enabled_agents(monkeypatch):
     monkeypatch.setenv("AGENTSUITE_ENABLED_AGENTS", "founder")
     reg = AgentRegistry()
+    reg._registered["founder"] = object  # type: ignore[assignment]
     assert reg.enabled_names() == ["founder"]
 
 
 def test_registry_defaults_to_founder_only(monkeypatch):
     monkeypatch.delenv("AGENTSUITE_ENABLED_AGENTS", raising=False)
     reg = AgentRegistry()
+    reg._registered["founder"] = object  # type: ignore[assignment]
     assert reg.enabled_names() == ["founder"]
 
 
 def test_registry_supports_comma_separated(monkeypatch):
     monkeypatch.setenv("AGENTSUITE_ENABLED_AGENTS", "founder,design,product")
     reg = AgentRegistry()
+    for name in ("founder", "design", "product"):
+        reg._registered[name] = object  # type: ignore[assignment]
     assert reg.enabled_names() == ["founder", "design", "product"]
 
 
 def test_registry_strips_whitespace(monkeypatch):
     monkeypatch.setenv("AGENTSUITE_ENABLED_AGENTS", "founder, design ,  product")
     reg = AgentRegistry()
+    for name in ("founder", "design", "product"):
+        reg._registered[name] = object  # type: ignore[assignment]
     assert reg.enabled_names() == ["founder", "design", "product"]
+
+
+def test_enabled_names_raises_on_unregistered_even_when_registry_empty(monkeypatch):
+    """Validation is unconditional — empty registry rejects any env-listed agent."""
+    monkeypatch.setenv("AGENTSUITE_ENABLED_AGENTS", "founder")
+    reg = AgentRegistry()
+    with pytest.raises(UnknownAgent, match="founder"):
+        reg.enabled_names()
 
 
 def test_get_agent_class_raises_for_unknown(monkeypatch):
