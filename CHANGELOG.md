@@ -17,7 +17,7 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 - **LLM SDK dependencies are now optional extras** — `pip install agentsuite` installs only the core library (pydantic, typer, httpx, jinja2). Provider SDKs are opt-in: `pip install agentsuite[anthropic]`, `agentsuite[openai]`, `agentsuite[gemini]`, `agentsuite[ollama]`, `agentsuite[mcp]`, `agentsuite[image]`, or `agentsuite[all]`.
 - **`approve` commands normalized** — all 7 agents now return `{"run_id", "status", "approved_by"}` JSON. Previously marketing, engineering, product, trust-risk, and cio returned plain text.
 
-## [0.7.1] - 2026-04-27
+## [0.7.1] - 2026-04-27 (not released as standalone tag; changes included in v0.8.0)
 
 ### Added
 - **CI wheel-smoke job** — builds the wheel, installs in a fresh venv (no extras), and verifies all 7 `prompt_loader` imports plus `agentsuite --help` and `agentsuite-mcp --help`. Catches missing package-data and broken entry points before users do.
@@ -161,7 +161,9 @@ Initial release.
 - Per-run cost cap only; per-day cap deferred.
 - Single MCP server with env-gated agent enablement (no per-agent server topology).
 
-[Unreleased]: https://github.com/scottconverse/AgentSuite/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/scottconverse/AgentSuite/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/scottconverse/AgentSuite/compare/v0.7.0...v0.8.0
+[0.7.1]: https://github.com/scottconverse/AgentSuite/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/scottconverse/AgentSuite/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/scottconverse/AgentSuite/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/scottconverse/AgentSuite/compare/v0.4.0...v0.5.0

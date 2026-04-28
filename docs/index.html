@@ -45,7 +45,7 @@
 </head>
 <body>
   <header>
-    <h1>AgentSuite <span class="v">v0.7.0</span></h1>
+    <h1>AgentSuite <span class="v">v0.8.0</span></h1>
     <p class="lede">Seven role-specific reasoning agents that turn vague intent into precise operating artifacts. Open-source. MCP-compatible with Codex, Claude Code, and Cowork.</p>
   </header>
 
@@ -53,7 +53,8 @@
   <p>AgentSuite codifies the operating system around AI generation. Each agent walks a six-stage pipeline (intake → extract → spec → execute → qa → approval), persists 26 artifacts to disk, and promotes approved output into a long-lived <code>_kernel/</code> that downstream agents consume. The result is a reusable creative-ops or product-ops layer, not a one-off content generator.</p>
 
   <h2>Install</h2>
-  <pre><code>pip install git+https://github.com/scottconverse/AgentSuite.git
+  <pre><code>pip install "agentsuite[anthropic] @ git+https://github.com/scottconverse/AgentSuite.git"
+# other providers: [openai]  [gemini]  [ollama]  [all]
 # or, no install:
 uvx --from git+https://github.com/scottconverse/AgentSuite.git agentsuite-mcp</code></pre>
 

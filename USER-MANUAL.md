@@ -1,6 +1,6 @@
 # AgentSuite User Manual
 
-**Version 0.7.0**
+**Version 0.8.0**
 
 ---
 
@@ -90,8 +90,10 @@ A terminal (also called a "command prompt" or "command line") is a text-based wi
 Open a terminal. Type the following command exactly as shown and press Enter:
 
 ```
-pip install git+https://github.com/scottconverse/AgentSuite.git
+pip install "agentsuite[anthropic] @ git+https://github.com/scottconverse/AgentSuite.git"
 ```
+
+This installs AgentSuite with the Anthropic Claude provider. To use a different AI provider instead, replace `[anthropic]` with `[openai]`, `[gemini]`, or `[ollama]`. To install all providers at once: `agentsuite[all]`.
 
 You will see a lot of text scroll by as your computer downloads and installs AgentSuite from GitHub (a website where open-source software is stored). This is normal. When it finishes, your prompt returns.
 
@@ -119,6 +121,8 @@ If you have downloaded the AgentSuite code directly (for example, from GitHub as
 ```
 pip install -e .
 ```
+
+For development installs, add your provider: `pip install -e ".[anthropic]"` (or `.[all]` for all providers).
 
 The `-e` flag means "editable install" — changes to the code in that folder take effect immediately without reinstalling.
 
@@ -880,4 +884,4 @@ This glossary defines every technical term used in this manual. Terms are listed
 
 ---
 
-*AgentSuite v0.7.0 — User Manual*
+*AgentSuite v0.8.0 — User Manual*
