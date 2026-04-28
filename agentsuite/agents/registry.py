@@ -32,18 +32,25 @@ class AgentRegistry:
     def enabled_names(self) -> list[str]:
         """Return enabled agent names from AGENTSUITE_ENABLED_AGENTS env (or default).
 
+        Normalises hyphens to underscores so both ``trust-risk`` and
+        ``trust_risk`` resolve to the same registered key.  The README
+        and MCP config snippets use the hyphen form; the registry key
+        (and ``TrustRiskAgent.name``) use the underscore form.
+
         Raises UnknownAgent if any name in the env var is not registered.
         """
         raw = os.environ.get("AGENTSUITE_ENABLED_AGENTS", self.DEFAULT_ENABLED)
         names = [n.strip() for n in raw.split(",") if n.strip()]
-        unknown = [n for n in names if n not in self._registered]
+        # Normalise hyphens → underscores (e.g. "trust-risk" → "trust_risk")
+        normalized = [n.replace("-", "_") for n in names]
+        unknown = [n for n in normalized if n not in self._registered]
         if unknown:
             registered = self.registered_names()
             raise UnknownAgent(
                 f"Unknown agents in AGENTSUITE_ENABLED_AGENTS: {unknown}. "
                 f"Registered: {registered}"
             )
-        return names
+        return normalized
 
     def get_class(self, name: str) -> Type[BaseAgent]:
         """Return the registered class for ``name``. Raises UnknownAgent if disabled or unregistered."""
