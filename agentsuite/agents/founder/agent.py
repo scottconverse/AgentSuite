@@ -100,11 +100,8 @@ def build_cli_spec() -> AgentCLISpec:
         state = agent.run(request=inp, run_id=rid)
         typer.echo(json.dumps({
             "run_id": state.run_id,
-            "status": "awaiting_approval" if state.stage == "approval" else state.stage,
-            "stage": state.stage,
             "primary_path": str(_output_root() / "runs" / state.run_id / "brand-system.md"),
-            "open_questions": state.open_questions,
-            "cost_usd": state.cost_so_far.usd,
+            "status": state.stage,
         }, indent=2))
 
     return AgentCLISpec(

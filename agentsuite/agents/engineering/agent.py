@@ -108,11 +108,9 @@ def build_cli_spec() -> AgentCLISpec:
         result = agent.run(request=inp, run_id=rid)
         typer.echo(json.dumps({
             "run_id": result.run_id,
-            "status": "awaiting_approval" if result.stage == "approval" else result.stage,
-            "stage": result.stage,
-            "system_name": system_name,
-            "cost_usd": result.cost_so_far.usd,
-        }, indent=2, default=str))
+            "primary_path": str(_output_root() / "runs" / result.run_id / "architecture-decision-record.md"),
+            "status": result.stage,
+        }, indent=2))
 
     return AgentCLISpec(
         cli_name="engineering",
