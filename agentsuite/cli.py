@@ -4,6 +4,7 @@ from __future__ import annotations
 import importlib
 import json
 import os
+import sys
 import traceback
 from pathlib import Path
 from typing import Any, Optional
@@ -15,7 +16,26 @@ from agentsuite.kernel.state_store import StateStore
 from agentsuite.llm.resolver import NoProviderConfigured, resolve_provider
 
 
-app = typer.Typer(help="AgentSuite — reasoning agents for vague intent → precise artifacts")
+# Force UTF-8 on stdout/stderr early so Typer help text containing non-ASCII
+# characters (em-dash, arrow) does not crash on default Windows cp1252 consoles.
+# Idempotent and a no-op on terminals that already speak UTF-8.
+def _force_utf8_io() -> None:
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            try:
+                reconfigure(encoding="utf-8")
+            except Exception:
+                # Some test harnesses swap stdout for a buffer without
+                # reconfigure(); a failure here is non-fatal.
+                pass
+
+
+_force_utf8_io()
+
+app = typer.Typer(
+    help="AgentSuite -- reasoning agents for vague intent -> precise artifacts"
+)
 
 # Module-level flag toggled by the --debug callback so inner helpers can read it.
 _debug_mode: bool = False

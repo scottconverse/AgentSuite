@@ -91,3 +91,29 @@ jobs:
             dist/*.tar.gz
             dist/*-sbom.cdx.json
             pip-audit.json
+
+  windows-smoke:
+    # QA-001 regression gate: confirm `agentsuite --help` runs cleanly on
+    # default-Windows (cp1252 console). v1.0.0 shipped with a UnicodeEncodeError
+    # on the Typer help text. The fix is in `agentsuite/cli.py` (ASCII help
+    # string + early `sys.stdout.reconfigure(encoding="utf-8")`); this matrix
+    # confirms it stays fixed.
+    needs: build-and-publish
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install from source (matches the README's git+pip path)
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          pip install ".[mcp]"
+      - name: Smoke (Windows) -- agentsuite --help under default cp1252 console
+        shell: pwsh
+        env:
+          PYTHONIOENCODING: cp1252
+        run: |
+          agentsuite --help
+          agentsuite-mcp --help
