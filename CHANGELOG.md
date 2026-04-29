@@ -4,20 +4,42 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 ## [Unreleased]
 
+### Roadmap
+
+- **v1.0.0** — General availability after rc1 dogfood bake (5–7 days, real-project run, friction triage, CHANGELOG promotion, public launch posts).
+
+## [1.0.0rc1] - 2026-04-29
+
+Release candidate for v1.0.0. Compatibility freeze begins here. The seven-agent surface (Founder, Design, Product, Engineering, Marketing, Trust/Risk, CIO), the kernel pipeline, the MCP tool naming, and the persisted `_state.json` schema are locked. Any breaking change post-rc1 requires explicit acknowledgement.
+
 ### Added
 
-- **PEP 561 `py.typed` marker** at `agentsuite/py.typed` and registered in `pyproject.toml` package-data. Downstream consumers' mypy now follows AgentSuite's typed source through the wheel.
+- **PEP 561 `py.typed` marker** at `agentsuite/py.typed` and registered in `pyproject.toml` package-data. Downstream consumers' mypy now follows AgentSuite's typed source through the installed wheel.
 - **Downstream-consumer typing test** at `tests/integration/test_downstream_consumer.py`. Synthesizes a small package using AgentSuite's public API and runs `mypy --strict` against it; fails the suite on any typing regression that would surface to downstream users. Covers the editable-install case via `MYPYPATH`; the wheel-install case is verified by the existing release-workflow `clean-install-check` job.
+- **Community-launch drafts** at `docs/community/discussions-seeds.md` and `docs/community/good-first-issues.md`. Discussions seed content (Welcome, 3 Q&A, 2 Ideas, General pointers) and 3 good-first-issue ticket drafts (`--quiet` flag, Marketing-agent USER-MANUAL example, `AGENTSUITE_OUTPUT_DIR` test). Drafts only — to be reviewed and posted by the maintainer once Discussions is enabled and rc1 is tagged.
 
 ### Changed
 
 - **README hook** sharpened. The pre-install paragraph now leads with "Why AgentSuite" (target user + 30-second pitch + what makes it different) replacing the previous "Why this exists" framing. Same anchor position, tighter copy.
 - **`docs/test-coverage.md` audit-honesty pass.** Documented the existing conditional `@pytest.mark.skipif` in `test_founder_pipeline.py` (cassette-recording path); explained why it is not a Hard Rule 4a violation. Updated default-run test count (689 of 692).
-- **Community-launch drafts** at `docs/community/discussions-seeds.md` and `docs/community/good-first-issues.md`. Discussions seed content (Welcome, 3 Q&A, 2 Ideas, General pointers) and 3 good-first-issue ticket drafts (`--quiet` flag, Marketing-agent USER-MANUAL example, `AGENTSUITE_OUTPUT_DIR` test). Drafts only — to be reviewed and posted by the maintainer once Discussions is enabled and rc1 is tagged.
 
-### Roadmap
+### Compatibility
 
-- **v1.0.0-rc1 / v1.0.0** — Compatibility freeze (in progress: py.typed + downstream-consumer test landed; Discussions seeding, three good-first-issue tickets, signed tags, public launch still pending).
+The following are locked from rc1 onward; breaking changes require an explicit major-version bump or a documented deprecation cycle:
+
+- **Public API surface:** `agentsuite.agents.<agent>.agent.<Agent>Agent`, `agentsuite.agents.<agent>.input_schema.<Agent>AgentInput`, `agentsuite.kernel.schema.{Constraints, RunState, ArtifactRef, Cost, Stage}`, `agentsuite.kernel.qa.{QARubric, RubricDimension}`, `agentsuite.llm.base.LLMProvider`, `agentsuite.llm.mock.MockLLMProvider`.
+- **`_state.json` schema:** `schema_version: 2`. Any future shape change ships a migrator or raises `RunStateSchemaVersionError` with a documented remediation path (per ADR-0002 + ADR-0007).
+- **MCP tool naming:** `<agent>_run`, `<agent>_resume`, `<agent>_approve` (per ADR-0004). Tool names are part of the public contract.
+- **Kernel pipeline:** six stages (`intake → extract → spec → execute → qa → approval`). Stage names are part of the public contract; reordering or splitting requires the same deprecation discipline as an API change.
+
+### Known limitations (intentional, deferred to v1.0.x or later)
+
+- No multi-tenancy / API server mode (CLI + library + MCP server only).
+- No web UI.
+- No additional agents beyond the seven shipped.
+- Per-run cost cap only (no per-day cap; tracked in Discussions).
+- Single MCP server topology with env-gated agent enablement (no per-agent server).
+- AgentSuite is local-first; no cloud-hosted offering.
 
 ## [0.9.3] - 2026-04-29
 

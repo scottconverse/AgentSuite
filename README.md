@@ -2,7 +2,7 @@
 
 > Seven role-specific reasoning agents that turn vague intent into precise operating artifacts.
 >
-> **v0.9.3** — Specification Kernel + Founder · Design · Product · Engineering · Marketing · Trust/Risk · CIO Agents
+> **v1.0.0-rc1** — Specification Kernel + Founder · Design · Product · Engineering · Marketing · Trust/Risk · CIO Agents
 
 ![AgentSuite founder run](docs/screenshots/cli-founder-run.svg)
 
