@@ -51,7 +51,7 @@ The following are locked from rc1 onward; breaking changes require an explicit m
 - **Public API surface:** `agentsuite.agents.<agent>.agent.<Agent>Agent`, `agentsuite.agents.<agent>.input_schema.<Agent>AgentInput`, `agentsuite.kernel.schema.{Constraints, RunState, ArtifactRef, Cost, Stage}`, `agentsuite.kernel.qa.{QARubric, RubricDimension}`, `agentsuite.llm.base.LLMProvider`, `agentsuite.llm.mock.MockLLMProvider`.
 - **`_state.json` schema:** `schema_version: 2`. Any future shape change ships a migrator or raises `RunStateSchemaVersionError` with a documented remediation path (per ADR-0002 + ADR-0007).
 - **MCP tool naming:** `<agent>_run`, `<agent>_resume`, `<agent>_approve` (per ADR-0004). Tool names are part of the public contract.
-- **Kernel pipeline:** six stages (`intake → extract → spec → execute → qa → approval`). Stage names are part of the public contract; reordering or splitting requires the same deprecation discipline as an API change.
+- **Kernel pipeline:** five stages (`intake -> extract -> spec -> execute -> qa`) plus a kernel-managed approval transition. Stage names are part of the public contract; reordering or splitting requires the same deprecation discipline as an API change.
 
 ### Known limitations (intentional, deferred to v1.0.x or later)
 

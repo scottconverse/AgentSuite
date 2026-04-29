@@ -142,7 +142,7 @@ This copies the approved artifacts to `.agentsuite/_kernel/my-product/` where th
 
 If `brand-system.md` is wrong:
 - **Wrong audience or voice:** add more inputs (a longer voice sample, more product docs) and re-run with a new `--run-id`.
-- **A specific section is off:** open the file, edit by hand, and use `agentsuite founder resume --run-id <id> --stage qa` to re-run the QA check on your edits.
+- **A specific section is off:** open the file, edit by hand. Re-running the QA stage from the CLI is on the v1.0.x roadmap (see `dev-reports/audit-AgentSuite-2026-04-29/next-sprint-watchlist.md` W-09); for now, hand-edited artifacts are accepted at approval time without re-scoring.
 
 You can do this as many times as you want. Each run costs cents to a few dollars depending on input size.
 

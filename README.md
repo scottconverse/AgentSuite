@@ -93,7 +93,7 @@ args = ["agentsuite-mcp"]
 AGENTSUITE_ENABLED_AGENTS = "founder,design,product,engineering,marketing,trust-risk,cio"
 ```
 
-Restart Codex. Tools `founder_run`, `founder_approve`, `founder_get_status`, `founder_list_runs`, `founder_resume`, plus the cross-agent `agentsuite_list_agents`, `agentsuite_kernel_artifacts`, `agentsuite_cost_report` are now callable.
+Restart Codex. Tools `agentsuite_founder_run`, `agentsuite_founder_approve`, `agentsuite_founder_get_status`, `agentsuite_founder_list_runs`, `agentsuite_founder_resume`, plus the cross-agent `agentsuite_list_agents`, `agentsuite_kernel_artifacts`, `agentsuite_cost_report` are now callable.
 
 ## Quick start (MCP — Claude Code / Cowork)
 
@@ -126,7 +126,7 @@ Restart the harness.
 | 5 qa | `qa_report.md`, `qa_scores.json` |
 | state | `_state.json`, `_meta.json` |
 
-On `founder_approve`, the spec artifacts + brief-template-library are promoted to `.agentsuite/_kernel/<project_slug>/` for use by downstream agents.
+On `agentsuite_founder_approve`, the spec artifacts + brief-template-library are promoted to `.agentsuite/_kernel/<project_slug>/` for use by downstream agents.
 
 ### Design agent — see CHANGELOG for artifact list.
 
@@ -152,7 +152,7 @@ Input: `product_name`, `risk_domain`, `stakeholder_context` (plus optional `regu
 | 5 qa | `qa_report.md`, `qa_scores.json` |
 | state | `_state.json`, `_meta.json` |
 
-Primary artifact: `threat-model.md`. On `trust_risk_approve`, all spec artifacts and brief templates are promoted to `.agentsuite/_kernel/<project_slug>/`.
+Primary artifact: `threat-model.md`. On `agentsuite_trust_risk_approve`, all spec artifacts and brief templates are promoted to `.agentsuite/_kernel/<project_slug>/`.
 
 ### CIO agent (v0.7.0) — 17 artifacts per run:
 
@@ -165,7 +165,7 @@ Input: `organization_name`, `strategic_priorities`, `it_maturity_level`.
 | 5 qa | `qa_report.md`, `qa_scores.json` |
 | state | `_state.json`, `_meta.json` |
 
-Primary artifact: `it-strategy.md`. On `cio_approve`, all spec artifacts and brief templates are promoted to `.agentsuite/_kernel/<project_slug>/`.
+Primary artifact: `it-strategy.md`. On `agentsuite_cio_approve`, all spec artifacts and brief templates are promoted to `.agentsuite/_kernel/<project_slug>/`.
 
 ## Quick start (Python SDK)
 
