@@ -99,6 +99,27 @@ AgentSuite does not publish to PyPI. Releases are distributed via GitHub only.
 - Pydantic for all data shapes that cross module boundaries.
 - Jinja2 for prompts and templates with `StrictUndefined` (fail loudly on missing variables).
 
+## Regenerating golden snapshots
+
+Golden tests in `tests/golden/` compare each agent's output to committed
+snapshots under `tests/golden/snapshots/<agent>/<scenario>/`. v0.9.0 adds
+content-aware fixtures (e.g. `brand-system.md`, `qa_scores.json`) on top
+of the existing structural assertions.
+
+When a deliberate prompt or template change shifts the rendered output:
+
+1. Run `make update-goldens` (alias for `make resnap-golden`). The target
+   sleeps 5s as a safety beat, then re-runs `pytest tests/golden -v` with
+   `RESNAP=1` so the test runner overwrites the snapshot files in place.
+2. Review the diff with `git diff -- tests/golden/snapshots/`. Every
+   changed line should reflect the intended change. If you see drift you
+   didn't intend, roll back instead of committing the snapshot.
+3. Commit the snapshot changes alongside the prompt/template change in
+   the same commit so the rationale lives in the same blame entry.
+
+`make resnap-golden` and `make update-goldens` are equivalent — the
+sprint plan named the alias.
+
 ## Architecture decisions
 
 Load-bearing design decisions live in [`docs/adr/`](docs/adr/) as short

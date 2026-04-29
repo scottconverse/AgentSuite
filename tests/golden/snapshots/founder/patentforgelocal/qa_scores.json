@@ -1,0 +1,17 @@
+{
+  "scores": {
+    "reusability": 8.0,
+    "brand_consistency": 8.0,
+    "claims_grounded": 8.0,
+    "voice_fit": 8.0,
+    "template_specificity": 8.0,
+    "goal_alignment": 8.0,
+    "anti_genericity": 8.0,
+    "constraint_adherence": 8.0,
+    "completeness": 8.0
+  },
+  "average": 8.0,
+  "passed": true,
+  "revision_instructions": [],
+  "requires_revision": false
+}
