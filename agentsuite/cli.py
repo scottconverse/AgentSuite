@@ -44,10 +44,16 @@ _debug_mode: bool = False
 @app.callback()
 def _global_options(
     debug: bool = typer.Option(False, "--debug", help="Show full traceback on errors."),
+    quiet: bool = typer.Option(
+        False, "--quiet", "-q",
+        help="Suppress per-stage progress markers on stderr (UX-006/QA-005).",
+    ),
 ) -> None:
     """Global options applied to every subcommand."""
     global _debug_mode
     _debug_mode = debug
+    if quiet:
+        os.environ["AGENTSUITE_QUIET"] = "1"
 
 
 def _output_root() -> Path:

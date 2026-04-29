@@ -20,6 +20,29 @@ _log = logging.getLogger(__name__)
 PIPELINE_ORDER: list[Stage] = ["intake", "extract", "spec", "execute", "qa"]
 
 
+def _emit_stage_progress(stage: Stage, elapsed_s: float, total_usd: float) -> None:
+    """Emit one line of stage-completion progress to stderr.
+
+    Silenced when ``AGENTSUITE_QUIET`` is set (the CLI's ``--quiet`` flag
+    exports this). Always writes to ``sys.stderr`` so the CLI's JSON stdout
+    stays clean for shell-piping. Never raises.
+    """
+    import os
+    import sys
+    if os.environ.get("AGENTSUITE_QUIET", "").lower() in {"1", "true", "yes"}:
+        return
+    line = (
+        "[OK] " + stage + " complete  ("
+        + format(elapsed_s, "0.1f") + "s, $"
+        + format(total_usd, "0.4f") + ")"
+    )
+    try:
+        sys.stderr.write(line + chr(10))
+        sys.stderr.flush()
+    except Exception:
+        pass
+
+
 @dataclass
 class AgentCLISpec:
     """Describes how an agent is exposed via the CLI."""
@@ -133,10 +156,12 @@ class BaseAgent(ABC):
                     pass
         ctx = StageContext(writer=writer, cost_tracker=cost_tracker, edits=edits)
         start_idx = PIPELINE_ORDER.index(state.stage) if state.stage in PIPELINE_ORDER else 0
+        import time
         for stage in PIPELINE_ORDER[start_idx:]:
             if stage not in handlers:
                 raise NotImplementedError(f"Agent {self.name} missing handler for stage '{stage}'")
             cost_tracker.current_stage = stage
+            stage_start = time.monotonic()
             try:
                 state = handlers[stage](state, ctx)
                 state.artifacts = writer.refs()
@@ -145,7 +170,10 @@ class BaseAgent(ABC):
                 # Persist cost_summary.json after every successful stage so a
                 # crashed run still leaves an authoritative cost record on disk.
                 cost_tracker.save_summary(cost_summary_path)
-                _log.debug("✔ %s complete", stage)
+                # UX-006/QA-005: emit one stderr line per completed stage so
+                # the CLI does not appear hung during long LLM phases.
+                _emit_stage_progress(stage, time.monotonic() - stage_start, state.cost_so_far.usd)
+                _log.debug("[OK] %s complete", stage)
             except Exception:
                 state.cost_so_far = cost_tracker.total
                 store.save(state)
