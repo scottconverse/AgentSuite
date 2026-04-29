@@ -7,6 +7,11 @@ from pathlib import Path
 from agentsuite.agents.engineering.agent import EngineeringAgent
 from agentsuite.agents.engineering.input_schema import EngineeringAgentInput
 from agentsuite.llm.mock import _default_mock_for_cli
+from tests.golden._helpers import (
+    assert_artifact_exact,
+    assert_qa_within_tolerance,
+    load_qa_scores,
+)
 
 
 SNAPSHOT_DIR = Path(__file__).parent / "snapshots" / "engineering" / "acme-platform"
@@ -93,3 +98,34 @@ def test_golden_engineering_json_artifact_structure(tmp_path: Path) -> None:
     # extracted_context.json is valid JSON with at least one key
     ec = json.loads((run_dir / "extracted_context.json").read_text(encoding="utf-8"))
     assert isinstance(ec, dict) and len(ec) > 0, "extracted_context.json is empty or not a dict"
+
+
+
+# --- v0.9.2 content-aware golden assertions -----------------------------
+
+
+def test_golden_engineering_primary_artifact_content_matches_snapshot(tmp_path: Path) -> None:
+    """Engineering's architecture-decision-record.md output must match the committed snapshot byte-for-byte.
+
+    Under deterministic mock LLM the rendered scaffold is stable. A prompt
+    refactor that changes output regenerates the snapshot via
+    `make update-goldens`; an accidental drift fails the test with a unified
+    diff so the change is reviewable.
+    """
+    _, run_dir = _run_engineering(tmp_path)
+    assert_artifact_exact(
+        actual_path=run_dir / "architecture-decision-record.md",
+        fixture_path=SNAPSHOT_DIR / "architecture-decision-record.md",
+    )
+
+
+def test_golden_engineering_qa_scores_within_tolerance(tmp_path: Path) -> None:
+    """QA scores must match the committed snapshot within 5% relative tolerance.
+
+    Numeric tolerance applies only to ``scores`` and ``average``; ``passed``
+    and ``requires_revision`` are exact-checked.
+    """
+    _, run_dir = _run_engineering(tmp_path)
+    actual = load_qa_scores(run_dir)
+    fixture = json.loads((SNAPSHOT_DIR / "qa_scores.json").read_text(encoding="utf-8"))
+    assert_qa_within_tolerance(actual, fixture, rtol=0.05)

@@ -1,0 +1,17 @@
+{
+  "scores": {
+    "strategic_alignment": 8.0,
+    "technology_debt_awareness": 8.0,
+    "vendor_discipline": 8.0,
+    "digital_readiness": 8.0,
+    "governance_maturity": 8.0,
+    "budget_realism": 8.0,
+    "workforce_capability": 8.0,
+    "risk_tolerance_clarity": 8.0,
+    "innovation_balance": 8.0
+  },
+  "average": 8.0,
+  "passed": true,
+  "revision_instructions": [],
+  "requires_revision": false
+}

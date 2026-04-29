@@ -1,0 +1,17 @@
+{
+  "scores": {
+    "spec_completeness": 8.0,
+    "brand_fidelity": 8.0,
+    "audience_fit": 8.0,
+    "craft_specificity": 8.0,
+    "accessibility_rigor": 8.0,
+    "anti_genericity": 8.0,
+    "revision_actionability": 8.0,
+    "consistency": 8.0,
+    "image_prompt_precision": 8.0
+  },
+  "average": 8.0,
+  "passed": true,
+  "revision_instructions": [],
+  "requires_revision": false
+}

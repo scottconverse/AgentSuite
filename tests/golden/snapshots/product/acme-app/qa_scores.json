@@ -1,0 +1,19 @@
+{
+  "scores": {
+    "problem_clarity": 8.0,
+    "user_grounding": 7.5,
+    "scope_discipline": 8.0,
+    "metric_specificity": 7.0,
+    "feasibility_awareness": 8.0,
+    "anti_feature_creep": 7.5,
+    "acceptance_completeness": 8.0,
+    "stakeholder_clarity": 7.0,
+    "roadmap_sequencing": 8.0
+  },
+  "average": 7.666666666666667,
+  "passed": true,
+  "revision_instructions": [
+    "Clarify the success metrics timeframe"
+  ],
+  "requires_revision": false
+}

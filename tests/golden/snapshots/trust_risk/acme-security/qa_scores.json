@@ -1,0 +1,17 @@
+{
+  "scores": {
+    "threat_coverage": 8.0,
+    "control_specificity": 8.0,
+    "risk_quantification": 8.0,
+    "regulatory_alignment": 8.0,
+    "incident_readiness": 8.0,
+    "zero_trust_posture": 8.0,
+    "vendor_risk_awareness": 8.0,
+    "audit_traceability": 8.0,
+    "residual_risk_acceptance": 8.0
+  },
+  "average": 8.0,
+  "passed": true,
+  "revision_instructions": [],
+  "requires_revision": false
+}

@@ -1,0 +1,17 @@
+{
+  "scores": {
+    "audience_clarity": 8.0,
+    "message_resonance": 8.0,
+    "channel_fit": 8.0,
+    "metric_specificity": 8.0,
+    "budget_realism": 8.0,
+    "anti_vanity_metrics": 8.0,
+    "content_depth": 8.0,
+    "competitive_awareness": 8.0,
+    "launch_sequencing": 8.0
+  },
+  "average": 8.0,
+  "passed": true,
+  "revision_instructions": [],
+  "requires_revision": false
+}
