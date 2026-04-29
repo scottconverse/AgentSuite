@@ -45,7 +45,7 @@
 </head>
 <body>
   <header>
-    <h1>AgentSuite <span class="v">v0.9.2</span></h1>
+    <h1>AgentSuite <span class="v">v0.9.3</span></h1>
     <p class="lede">Seven role-specific reasoning agents that turn vague intent into precise operating artifacts. Open-source. MCP-compatible with Codex, Claude Code, and Cowork.</p>
   </header>
 
@@ -66,21 +66,19 @@ agentsuite founder run \
   --inputs-dir ./examples/patentforgelocal</code></pre>
 
   <section class="output-example">
-    <h2>Sample Output</h2>
-    <pre><code>$ agentsuite founder --company-name "Acme Corp" --industry "SaaS" --stage "seed"
+    <h2>Sample run</h2>
+    <p><img src="screenshots/cli-founder-run.svg" alt="agentsuite founder run end to end" style="max-width:100%;border-radius:6px;border:1px solid var(--border);" /></p>
+    <p>Browse the full output of a real run — 14 artifacts, no install required — at <a href="https://github.com/scottconverse/AgentSuite/tree/main/examples/sample-output/founder">examples/sample-output/founder/</a>.</p>
 
-✔ Intake complete
-✔ Context extracted
-✔ Spec generated (9 artifacts)
-✔ Execute complete
-✔ QA passed — score 8.3/10
+    <h3>What you get on disk</h3>
+    <p><img src="screenshots/runs-tree.svg" alt="run directory tree after success" style="max-width:100%;border-radius:6px;border:1px solid var(--border);" /></p>
 
-Artifacts written to .agentsuite/founder-2026-04-27/
-  brand-voice.md          2.1 KB
-  positioning-statement.md  1.4 KB
-  icp-profile.md          1.8 KB
-  + 6 more artifacts
-</code></pre>
+    <h3>Spec artifacts (rendered)</h3>
+    <p><img src="screenshots/brand-system-rendered.svg" alt="brand-system.md rendered" style="max-width:100%;border-radius:6px;border:1px solid var(--border);" /></p>
+    <p><img src="screenshots/qa-report-rendered.svg" alt="qa_report.md rendered" style="max-width:100%;border-radius:6px;border:1px solid var(--border);" /></p>
+
+    <h3>After approval</h3>
+    <p><img src="screenshots/kernel-tree.svg" alt="kernel directory after approval" style="max-width:100%;border-radius:6px;border:1px solid var(--border);" /></p>
   </section>
 
   <h2>Quick start (MCP)</h2>

@@ -2,7 +2,9 @@
 
 > Seven role-specific reasoning agents that turn vague intent into precise operating artifacts.
 >
-> **v0.9.2** — Specification Kernel + Founder · Design · Product · Engineering · Marketing · Trust/Risk · CIO Agents
+> **v0.9.3** — Specification Kernel + Founder · Design · Product · Engineering · Marketing · Trust/Risk · CIO Agents
+
+![AgentSuite founder run](docs/screenshots/cli-founder-run.svg)
 
 AgentSuite is a Python package and MCP server. It exposes role-specific agents (Founder, Design, Product, Engineering, Marketing, Trust/Risk, and CIO shipped) that take loose human intent and produce structured, reusable artifacts: brand systems, brief libraries, voice guides, prompt templates, engineering specs, IT strategies, and more.
 
@@ -199,6 +201,18 @@ print(state.stage)   # "approval"
 | `AGENTSUITE_LLM_PROVIDER` | (auto-detect) | Force `anthropic`, `openai`, `gemini`, or `ollama` |
 | `AGENTSUITE_COST_CAP_USD` | `5.0` | Hard kill cap per run |
 | `AGENTSUITE_EXPOSE_STAGES` | (off) | Set `true` to expose `founder_intake`/`extract`/`spec`/`execute`/`qa` as MCP tools |
+
+## Screenshots and sample output
+
+| | |
+|---|---|
+| ![cli](docs/screenshots/cli-founder-run.svg) | A real `agentsuite founder run` end-to-end. Five stages, JSON summary. |
+| ![tree](docs/screenshots/runs-tree.svg) | The 14-artifact run directory after success. |
+| ![brand](docs/screenshots/brand-system-rendered.svg) | `brand-system.md` rendered. |
+| ![qa](docs/screenshots/qa-report-rendered.svg) | `qa_report.md` rendered. |
+| ![kernel](docs/screenshots/kernel-tree.svg) | `_kernel/<project_slug>/` after approval. |
+
+Browse a complete sample run on GitHub at [`examples/sample-output/founder/`](examples/sample-output/founder/) — every artifact a real Founder run produces, no install required.
 
 ## Architecture
 

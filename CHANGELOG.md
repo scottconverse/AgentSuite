@@ -6,8 +6,24 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 ### Roadmap
 
-- **v0.9.3** — Screenshots + committed `examples/sample-output/founder/` fixture (P4).
 - **v1.0.0-rc1 / v1.0.0** — Compatibility freeze, Discussions seeding, "Why AgentSuite" hook, three good-first-issue tickets, signed tags, public launch.
+
+## [0.9.3] - 2026-04-29
+
+P4 — visual + sample-output release. Replaces the text-only landing
+experience with rendered terminal SVGs and a committed sample run.
+No code changes; documentation and assets only.
+
+### Added
+
+- **5 SVG screenshots** under `docs/screenshots/` rendered programmatically via `rich.Console.save_svg()`: `cli-founder-run.svg`, `runs-tree.svg`, `brand-system-rendered.svg`, `qa-report-rendered.svg`, `kernel-tree.svg`. Reproducible from the sample-output and `scripts/_v093_wire.py` invocation in the v0.9.3 dev report.
+- **`examples/sample-output/founder/`** — a complete, browsable Founder run committed to the repo (29 files: state + inputs + extracted context + cost + QA + 7 spec artifacts + 8 brief templates + TREE.txt). Generated under the deterministic mock LLM so adopters can preview real output without installing AgentSuite.
+- **Hero screenshot** in `README.md` above the install block, plus a "Screenshots and sample output" section linking the rendered SVGs and the committed sample run.
+- **`docs/index.html`** sample section now embeds the cli, runs-tree, brand-system, qa-report, and kernel-tree SVGs in place of the text-only mock output.
+
+### Deferred
+
+- The 6th planned screenshot — `mcp-tool-list-claude-code.png` showing AgentSuite tools surfaced inside Claude Code — needs a real Claude Code session and is left for a hand capture in the next minor.
 
 ## [0.9.2] - 2026-04-28
 
