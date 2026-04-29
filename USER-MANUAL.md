@@ -1,6 +1,6 @@
 # AgentSuite User Manual
 
-**Version 0.8.4**
+**Version 0.9.0**
 
 ---
 
@@ -981,4 +981,4 @@ This glossary defines every technical term used in this manual. Terms are listed
 
 ---
 
-*AgentSuite v0.8.4 — User Manual*
+*AgentSuite v0.9.0 — User Manual*

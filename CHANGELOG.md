@@ -6,10 +6,92 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 ### Roadmap
 
-- **v0.9.0 (Sprint 3)** — per-run `cost_summary.json` telemetry + configurable `AGENTSUITE_COST_CAP_USD` default raised to $5.00; `RunState.inputs` discriminated union with `RunStateSchemaVersionError` on pre-v0.9 state files (no migration shipped); golden content assertions (`assert_artifact_exact()` + `assert_qa_within_tolerance(rtol=0.05)`); CIO agent `cio_name` + `as_of_date` field fixes; resume-from-failure idempotency test + ADR; clean-install verification on tag push (Ubuntu + Windows); ADR backfill for rubric, RunState, retry policy, MCP naming, cost-cap, no-PyPI decisions.
 - **v0.9.1** — Founder rubric audit one-pager; remaining skip/deselect cleanup.
 - **v0.9.2** — Screenshots + committed `examples/sample-output/founder/` fixture (P4).
 - **v1.0.0-rc1 / v1.0.0** — Compatibility freeze, Discussions seeding, "Why AgentSuite" hook, three good-first-issue tickets, signed tags, public launch.
+
+## [0.9.0] - 2026-04-28
+
+Sprint 3 — engineering hardening release. All seven planned items shipped
+(content-aware golden coverage shipped lite for Founder; remaining six
+agents follow in v0.9.1 per the approved sprint cut).
+
+### ⚠ BREAKING
+
+- **`_state.json` schema is now versioned (`schema_version: 2`).** Loading a
+  pre-v0.9 state file raises `RunStateSchemaVersionError` with a message
+  naming the run dir to delete. No automatic migration is shipped — pre-v0.9
+  has no installed base outside the local workspace and a one-shot migrator
+  earns its complexity only when it will be exercised. See ADR-0002.
+
+### Added
+
+- **Per-run cost telemetry.** `CostTracker` tracks `per_stage` cost
+  breakdown, identity fields (`run_id`, `agent`, `provider`, `model`), and a
+  `summary()`-shaped JSON contract. Every successful stage writes
+  `cost_summary.json` to the run dir; best-effort write also fires on
+  failure so a crashed run leaves an authoritative cost record. The
+  schema is pinned by `tests/unit/kernel/test_cost.py::test_summary_schema_keys`.
+- **`Cost.model: str | None` field** on the kernel cost type. Last-non-None
+  wins under aggregation so per-stage and total summaries reflect the most
+  recent model recorded.
+- **Resume-from-failure cost carry-forward.** `_drive()` now seeds the new
+  `CostTracker` with `state.cost_so_far` and rehydrates `per_stage` from
+  the prior `cost_summary.json` on resume, so cap enforcement reflects
+  multi-attempt total spend rather than zeroing on each restart. ADR-0007
+  documents the contract; integration test in
+  `tests/integration/test_resume_idempotency.py` pins it.
+- **`RunStateSchemaVersionError`** typed exception in `agentsuite.kernel.state_store`.
+- **Lazy importlib registry** `_INPUTS_BY_AGENT` resolves agent name to
+  its input subclass on `StateStore.load()` so subclass-specific fields
+  (e.g. `DesignAgentInput.campaign_goal`, `CIOAgentInput.organization_name`)
+  survive save/load round-trip. ValidationError fallback to base
+  `AgentRequest` preserves legacy fixture paths.
+- **Architecture Decision Records** under `docs/adr/`. Seven ADRs backfill
+  the load-bearing decisions surfaced during v0.8.x audits: rubric
+  dimensions, RunState shape, retry/timeout policy, MCP tool naming,
+  cost-cap-vs-telemetry split, no-PyPI distribution, resume idempotency.
+  Index at `docs/adr/README.md`; CONTRIBUTING points new contributors at
+  the index.
+- **CIO `as_of_date: date | None` field** for reproducibility. Helpers
+  `_resolve_as_of` + tz-aware `datetime.now(tz=timezone.utc)` replace the
+  prior naive `datetime.now()`. Two runs with different `as_of_date`
+  produce different quarter / fiscal-year strings in artifacts.
+- **Clean-install verification on tag push.** `release.yml` gains a
+  README install-block drift check (`scripts/check_install_block_drift.py`)
+  and a CLI smoke step that runs `agentsuite --help` + `agentsuite-mcp --help`
+  from the freshly-installed wheel. README install commands wrapped with
+  `<!-- install:start -->` / `<!-- install:end -->` markers; canonical
+  fixture at `tests/fixtures/install-block.md`. Windows matrix deferred to
+  v0.9.x — Ubuntu catches the common-case regression.
+- **Golden test content-aware helpers** in `tests/golden/_helpers.py`:
+  `assert_artifact_exact()` for byte-stable text/JSON, `assert_qa_within_tolerance(rtol=0.05)`
+  for numeric QA scores. Type split enforced — text never gets tolerance.
+  Founder snapshot extended with `brand-system.md` + `qa_scores.json`
+  fixtures.
+- **`make update-goldens`** Makefile alias for `resnap-golden`. CONTRIBUTING
+  documents the regenerate-and-review workflow.
+
+### Changed
+
+- **`StateStore.save()`** dumps `inputs` using the runtime instance's
+  schema (subclass-aware) rather than the declared
+  `RunState.inputs: AgentRequest` field type. The on-disk envelope adds
+  a `schema_version` field; bump it when the persisted shape changes in
+  a way that requires re-running rather than silent migration.
+
+### Fixed
+
+- **CIO date helpers are tz-aware.** `_current_quarter`, `_next_quarter`,
+  `_current_fiscal_year`, `_fiscal_year_range` now accept a `date` parameter
+  rather than calling naive `datetime.now()`. Year-boundary wrap (Q4 →
+  Q1+1) is unit-tested.
+
+### Test counts
+
+- v0.8.4 baseline: 648 passing, 0 skipped
+- v0.9.0: 676 passing, 0 skipped (+28 across cost, RunState, CIO date,
+  drift check, idempotency, golden helpers)
 
 ## [0.8.4] - 2026-04-28
 
@@ -240,7 +322,8 @@ Initial release.
 - Per-run cost cap only; per-day cap deferred.
 - Single MCP server with env-gated agent enablement (no per-agent server topology).
 
-[Unreleased]: https://github.com/scottconverse/AgentSuite/compare/v0.8.4...HEAD
+[Unreleased]: https://github.com/scottconverse/AgentSuite/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/scottconverse/AgentSuite/compare/v0.8.4...v0.9.0
 [0.8.4]: https://github.com/scottconverse/AgentSuite/compare/v0.8.3...v0.8.4
 [0.8.3]: https://github.com/scottconverse/AgentSuite/compare/v0.8.2...v0.8.3
 [0.8.2]: https://github.com/scottconverse/AgentSuite/compare/v0.8.1...v0.8.2

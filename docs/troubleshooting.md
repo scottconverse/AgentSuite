@@ -1,6 +1,6 @@
 # AgentSuite Troubleshooting Guide
 
-**Version 0.8.4**
+**Version 0.9.0**
 
 This guide covers the five most common failure modes in AgentSuite, with plain-language explanations and specific steps to resolve each one.
 
@@ -209,4 +209,4 @@ If you are using an expensive cloud model, consider switching to a lower-cost ti
 
 ---
 
-*AgentSuite v0.8.4 — Troubleshooting Guide*
+*AgentSuite v0.9.0 — Troubleshooting Guide*
