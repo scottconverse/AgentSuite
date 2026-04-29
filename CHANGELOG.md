@@ -6,7 +6,28 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 ### Roadmap
 
-- **v1.0.0** — General availability after rc1 dogfood bake (5–7 days, real-project run, friction triage, CHANGELOG promotion, public launch posts).
+- **v1.0.x** — Patch releases for any post-launch friction surfaced by dogfood, the `/audit-team` pass, or community feedback.
+- **v1.1.x** — First minor after GA. Candidates from the rc1 Discussions Ideas board (8th agent, per-day cost cap, GPG signed tags if requested).
+
+## [1.0.0] - 2026-04-29
+
+**General availability.** First public release. The compatibility surface
+established in 1.0.0rc1 (per ADR-0002, ADR-0004, ADR-0007) is now the
+project's public contract — breaking changes from this point require a
+major-version bump or a documented deprecation cycle.
+
+No code changes vs. 1.0.0rc1. The rc1 → GA window was used for dogfood,
+documentation polish (`docs/lighthouse-rc1.md`, `docs/press-kit/`,
+`docs/community/launch-posts.md`), and community-launch prep.
+
+### Compatibility (carried forward from 1.0.0rc1)
+
+The following are part of the public contract from 1.0.0 onward:
+
+- **Public API surface:** `agentsuite.agents.<agent>.agent.<Agent>Agent`, `agentsuite.agents.<agent>.input_schema.<Agent>AgentInput`, `agentsuite.kernel.schema.{Constraints, RunState, ArtifactRef, Cost, Stage}`, `agentsuite.kernel.qa.{QARubric, RubricDimension}`, `agentsuite.llm.base.LLMProvider`, `agentsuite.llm.mock.MockLLMProvider`.
+- **`_state.json` schema:** `schema_version: 2`. Future shape changes ship a migrator or raise `RunStateSchemaVersionError` with a documented remediation path.
+- **MCP tool naming:** `<agent>_run`, `<agent>_resume`, `<agent>_approve` (per ADR-0004).
+- **Kernel pipeline:** six stages (`intake → extract → spec → execute → qa → approval`).
 
 ## [1.0.0rc1] - 2026-04-29
 
