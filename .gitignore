@@ -38,3 +38,7 @@ tests/.live-output.log
 # Secrets
 *.pem
 .envrc
+
+# Lighthouse raw reports — regenerate locally
+docs/lighthouse-*.report.html
+docs/lighthouse-*.report.json

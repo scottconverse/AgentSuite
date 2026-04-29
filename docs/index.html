@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231a1a1a'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='18' font-weight='bold' text-anchor='middle' fill='%23fff'%3EA%3C/text%3E%3C/svg%3E">
   <title>AgentSuite — reasoning agents for vague intent → precise artifacts</title>
   <meta name="description" content="Seven role-specific reasoning agents that turn vague human intent into precise operating artifacts. Open-source, MIT-licensed, MCP-compatible with Codex, Claude Code, and Cowork.">
   <style>
@@ -31,7 +32,7 @@
     pre { background: var(--code-bg); padding: 1rem; border-radius: 4px; overflow-x: auto; font-size: 0.9rem; }
     code { background: var(--code-bg); padding: 0.1em 0.3em; border-radius: 3px; font-size: 0.9em; }
     pre code { background: transparent; padding: 0; }
-    a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; }
+    a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; border-bottom: 1px solid transparent; }
     a:hover { border-bottom-color: var(--accent); }
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
     .card { padding: 1rem; border: 1px solid var(--border); border-radius: 4px; background: white; }
@@ -49,6 +50,7 @@
     <p class="lede">Seven role-specific reasoning agents that turn vague intent into precise operating artifacts. Open-source. MCP-compatible with Codex, Claude Code, and Cowork.</p>
   </header>
 
+  <main>
   <h2>What it does</h2>
   <p>AgentSuite codifies the operating system around AI generation. Each agent walks a six-stage pipeline (intake → extract → spec → execute → qa → approval), persists 26 artifacts to disk, and promotes approved output into a long-lived <code>_kernel/</code> that downstream agents consume. The result is a reusable creative-ops or product-ops layer, not a one-off content generator.</p>
 
@@ -132,5 +134,6 @@ AGENTSUITE_ENABLED_AGENTS = "founder,design,product,engineering,marketing,trust_
   <footer>
     <p>AgentSuite is built and maintained by <a href="https://github.com/scottconverse">Scott Converse</a>.</p>
   </footer>
+  </main>
 </body>
 </html>
