@@ -39,6 +39,12 @@ class OpenAIProvider:
         messages.append({"role": "user", "content": request.prompt})
         result = self.client.chat.completions.create(
             model=model,
+            # ENG-005 (audit): newer reasoning models (o1/o3) prefer
+            # max_completion_tokens, but the OpenAI SDK currently accepts both
+            # parameter names on chat completions. Sticking with max_tokens here
+            # because every non-reasoning chat model still accepts it; switching
+            # to max_completion_tokens is queued for v1.1 along with reasoning-
+            # model support (no reasoning-model code path lives in v1.x today).
             max_tokens=request.max_tokens,
             temperature=request.temperature,
             messages=messages,  # type: ignore[arg-type]

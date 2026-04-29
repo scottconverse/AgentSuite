@@ -29,8 +29,21 @@ class MockLLMProvider:
         return self._default_model
 
     def complete(self, request: LLMRequest) -> LLMResponse:
+        """Match the request to a canned response.
+
+        TEST-003 (audit): match by *longest* matching keyword rather than
+        dict-insertion order. With insertion-order matching, ``responses =
+        {"brand": ..., "brand-system": ...}`` would return the ``brand``
+        response for a ``brand-system`` prompt -- a silent prompt-drift
+        masking pattern. With length-descending matching, the most-specific
+        keyword wins. ``NoMockResponseConfigured`` still raises on no match
+        so test authors cannot accidentally rely on a default response.
+        """
         self.calls.append(request)
-        for keyword, text in self.responses.items():
+        # Sort by keyword length descending so the most-specific match wins.
+        # Stable for ties via dict insertion order (Python >= 3.7).
+        items = sorted(self.responses.items(), key=lambda kv: -len(kv[0]))
+        for keyword, text in items:
             if keyword in request.prompt or keyword in request.system:
                 return LLMResponse(
                     text=text,

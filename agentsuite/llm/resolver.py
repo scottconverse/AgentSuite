@@ -27,10 +27,22 @@ _PROVIDERS: dict[str, type[LLMProvider]] = {
 
 
 def _ollama_daemon_running() -> bool:
-    """Probe http://localhost:11434/api/tags; True if reachable."""
+    """Probe http://localhost:11434/api/tags; True if reachable.
+
+    Uses GET (not HEAD): some Ollama versions only register GET on this
+    endpoint and 405 a HEAD probe (audit ENG-004). GET with a small read
+    timeout has the same observable behavior on a live daemon while
+    surviving HEAD-unfriendly versions. Body is discarded immediately.
+    """
     try:
-        req = urllib.request.Request("http://localhost:11434/api/tags", method="HEAD")
+        req = urllib.request.Request("http://localhost:11434/api/tags", method="GET")
         with urllib.request.urlopen(req, timeout=0.5) as resp:  # noqa: S310 (fixed URL)
+            # Drain at most one chunk so the connection closes cleanly without
+            # buffering the (potentially large) full model list.
+            try:
+                resp.read(1)
+            except Exception:
+                pass
             return bool(resp.status == 200)
     except (urllib.error.URLError, ConnectionError, TimeoutError, OSError):
         return False

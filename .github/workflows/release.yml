@@ -117,3 +117,31 @@ jobs:
         run: |
           agentsuite --help
           agentsuite-mcp --help
+      - name: Wheel-install mypy smoke (TEST-006 / py.typed contract)
+        shell: pwsh
+        run: |
+          # Confirm the installed wheel is mypy-discoverable via py.typed.
+          # A downstream consumer that pip-installs AgentSuite (no editable
+          # mode, no MYPYPATH) must have its `from agentsuite... import ...`
+          # type-check clean. This step covers the gap that the editable
+          # `tests/integration/test_downstream_consumer.py` cannot
+          # exercise.
+          pip install mypy
+          $consumer = Join-Path $env:RUNNER_TEMP "consumer_pkg"
+          New-Item -ItemType Directory -Force -Path $consumer | Out-Null
+          Set-Content -Path (Join-Path $consumer "__init__.py") -Value ""
+          @"
+          from agentsuite.kernel.qa import QARubric, RubricDimension
+          from agentsuite.llm.base import LLMProvider
+          from agentsuite.llm.mock import MockLLMProvider
+
+          def make_rubric() -> QARubric:
+              return QARubric(
+                  dimensions=[RubricDimension(name="x", question="x?")],
+                  pass_threshold=7.0,
+              )
+
+          def consume(p: LLMProvider) -> str:
+              return p.name
+          "@ | Set-Content -Path (Join-Path $consumer "consumer.py") -Encoding utf8
+          mypy --strict $consumer
