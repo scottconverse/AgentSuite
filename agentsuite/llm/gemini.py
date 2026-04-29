@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Any
 
 from agentsuite.llm.base import LLMRequest, LLMResponse, ProviderNotInstalled
-from agentsuite.llm.pricing import GEMINI_PRICING as _PRICING  # back-compat re-export
+from agentsuite.llm.pricing import GEMINI_PRICING as _PRICING  # noqa: F401  # back-compat re-export for existing tests
 from agentsuite.llm.pricing import cost_usd as _provider_cost_usd
 
 

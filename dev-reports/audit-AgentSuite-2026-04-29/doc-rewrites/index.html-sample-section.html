@@ -1,0 +1,26 @@
+<!--
+Replacement for the "Sample run" section in docs/index.html (currently lines 70-84).
+Fix: every mock-derived asset gets an unambiguous caption disclosing source.
+The current section presents mock-fixture output as if it were real LLM output (DOC-S01 Blocker).
+-->
+
+  <section class="output-example">
+    <h2>Sample run</h2>
+    <p><img src="screenshots/cli-founder-run.svg" alt="agentsuite founder run end to end" style="max-width:100%;border-radius:6px;border:1px solid var(--border);" /></p>
+    <p style="font-size:0.85rem;color:var(--muted);margin-top:-0.5rem;">A real <code>agentsuite founder run</code> invocation. Five pipeline stages with progress markers and a final JSON status block.</p>
+
+    <p>Browse the full output of a real run - every artifact, no install required - at <a href="https://github.com/scottconverse/AgentSuite/tree/main/examples/sample-output/founder">examples/sample-output/founder/</a>.</p>
+
+    <h3>What you get on disk</h3>
+    <p><img src="screenshots/runs-tree.svg" alt="run directory tree after success" style="max-width:100%;border-radius:6px;border:1px solid var(--border);" /></p>
+    <p style="font-size:0.85rem;color:var(--muted);margin-top:-0.5rem;">The run directory after a successful Founder pipeline. Live LLM runs produce the same shape and file layout.</p>
+
+    <h3>Spec artifacts (rendered from the deterministic mock LLM fixture)</h3>
+    <p style="font-size:0.85rem;color:var(--muted);">The screenshots below are rendered from the committed deterministic-mock fixture so the page builds reproducibly. <strong>Live LLM runs produce real prose with the same shape and file layout.</strong> To see live output, run the CLI quick-start above against your provider of choice.</p>
+    <p><img src="screenshots/brand-system-rendered.svg" alt="brand-system.md rendered (mock fixture)" style="max-width:100%;border-radius:6px;border:1px solid var(--border);" /></p>
+    <p><img src="screenshots/qa-report-rendered.svg" alt="qa_report.md rendered (mock fixture)" style="max-width:100%;border-radius:6px;border:1px solid var(--border);" /></p>
+
+    <h3>After approval</h3>
+    <p><img src="screenshots/kernel-tree.svg" alt="kernel directory after approval" style="max-width:100%;border-radius:6px;border:1px solid var(--border);" /></p>
+    <p style="font-size:0.85rem;color:var(--muted);margin-top:-0.5rem;">After <code>agentsuite founder approve</code>, the spec artifacts and brief templates are promoted to <code>.agentsuite/_kernel/&lt;project_slug&gt;/</code> for downstream agents.</p>
+  </section>

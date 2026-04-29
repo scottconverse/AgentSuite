@@ -6,8 +6,101 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 ### Roadmap
 
-- **v1.0.x** — Patch releases for any post-launch friction surfaced by dogfood, the `/audit-team` pass, or community feedback.
+- **v1.0.2** — Real-LLM regen of `examples/sample-output/founder/` (closes the structural half of CR-01 with content from a live Anthropic run, ~$0.30). Cassette tier (W-01) and live-tier expansion (W-02) likely fold in here.
 - **v1.1.x** — First minor after GA. Candidates from the rc1 Discussions Ideas board (8th agent, per-day cost cap, GPG signed tags if requested).
+
+## [1.0.1] - 2026-04-29
+
+Hotfix sprint addressing the v1.0.0 audit-team findings. 5 Blockers, 9
+Critical fixes, 6 Major cleanup items closed. No public API changes; the
+v1.0 compatibility surface is unchanged. Net +88 tests vs v1.0.0 (689 ->
+777 passing in the default invocation).
+
+### Added
+
+- **Drift-detection traps for documented CLI + MCP tool names** (CR-04):
+  `tests/test_readme_cli_invocations.py` parses fenced shell blocks AND
+  inline backticks AND rendered SVG terminal screenshots, validating every
+  `agentsuite ...` invocation against the live Typer app.
+  `tests/test_mcp_tool_names_documented.py` builds the MCP server with all
+  7 agents enabled and validates every doc-mentioned tool name against the
+  registered set byte-for-byte. Catches the entire class of v1.0.0 bugs in
+  CI before they ship.
+- **PEP 561 path-traversal validation** (ENG-001): new
+  `agentsuite/kernel/identifiers.py` exports `validate_run_id` and
+  `validate_project_slug`. Wired into `ArtifactWriter.__init__`,
+  `ArtifactWriter.promote()`, and `BaseAgent.resume()`. Rejects
+  ``..``, leading/trailing dots, slashes, control chars, non-ASCII
+  letters, and oversize input. 41 new test cases.
+- **Cost-provenance lookup** in `agentsuite/llm/pricing.py` (ENG-002):
+  `lookup_pricing(provider, model) -> (rates, "exact"|"fallback")` and
+  `normalize_model_id(provider, model)` strip dated suffixes /
+  `-latest` aliases. Fallback paths log a structured WARNING. Pricing
+  table extended with every real-API model id (Anthropic
+  `claude-3-*-202xxxxx`, OpenAI `gpt-4o*`, Gemini `gemini-2.0-flash` /
+  `gemini-1.5-*`) so first-time users don't trigger fallback on call 1.
+- **Per-stage progress on stderr** (UX-006 + QA-005): the kernel now
+  emits `[OK] <stage> complete  (Xs, $Y.YYYY)` to stderr after every
+  successful stage. ASCII-only and stable across cp1252. JSON stdout
+  unaffected. New CLI `--quiet` / `-q` flag silences the emitter.
+- **`SECURITY.md`** (DOC-S04): security disclosure policy.
+- **`windows-smoke` CI job** (QA-001 follow-up): `release.yml` now
+  smokes `agentsuite --help` + `agentsuite-mcp --help` on
+  `windows-latest` with `PYTHONIOENCODING=cp1252` after every tag.
+- **Wheel-install mypy smoke** (TEST-006) appended to the same job:
+  spawns a synthetic consumer package, imports AgentSuite public types,
+  runs `mypy --strict`. Closes the gap that
+  `tests/integration/test_downstream_consumer.py` couldn't exercise.
+
+### Fixed
+
+- **Windows `agentsuite --help` UnicodeEncodeError** (QA-001): replaced
+  U+2014 / U+2192 in Typer help with ASCII fallbacks, plus
+  `sys.stdout.reconfigure(encoding="utf-8")` at import time as
+  defense-in-depth.
+- **MCP path traversal** (ENG-001): unvalidated `run_id` / `project_slug`
+  no longer flow into `Path.mkdir`, `shutil.rmtree`, or `rglob`.
+- **Cost telemetry silent fallback** (ENG-002): unknown model ids now log
+  a WARNING tagged `[ENG-002]` instead of silently mis-pricing.
+- **Hero CLI screenshot** (CR-02): `docs/screenshots/cli-founder-run.svg`
+  re-recorded from a real `agentsuite founder run` against the
+  deterministic mock LLM. Real flag names, real progress lines, real
+  JSON. Drift traps now pass.
+- **Sample-output README honesty pass** (CR-01): `examples/sample-output/
+  founder/README.md` rewritten to be explicit about its mock-LLM origin
+  and what's authentic vs scaffold. `docs/index.html` "Spec artifacts"
+  panel renamed to "Spec artifacts (rendered, mock-LLM scaffold)" with
+  a qualifier. The structural half (regenerating bodies from a real LLM
+  run) is queued for v1.0.2.
+- **README MCP tool names** (CR-03): every documented tool name now uses
+  the `agentsuite_<agent>_<verb>` form per ADR-0004. Copy-paste into MCP
+  client config now resolves on first try.
+- **CHANGELOG pipeline-stage count** (DOC-001): v1.0.0 entry corrected
+  from "six stages" to "five stages plus a kernel-managed approval
+  transition", matching `PIPELINE_ORDER` in the code.
+- **`README-FULL.pdf` 4 broken links** (DOC-006): file moved from repo
+  root to `docs/` so all 4 references resolve.
+- **`USER-MANUAL.md` `agentsuite founder resume` reference** (QA-009):
+  removed the stale CLI example pointing at an unregistered
+  subcommand. Real `resume` CLI subcommand queued for v1.0.x.
+- **OpenAI default model ID + `max_tokens`** (ENG-003 + ENG-005):
+  default model verified in pricing table; `max_tokens` parameter use
+  documented via inline comment (still SDK-supported on chat
+  completions).
+- **Ollama probe HEAD->GET** (ENG-004): some Ollama versions 405 a HEAD
+  probe; switched to GET with a 1-byte read.
+- **MockLLMProvider matcher precedence** (TEST-003): longest-keyword
+  match wins, not dict-insertion-order. Eliminates a class of silent
+  prompt-drift masking in tests.
+
+### Audit follow-up
+
+The full v1.0.0 audit package is at
+`dev-reports/audit-AgentSuite-2026-04-29/`. v1.0.1 closes 5 of 5
+Blockers, 9 of 16 Criticals, 6 of 27 Majors. Remaining items are in
+`next-sprint-watchlist.md` (W-01 through W-14). The drift-trap pattern
+(CR-04) is the single highest-leverage fix in the audit -- it will
+catch this entire class of regression in CI from now on.
 
 ## [1.0.0] - 2026-04-29
 
