@@ -1,0 +1,19 @@
+{
+  "business_goal": "Launch PatentForgeLocal v1",
+  "current_state": "pre-launch",
+  "sources": [
+    {
+      "kind": "product-doc",
+      "path": "C:\\Users\\scott\\OneDrive\\Desktop\\Claude\\AgentSuite\\examples\\patentforgelocal\\README.md"
+    },
+    {
+      "kind": "product-doc",
+      "path": "C:\\Users\\scott\\OneDrive\\Desktop\\Claude\\AgentSuite\\examples\\patentforgelocal\\voice-sample.txt"
+    },
+    {
+      "kind": "voice-sample",
+      "path": "C:\\Users\\scott\\OneDrive\\Desktop\\Claude\\AgentSuite\\examples\\patentforgelocal\\voice-sample.txt"
+    }
+  ],
+  "source_count": 3
+}

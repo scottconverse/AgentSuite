@@ -1,0 +1,204 @@
+{
+  "run_id": "sample-run-1",
+  "agent": "founder",
+  "stage": "approval",
+  "artifacts": [
+    {
+      "path": "C:\\Users\\scott\\AppData\\Local\\Temp\\tmp54y9g9fl\\runs\\sample-run-1\\inputs_manifest.json",
+      "kind": "data",
+      "stage": "intake",
+      "sha256": "e7f8defe177f4a7fea2cadaba621d0fcc7ac396cf489cb4fa3948ae1156253cb"
+    },
+    {
+      "path": "C:\\Users\\scott\\AppData\\Local\\Temp\\tmp54y9g9fl\\runs\\sample-run-1\\extracted_context.json",
+      "kind": "data",
+      "stage": "extract",
+      "sha256": "16218d375bbba730d582446d8cac7e3cf4d420b81daeabaa2745b34f5198198e"
+    },
+    {
+      "path": "C:\\Users\\scott\\AppData\\Local\\Temp\\tmp54y9g9fl\\runs\\sample-run-1\\brand-system.md",
+      "kind": "spec",
+      "stage": "spec",
+      "sha256": "b5fb01dda8e2509f873e3dfc4052109673303e7109ab191cd276051797843f04"
+    },
+    {
+      "path": "C:\\Users\\scott\\AppData\\Local\\Temp\\tmp54y9g9fl\\runs\\sample-run-1\\founder-voice-guide.md",
+      "kind": "spec",
+      "stage": "spec",
+      "sha256": "857a88121118c74ab677682e4fb47efb80d675caf6ee72addf2ed10f989d10fd"
+    },
+    {
+      "path": "C:\\Users\\scott\\AppData\\Local\\Temp\\tmp54y9g9fl\\runs\\sample-run-1\\product-positioning.md",
+      "kind": "spec",
+      "stage": "spec",
+      "sha256": "4779ad54b87241f83be89a52ee06fd359ff59e200d1c5851d0d7ec0f816568f2"
+    },
+    {
+      "path": "C:\\Users\\scott\\AppData\\Local\\Temp\\tmp54y9g9fl\\runs\\sample-run-1\\audience-map.md",
+      "kind": "spec",
+      "stage": "spec",
+      "sha256": "6df2f1831f19fdc9fa7881b8e62885dfb1953303e14511cc902cebf1b2d490dc"
+    },
+    {
+      "path": "C:\\Users\\scott\\AppData\\Local\\Temp\\tmp54y9g9fl\\runs\\sample-run-1\\claims-and-proof-library.md",
+      "kind": "spec",
+      "stage": "spec",
+      "sha256": "a3c19635aa406a811990ab7218f7228107fd0dc7fb2e39700722c314a40e1258"
+    },
+    {
+      "path": "C:\\Users\\scott\\AppData\\Local\\Temp\\tmp54y9g9fl\\runs\\sample-run-1\\visual-style-guide.md",
+      "kind": "spec",
+      "stage": "spec",
+      "sha256": "a24a17e41255da43cabe7ffba41c8b2c836b5783526582ae1e7f40957419c278"
+    },
+    {
+      "path": "C:\\Users\\scott\\AppData\\Local\\Temp\\tmp54y9g9fl\\runs\\sample-run-1\\campaign-production-workflow.md",
+      "kind": "spec",
+      "stage": "spec",
+      "sha256": "4b46cb4931f5520e61b6f60f4c359b1acf6ef5b123a805c5df7c56baa1a1e0f9"
+    },
+    {
+      "path": "C:\\Users\\scott\\AppData\\Local\\Temp\\tmp54y9g9fl\\runs\\sample-run-1\\asset-qa-checklist.md",
+      "kind": "spec",
+      "stage": "spec",
+      "sha256": "60e9717107026f37697a620cf08c3cad39bd84f13b24e043dd939099da128087"
+    },
+    {
+      "path": "C:\\Users\\scott\\AppData\\Local\\Temp\\tmp54y9g9fl\\runs\\sample-run-1\\reusable-prompt-library.md",
+      "kind": "spec",
+      "stage": "spec",
+      "sha256": "e011aa921d34f6b0c0709a12d7ea2725ac6acd5dba0ba56d19b8486529e09fd6"
+    },
+    {
+      "path": "C:\\Users\\scott\\AppData\\Local\\Temp\\tmp54y9g9fl\\runs\\sample-run-1\\consistency_report.json",
+      "kind": "data",
+      "stage": "spec",
+      "sha256": "36d97a00fb3b77e89c027834f64fdc0bfdb3ed8b62580fd8f6eebe8560bc5d9c"
+    },
+    {
+      "path": "C:\\Users\\scott\\AppData\\Local\\Temp\\tmp54y9g9fl\\runs\\sample-run-1\\brief-template-library\\landing-hero.md",
+      "kind": "template",
+      "stage": "execute",
+      "sha256": "4a3f2478341a42cbc0e7188cd0a796790dfc32785289b00f32a768dbc473b814"
+    },
+    {
+      "path": "C:\\Users\\scott\\AppData\\Local\\Temp\\tmp54y9g9fl\\runs\\sample-run-1\\brief-template-library\\readme-graphic.md",
+      "kind": "template",
+      "stage": "execute",
+      "sha256": "edc214bdc595cc3dc06d7eaefb53fa134fc622a73f87ab0d66fb0c10ce414b2f"
+    },
+    {
+      "path": "C:\\Users\\scott\\AppData\\Local\\Temp\\tmp54y9g9fl\\runs\\sample-run-1\\brief-template-library\\launch-announce.md",
+      "kind": "template",
+      "stage": "execute",
+      "sha256": "c9fd672fc88031516bcb379d84e995b011644967d6fd37e2a6768eaaafd3248a"
+    },
+    {
+      "path": "C:\\Users\\scott\\AppData\\Local\\Temp\\tmp54y9g9fl\\runs\\sample-run-1\\brief-template-library\\investor-one-pager.md",
+      "kind": "template",
+      "stage": "execute",
+      "sha256": "2100f9000dbf144e7294b0c0de22a190940889a9708cbab5a6b1b98506d433b1"
+    },
+    {
+      "path": "C:\\Users\\scott\\AppData\\Local\\Temp\\tmp54y9g9fl\\runs\\sample-run-1\\brief-template-library\\municipal-buyer-email.md",
+      "kind": "template",
+      "stage": "execute",
+      "sha256": "b7a29b493f80a9afe86721719ba35e1745f301fe90f2a2e7dd3dbd07002e8e5d"
+    },
+    {
+      "path": "C:\\Users\\scott\\AppData\\Local\\Temp\\tmp54y9g9fl\\runs\\sample-run-1\\brief-template-library\\product-explainer.md",
+      "kind": "template",
+      "stage": "execute",
+      "sha256": "3dab0c8a7f990d5c1b02907465098a2ddc1f8550df6aace297a52b2e9f47f2cb"
+    },
+    {
+      "path": "C:\\Users\\scott\\AppData\\Local\\Temp\\tmp54y9g9fl\\runs\\sample-run-1\\brief-template-library\\social-graphic.md",
+      "kind": "template",
+      "stage": "execute",
+      "sha256": "0472cd3760601dce6b377f419b8eab4c8c354668a7686e577c6c1ba333300b25"
+    },
+    {
+      "path": "C:\\Users\\scott\\AppData\\Local\\Temp\\tmp54y9g9fl\\runs\\sample-run-1\\brief-template-library\\conference-slide.md",
+      "kind": "template",
+      "stage": "execute",
+      "sha256": "4ebf43fc7288dc61bc2aeb508d90f13091e17e2d81e9d38228e9936a4f14daa4"
+    },
+    {
+      "path": "C:\\Users\\scott\\AppData\\Local\\Temp\\tmp54y9g9fl\\runs\\sample-run-1\\brief-template-library\\press-pitch.md",
+      "kind": "template",
+      "stage": "execute",
+      "sha256": "0c52d29b019f85f1e706dbfa4247bb38e66163f2e2d99c4ff0756a30f57d5778"
+    },
+    {
+      "path": "C:\\Users\\scott\\AppData\\Local\\Temp\\tmp54y9g9fl\\runs\\sample-run-1\\brief-template-library\\demo-script.md",
+      "kind": "template",
+      "stage": "execute",
+      "sha256": "3b97e86be0b29808dce516019c192c1f65a2160bcbb954598c7073ba31771e0b"
+    },
+    {
+      "path": "C:\\Users\\scott\\AppData\\Local\\Temp\\tmp54y9g9fl\\runs\\sample-run-1\\brief-template-library\\comparison-page.md",
+      "kind": "template",
+      "stage": "execute",
+      "sha256": "781ba37433f0d9bd93f6fc93e57432104f8040d78a79be675f5659f11944fa14"
+    },
+    {
+      "path": "C:\\Users\\scott\\AppData\\Local\\Temp\\tmp54y9g9fl\\runs\\sample-run-1\\export-manifest-template.json",
+      "kind": "data",
+      "stage": "execute",
+      "sha256": "2629db15cf5c071f845a082c3a67e6623fe43eb816a68947cd1b32c1268ac2ec"
+    },
+    {
+      "path": "C:\\Users\\scott\\AppData\\Local\\Temp\\tmp54y9g9fl\\runs\\sample-run-1\\qa_report.md",
+      "kind": "qa_report",
+      "stage": "qa",
+      "sha256": "96041cc65b30bec6255219cd8226f017cef8bbfb6c92c5c8e5d4e4da20da9e8a"
+    },
+    {
+      "path": "C:\\Users\\scott\\AppData\\Local\\Temp\\tmp54y9g9fl\\runs\\sample-run-1\\qa_scores.json",
+      "kind": "data",
+      "stage": "qa",
+      "sha256": "adcbe1daff71aeb25450a168412fc899b581d536c7ca9c3ca5abd78291341a29"
+    }
+  ],
+  "open_questions": [],
+  "cost_so_far": {
+    "input_tokens": 2139,
+    "output_tokens": 98,
+    "usd": 0.0,
+    "model": null
+  },
+  "started_at": "2026-04-29T06:08:36.442221Z",
+  "updated_at": "2026-04-29T06:08:36.551107Z",
+  "requires_revision": false,
+  "approved_at": null,
+  "approved_by": null,
+  "inputs": {
+    "agent_name": "founder",
+    "role_domain": "creative-ops",
+    "user_request": "build creative ops for PatentForgeLocal",
+    "business_goal": "Launch PatentForgeLocal v1",
+    "target_audience": null,
+    "source_materials": [],
+    "constraints": {
+      "brand": [],
+      "legal": [],
+      "technical": [],
+      "format": [],
+      "timeline": [],
+      "budget": []
+    },
+    "assumptions": [],
+    "missing_information": [],
+    "inputs_dir": "C:\\Users\\scott\\OneDrive\\Desktop\\Claude\\AgentSuite\\examples\\patentforgelocal",
+    "repo_urls": [],
+    "web_urls": [],
+    "screenshots": [],
+    "explicit_brand_docs": [],
+    "founder_voice_samples": [
+      "C:\\Users\\scott\\OneDrive\\Desktop\\Claude\\AgentSuite\\examples\\patentforgelocal\\voice-sample.txt"
+    ],
+    "project_slug": "pfl",
+    "current_state": "pre-launch"
+  },
+  "schema_version": 2
+}

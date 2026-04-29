@@ -1,0 +1,29 @@
+├── brief-template-library
+│   ├── comparison-page.md
+│   ├── conference-slide.md
+│   ├── demo-script.md
+│   ├── investor-one-pager.md
+│   ├── landing-hero.md
+│   ├── launch-announce.md
+│   ├── municipal-buyer-email.md
+│   ├── press-pitch.md
+│   ├── product-explainer.md
+│   ├── readme-graphic.md
+│   └── social-graphic.md
+├── _state.json
+├── asset-qa-checklist.md
+├── audience-map.md
+├── brand-system.md
+├── campaign-production-workflow.md
+├── claims-and-proof-library.md
+├── consistency_report.json
+├── cost_summary.json
+├── export-manifest-template.json
+├── extracted_context.json
+├── founder-voice-guide.md
+├── inputs_manifest.json
+├── product-positioning.md
+├── qa_report.md
+├── qa_scores.json
+├── reusable-prompt-library.md
+└── visual-style-guide.md

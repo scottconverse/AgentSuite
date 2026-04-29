@@ -1,0 +1,35 @@
+{
+  "run_id": "sample-run-1",
+  "agent": "founder",
+  "provider": null,
+  "model": null,
+  "stages": [
+    {
+      "stage": "extract",
+      "input_tokens": 480,
+      "output_tokens": 39,
+      "cost_usd": 0.0,
+      "model": null
+    },
+    {
+      "stage": "spec",
+      "input_tokens": 1515,
+      "output_tokens": 38,
+      "cost_usd": 0.0,
+      "model": null
+    },
+    {
+      "stage": "qa",
+      "input_tokens": 144,
+      "output_tokens": 21,
+      "cost_usd": 0.0,
+      "model": null
+    }
+  ],
+  "total_input_tokens": 2139,
+  "total_output_tokens": 98,
+  "total_cost_usd": 0.0,
+  "cap_usd": 5.0,
+  "cap_remaining_usd": 5.0,
+  "cap_warned": false
+}

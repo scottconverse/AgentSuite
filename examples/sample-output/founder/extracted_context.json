@@ -1,0 +1,31 @@
+{
+  "mission": "x",
+  "audience": {
+    "primary_persona": "y",
+    "secondary_personas": []
+  },
+  "positioning": "z",
+  "tone_signals": [
+    "practical"
+  ],
+  "visual_signals": [],
+  "recurring_claims": [],
+  "recurring_vocabulary": [],
+  "prohibited_language": [],
+  "gaps": [],
+  "audience_profile": {
+    "primary_persona": "target user"
+  },
+  "brand_voice": {
+    "tone_words": [
+      "confident"
+    ],
+    "writing_style": "terse",
+    "forbidden_tones": []
+  },
+  "typography_signals": {
+    "heading_style": "sans-serif"
+  },
+  "color_palette_observed": [],
+  "craft_anti_patterns": []
+}

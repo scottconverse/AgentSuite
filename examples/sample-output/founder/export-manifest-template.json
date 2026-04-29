@@ -1,0 +1,31 @@
+{
+  "templates": [
+    "landing-hero.md",
+    "readme-graphic.md",
+    "launch-announce.md",
+    "investor-one-pager.md",
+    "municipal-buyer-email.md",
+    "product-explainer.md",
+    "social-graphic.md",
+    "conference-slide.md",
+    "press-pitch.md",
+    "demo-script.md",
+    "comparison-page.md"
+  ],
+  "values_snapshot": {
+    "product": "Launch PatentForgeLocal v1",
+    "audience": "y",
+    "core_message": "z",
+    "proof": "(see claims-and-proof-library.md)",
+    "visual_metaphor": "to be defined",
+    "tone": "practical",
+    "format_constraint": "(define per asset)",
+    "required_text": "(specify before draft)",
+    "exclusions": "no clich\u00e9s"
+  },
+  "ready_for": [
+    "design-agent",
+    "marketing-agent",
+    "manual-edit"
+  ]
+}
