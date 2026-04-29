@@ -7,6 +7,7 @@ import shutil
 from pathlib import Path
 from typing import Any
 
+from agentsuite.kernel.identifiers import validate_project_slug, validate_run_id
 from agentsuite.kernel.schema import ArtifactKind, ArtifactRef, Stage
 
 
@@ -20,9 +21,14 @@ class ArtifactWriter:
             output_root: Root directory where run subdirectories are created.
             run_id: Unique identifier for this run (used to create run_dir).
         """
-        self.output_root = Path(output_root)
-        self.run_id = run_id
-        self.run_dir = self.output_root / "runs" / run_id
+        # ENG-001: reject path-traversal and absolute paths before any I/O.
+        self.run_id = validate_run_id(run_id)
+        self.output_root = Path(output_root).resolve()
+        self.run_dir = (self.output_root / "runs" / self.run_id).resolve()
+        if not self.run_dir.is_relative_to(self.output_root):
+            raise ValueError(
+                f"run_dir {self.run_dir!r} escapes output_root {self.output_root!r}"
+            )
         self.run_dir.mkdir(parents=True, exist_ok=True)
         self._refs: list[ArtifactRef] = []
 
@@ -126,10 +132,16 @@ class ArtifactWriter:
         Returns:
             List of promoted artifact paths in the _kernel directory.
         """
+        # ENG-001: validate slug before any path construction.
+        slug = validate_project_slug(project_slug)
         kernel_dir = self.output_root / "_kernel"
         kernel_dir.mkdir(parents=True, exist_ok=True)
-        target = kernel_dir / project_slug
-        staging = kernel_dir / f".{project_slug}.promoting"
+        target = (kernel_dir / slug).resolve()
+        staging = (kernel_dir / f".{slug}.promoting").resolve()
+        if not target.is_relative_to(kernel_dir.resolve()):
+            raise ValueError(
+                f"promote target {target!r} escapes _kernel dir {kernel_dir!r}"
+            )
 
         # Clean any stale staging dir from a previous failed promote
         if staging.exists():

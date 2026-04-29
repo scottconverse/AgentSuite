@@ -74,7 +74,8 @@ class BaseAgent(ABC):
 
         Raises ``FileNotFoundError`` if the run dir or state file is missing.
         """
-        run_dir = self.output_root / "runs" / run_id
+        from agentsuite.kernel.identifiers import validate_run_id
+        run_dir = self.output_root / "runs" / validate_run_id(run_id)
         if not run_dir.exists():
             raise FileNotFoundError(f"Run not found: {run_dir}")
         writer = ArtifactWriter(output_root=self.output_root, run_id=run_id)
