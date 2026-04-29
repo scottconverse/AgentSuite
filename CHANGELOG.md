@@ -13,6 +13,7 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 - **README hook** sharpened. The pre-install paragraph now leads with "Why AgentSuite" (target user + 30-second pitch + what makes it different) replacing the previous "Why this exists" framing. Same anchor position, tighter copy.
 - **`docs/test-coverage.md` audit-honesty pass.** Documented the existing conditional `@pytest.mark.skipif` in `test_founder_pipeline.py` (cassette-recording path); explained why it is not a Hard Rule 4a violation. Updated default-run test count (689 of 692).
+- **Community-launch drafts** at `docs/community/discussions-seeds.md` and `docs/community/good-first-issues.md`. Discussions seed content (Welcome, 3 Q&A, 2 Ideas, General pointers) and 3 good-first-issue ticket drafts (`--quiet` flag, Marketing-agent USER-MANUAL example, `AGENTSUITE_OUTPUT_DIR` test). Drafts only — to be reviewed and posted by the maintainer once Discussions is enabled and rc1 is tagged.
 
 ### Roadmap
 
