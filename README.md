@@ -10,9 +10,11 @@ AgentSuite is a Python package and MCP server. It exposes role-specific agents (
 
 The agents are reasoning agents, not content generators. Output is a reusable system, not a one-off asset.
 
-## Why this exists
+## Why AgentSuite
 
-Modern AI tools generate fast. They do not generate *consistently*. Without a reusable brand system and brief library, every new asset re-introduces context, drifts on voice, and slowly turns into generic SaaS copy. AgentSuite codifies the operating system around generation: every agent persists its output to disk, runs through a six-stage pipeline (intake → extract → spec → execute → qa → approval), and promotes approved artifacts into a long-lived `_kernel/` that downstream agents consume.
+**For developers wiring AI into Codex / Claude Code / Cowork** who are tired of every generation re-introducing context and drifting on voice. AgentSuite is the operating layer between intent and output: seven role-specific agents that each walk a deterministic six-stage pipeline (intake → extract → spec → execute → qa → approval), persist 26 artifacts per run, and promote approved output into a `_kernel/` that the next run consumes. The output is a reusable creative-ops or product-ops layer — not a one-off asset.
+
+**What makes it different:** the *system around* generation, not the generation itself. Every artifact is on disk, versioned, QA-scored, and reusable. Provider-agnostic (Anthropic / OpenAI / Gemini / local Ollama). MCP-native — agents surface as tools in any MCP-compatible IDE without a separate server.
 
 ## Install
 

@@ -4,9 +4,19 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 ## [Unreleased]
 
+### Added
+
+- **PEP 561 `py.typed` marker** at `agentsuite/py.typed` and registered in `pyproject.toml` package-data. Downstream consumers' mypy now follows AgentSuite's typed source through the wheel.
+- **Downstream-consumer typing test** at `tests/integration/test_downstream_consumer.py`. Synthesizes a small package using AgentSuite's public API and runs `mypy --strict` against it; fails the suite on any typing regression that would surface to downstream users. Covers the editable-install case via `MYPYPATH`; the wheel-install case is verified by the existing release-workflow `clean-install-check` job.
+
+### Changed
+
+- **README hook** sharpened. The pre-install paragraph now leads with "Why AgentSuite" (target user + 30-second pitch + what makes it different) replacing the previous "Why this exists" framing. Same anchor position, tighter copy.
+- **`docs/test-coverage.md` audit-honesty pass.** Documented the existing conditional `@pytest.mark.skipif` in `test_founder_pipeline.py` (cassette-recording path); explained why it is not a Hard Rule 4a violation. Updated default-run test count (689 of 692).
+
 ### Roadmap
 
-- **v1.0.0-rc1 / v1.0.0** — Compatibility freeze, Discussions seeding, "Why AgentSuite" hook, three good-first-issue tickets, signed tags, public launch.
+- **v1.0.0-rc1 / v1.0.0** — Compatibility freeze (in progress: py.typed + downstream-consumer test landed; Discussions seeding, three good-first-issue tickets, signed tags, public launch still pending).
 
 ## [0.9.3] - 2026-04-29
 
