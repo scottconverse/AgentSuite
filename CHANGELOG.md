@@ -7,10 +7,12 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 ### Added
 
 - **Founder rubric audit one-pager** at `docs/rubric-audit.md` — side-by-side cross-reference of every dimension on every agent's rubric, grouped by semantic theme, with per-agent uniqueness signal. Confirms the post-`2b1dda0` state (all seven agents at 9 dimensions) and resolves the asymmetry concern that prompted ADR-0001. Linked from ADR-0001 and CONTRIBUTING.
+- **Content-aware golden coverage extended to all six remaining agents** (Design, Product, Engineering, Marketing, Trust/Risk, CIO). Each agent now has a primary spec markdown snapshot and `qa_scores.json` snapshot under `tests/golden/snapshots/<agent>/<scenario>/`, plus two new tests using `assert_artifact_exact()` and `assert_qa_within_tolerance()`. Golden suite goes from 42 to 54 tests.
 
 ### Changed
 
 - **ADR-0001 narrative refreshed** to reflect the post-`2b1dda0` reality (Founder is at 9 dimensions, not 7). The decision (signal-driven counts, not symmetry) is unchanged.
+- **Test-coverage notes documented** in `docs/test-coverage.md`. Three tests are deselected by default (`cleanroom`, `live`, `live_ollama`); the page records why each is gated, how to run it, and Hard Rule 4a's stance that gated ≠ skipped. Zero `pytest.skip` markers in the repo; 688 of 691 tests in the default run.
 
 ### Roadmap
 
