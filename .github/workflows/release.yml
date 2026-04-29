@@ -36,7 +36,14 @@ jobs:
         run: |
           python -m venv .audit-venv
           .audit-venv/bin/pip install --upgrade pip
-          .audit-venv/bin/pip install dist/*.whl
+          # Install the wheel WITH the [mcp] extra so the smoke step below
+          # can verify both CLIs. The README documents both `pip install
+          # agentsuite[<provider>]` and `uvx --from agentsuite[mcp] ...`,
+          # so the smoke must exercise the [mcp] codepath too. Find the
+          # wheel filename first since glob expansion + extras spec is
+          # unreliable in shell.
+          WHEEL=$(ls dist/*.whl | head -1)
+          .audit-venv/bin/pip install "${WHEEL}[mcp]"
       - name: Smoke check — agentsuite CLI runs from clean install
         run: |
           # The wheel install above is the same shape an end user gets
