@@ -4,12 +4,13 @@ from __future__ import annotations
 from typing import Any
 
 from agentsuite.llm.base import LLMRequest, LLMResponse, ProviderNotInstalled
-from agentsuite.llm.pricing import OPENAI_PRICING as _PRICING
+from agentsuite.llm.pricing import OPENAI_PRICING as _PRICING  # back-compat re-export
+from agentsuite.llm.pricing import cost_usd as _provider_cost_usd
 
 
 def _cost_usd(model: str, in_tokens: int, out_tokens: int) -> float:
-    rates = _PRICING.get(model, {"in": 5.0, "out": 15.0})
-    return (in_tokens * rates["in"] + out_tokens * rates["out"]) / 1_000_000
+    """Per-provider thin wrapper around pricing.cost_usd."""
+    return _provider_cost_usd("openai", model, in_tokens, out_tokens)
 
 
 class OpenAIProvider:
