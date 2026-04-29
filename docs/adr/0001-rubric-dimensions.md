@@ -19,10 +19,16 @@ of rewording prompts and breaking golden tests.
 ## Decision
 
 Each agent's rubric stays at the dimension count that produces a useful,
-non-redundant signal for that agent's domain. Founder remains at 7 dimensions;
-the other six agents remain at 9. Adding or removing a dimension requires
-evidence (low-correlation with existing dimensions, real change in score
-distribution on a representative run) — not symmetry.
+non-redundant signal for that agent's domain. Adding or removing a dimension
+requires evidence (low-correlation with existing dimensions, real change in
+score distribution on a representative run) — not symmetry.
+
+> **2026-04-28 update:** Founder was subsequently expanded to 9 dimensions
+> (commit `2b1dda0` added `constraint_adherence` and `completeness`), bringing
+> all seven agents to 9 each. The decision stands — the count was driven by
+> per-agent signal, not by symmetry. The supporting cross-reference audit is
+> at [`docs/rubric-audit.md`](../rubric-audit.md), which confirms each
+> dimension on every rubric carries unique domain signal.
 
 ## Consequences
 

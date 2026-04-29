@@ -4,10 +4,18 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 ## [Unreleased]
 
+### Added
+
+- **Founder rubric audit one-pager** at `docs/rubric-audit.md` — side-by-side cross-reference of every dimension on every agent's rubric, grouped by semantic theme, with per-agent uniqueness signal. Confirms the post-`2b1dda0` state (all seven agents at 9 dimensions) and resolves the asymmetry concern that prompted ADR-0001. Linked from ADR-0001 and CONTRIBUTING.
+
+### Changed
+
+- **ADR-0001 narrative refreshed** to reflect the post-`2b1dda0` reality (Founder is at 9 dimensions, not 7). The decision (signal-driven counts, not symmetry) is unchanged.
+
 ### Roadmap
 
-- **v0.9.1** — Founder rubric audit one-pager; remaining skip/deselect cleanup.
-- **v0.9.2** — Screenshots + committed `examples/sample-output/founder/` fixture (P4).
+- **v0.9.2** — Founder rubric audit (done); roll out content snapshot pattern from Founder to remaining 6 agents; skip/deselect cleanup.
+- **v0.9.3** — Screenshots + committed `examples/sample-output/founder/` fixture (P4).
 - **v1.0.0-rc1 / v1.0.0** — Compatibility freeze, Discussions seeding, "Why AgentSuite" hook, three good-first-issue tickets, signed tags, public launch.
 
 ## [0.9.1] - 2026-04-28

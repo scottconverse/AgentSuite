@@ -128,6 +128,8 @@ crosses a recorded decision (rubric shape, RunState contract, retry
 policy, MCP naming, cost-cap split, distribution channel, resume
 semantics). New ADRs follow the template in [`docs/adr/README.md`](docs/adr/README.md).
 
+For rubric changes specifically, also update [`docs/rubric-audit.md`](docs/rubric-audit.md) — it is the cross-reference source of truth backing ADR-0001.
+
 ## Reporting bugs
 
 Open an issue at https://github.com/scottconverse/AgentSuite/issues with: Python version, OS, full traceback, the command you ran, and the contents of `.agentsuite/runs/<failing-run-id>/_state.json` if applicable.
