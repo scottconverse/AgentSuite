@@ -29,11 +29,22 @@ jobs:
           fi
       - name: Build
         run: python -m build
-      - name: Install built wheel for audit + SBOM
+      - name: Verify README install block has not drifted from fixture
+        run: |
+          python scripts/check_install_block_drift.py
+      - name: Install built wheel for audit + SBOM + smoke
         run: |
           python -m venv .audit-venv
           .audit-venv/bin/pip install --upgrade pip
           .audit-venv/bin/pip install dist/*.whl
+      - name: Smoke check — agentsuite CLI runs from clean install
+        run: |
+          # The wheel install above is the same shape an end user gets
+          # via the README's git+pip command: a fresh venv with only the
+          # built artifact's dependency closure. If --help fails here, the
+          # README's install instructions don't actually work.
+          .audit-venv/bin/agentsuite --help
+          .audit-venv/bin/agentsuite-mcp --help
       - name: Run pip-audit (any vulnerability fails)
         env:
           # Allow override for emergencies via the commit message of the tagged

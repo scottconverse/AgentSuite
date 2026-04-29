@@ -14,6 +14,7 @@ Modern AI tools generate fast. They do not generate *consistently*. Without a re
 
 ## Install
 
+<!-- install:start -->
 ```bash
 # Install with your preferred provider:
 pip install "agentsuite[anthropic] @ git+https://github.com/scottconverse/AgentSuite.git"   # Anthropic Claude
@@ -27,6 +28,7 @@ pip install "agentsuite[all] @ git+https://github.com/scottconverse/AgentSuite.g
 # or, no install (MCP only):
 uvx --from "agentsuite[mcp] @ git+https://github.com/scottconverse/AgentSuite.git" agentsuite-mcp
 ```
+<!-- install:end -->
 
 > AgentSuite is distributed from GitHub only — there is no PyPI publication.
 
