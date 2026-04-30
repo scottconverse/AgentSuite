@@ -1,5 +1,4 @@
 """Unit tests for founder.rubric."""
-import pytest
 
 from agentsuite.agents.founder.rubric import FOUNDER_RUBRIC
 

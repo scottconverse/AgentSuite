@@ -55,10 +55,15 @@ def qa_stage(state: RunState, ctx: StageContext) -> RunState:
     except ValueError as exc:
         raise ValueError(f"qa stage produced invalid JSON: {exc}") from exc
 
-    report = MARKETING_RUBRIC.score(
-        scores=parsed["scores"],
-        revision_instructions=list(parsed.get("revision_instructions", [])),
-    )
+    if not isinstance(parsed, dict):
+        parsed = {}
+    raw_scores = parsed.get("scores")
+    if not isinstance(raw_scores, dict):
+        raw_scores = {}
+    raw_revisions = parsed.get("revision_instructions")
+    if not isinstance(raw_revisions, list):
+        raw_revisions = []
+    report = MARKETING_RUBRIC.score(scores=raw_scores, revision_instructions=raw_revisions)
     ctx.writer.write("qa_report.md", report.to_markdown(), kind="qa_report", stage="qa")
     ctx.writer.write_json("qa_scores.json", report.model_dump(), kind="data", stage="qa")
 

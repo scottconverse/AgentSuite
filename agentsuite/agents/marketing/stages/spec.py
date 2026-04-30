@@ -97,7 +97,9 @@ def spec_stage(state: RunState, ctx: StageContext) -> RunState:
 
     ctx.writer.write_json("consistency_report.json", report, kind="data", stage="spec")
 
-    critical = [c for c in report.get("mismatches", []) if c.get("severity") == "critical"]
+    mismatches_raw = report.get("mismatches") if isinstance(report, dict) else None
+    mismatches = mismatches_raw if isinstance(mismatches_raw, list) else []
+    critical = [c for c in mismatches if isinstance(c, dict) and c.get("severity") == "critical"]
     return state.model_copy(update={
         "stage": "execute",
         "requires_revision": bool(critical),

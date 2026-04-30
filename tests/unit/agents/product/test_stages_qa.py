@@ -4,7 +4,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import pytest
 
 from agentsuite.agents.product.input_schema import ProductAgentInput
 from agentsuite.agents.product.stages.qa import qa_stage

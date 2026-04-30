@@ -4,7 +4,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import pytest
 
 from agentsuite.agents.trust_risk.input_schema import TrustRiskAgentInput
 from agentsuite.agents.trust_risk.stages.qa import qa_stage

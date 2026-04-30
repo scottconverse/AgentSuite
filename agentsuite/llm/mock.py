@@ -58,6 +58,63 @@ class MockLLMProvider:
         )
 
 
+class SequentialMockLLMProvider:
+    """Mock provider that returns responses in sequence for each matching key.
+
+    Unlike ``MockLLMProvider`` (which always returns the same canned response),
+    each key in ``sequences`` maps to an ordered list of responses. The first
+    call to a matching key pops and returns the first item; subsequent calls
+    return the next item, repeating the last item indefinitely once the list
+    is exhausted.
+
+    Useful for testing pipelines where the same prompt pattern fires N times
+    but you want to inject a bad response on a specific call (e.g. the 5th
+    artifact generation, or the second QA attempt).
+
+    The longest-match-first rule from ``MockLLMProvider`` applies: when
+    multiple keys match, the longest key wins.
+    """
+    name = "mock-sequential"
+
+    def __init__(
+        self,
+        sequences: dict[str, list[str]],
+        *,
+        default_model: str = "mock-seq-1",
+        name: str | None = None,
+    ) -> None:
+        # Store mutable copies so callers can't mutate our state
+        self.sequences: dict[str, list[str]] = {k: list(v) for k, v in sequences.items()}
+        self._default_model = default_model
+        self.calls: list[LLMRequest] = []
+        if name is not None:
+            self.name = name
+
+    def default_model(self) -> str:
+        return self._default_model
+
+    def complete(self, request: LLMRequest) -> LLMResponse:
+        self.calls.append(request)
+        items = sorted(self.sequences.items(), key=lambda kv: -len(kv[0]))
+        for keyword, seq in items:
+            if keyword in request.prompt or keyword in request.system:
+                if len(seq) > 1:
+                    text = seq.pop(0)
+                else:
+                    text = seq[0]  # repeat last item indefinitely
+                return LLMResponse(
+                    text=text,
+                    model=request.model or self._default_model,
+                    input_tokens=max(len(request.prompt.split()), 1),
+                    output_tokens=max(len(text.split()), 1),
+                    usd=0.0,
+                )
+        raise NoMockResponseConfigured(
+            f"No canned response for prompt: {request.prompt[:80]!r}. "
+            f"Configured keywords: {list(self.sequences.keys())}"
+        )
+
+
 def _default_mock_for_cli(provider_name: str | None = None) -> "MockLLMProvider":
     """Default mock provider used by tests + CLI smoke-runs when no real provider is configured.
 

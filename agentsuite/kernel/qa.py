@@ -68,6 +68,14 @@ class QARubric(BaseModel):
             raise ValueError(f"Unknown dimensions: {provided - expected}")
         missing = expected - provided
         scores = dict(scores)  # mutable copy — do not mutate the caller's dict
+        # Coerce score values to float: real LLMs may return strings or nulls.
+        coerced: dict[str, float] = {}
+        for k, v in scores.items():
+            try:
+                coerced[k] = float(v) if v is not None else 0.0
+            except (TypeError, ValueError):
+                coerced[k] = 0.0
+        scores = coerced
         revision_instructions = list(revision_instructions)  # copy before appending
         if missing:
             for dim in missing:
