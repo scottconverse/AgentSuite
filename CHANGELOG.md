@@ -8,6 +8,20 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 - **v1.1.x** — First minor after GA. Candidates from the rc1 Discussions Ideas board (8th agent, per-day cost cap, GPG signed tags if requested). Plus next-sprint watchlist from the 2026-04-30 audit: extract `register_standard_tools()` to deduplicate per-agent mcp_tools.py (W-08), `_INPUTS_BY_AGENT` parity test (W-02), `agentsuite migrate` stub command (W-05), `SECURITY.md` disclosure policy (W-09).
 
+## [1.0.3] - 2026-04-30
+
+Live-test hardening: two systemic bugs surfaced by a real Anthropic Sonnet run that 805 mock tests did not catch. Both affect the same root-cause class — data captured from LLM responses was not robust to real-world variability.
+
+### Fixed
+
+- **CR-101 — JSON parsing not robust to markdown fences (Critical, systemic):** All 7 agents' `extract`, `qa`, and `spec` stages called `json.loads(response.text)` directly. Real Sonnet responses sometimes wrap JSON output in ```` ```json ``` ```` fences or add a one-line preamble even when prompted with "Return ONLY JSON." This caused `JSONDecodeError` crashes at runtime. New `agentsuite/llm/json_extract.py` module exposes `extract_json(text)` that strips fences and leading prose before parsing; all 21 callsites across 7 agents updated. 10 new unit tests cover: pure JSON, fenced (with/without lang tag), fenced with leading prose, leading prose without fences, whitespace-padded, and two malformed-input error paths.
+
+- **CR-102 — Cost provenance lost in per-stage records (Major, systemic):** `cost_summary.json` showed `"model": null` and `"provider": null` per stage even when real Anthropic Sonnet was in use and pricing was correct. Root cause: (a) every stage's `cost_tracker.add(Cost(...))` call omitted `model=response.model`, so per-stage cost records never received a model name; (b) `BaseAgent._drive()` constructed `CostTracker(run_id=..., agent=...)` without a `provider` argument. Fixed by adding `model=response.model` to all 21 Cost() callsites across 7 agents, and adding `provider=getattr(getattr(self, "llm", None), "name", None)` to the `CostTracker` construction in `_drive()`. One new integration test asserts `cost_summary.json["provider"]` and `["model"]` are non-null after a complete mocked run.
+
+### Added
+
+- `agentsuite/llm/json_extract.py` — new module with `extract_json(text: str) -> Any` helper. 10 unit tests in `tests/unit/llm/test_json_extract.py`.
+
 ## [1.0.2] - 2026-04-30
 
 Two-pass sprint closing the 2026-04-30 v1.0.1 post-ship audit AND the inline five-role re-audit run on the post-fix state. Pass 1 closed 8 Critical/Major findings from the original audit. Pass 2 — the user explicitly requested an inline re-audit ("no more 'I don't know why' activity") — surfaced 9 additional findings whose root cause was the same blast-radius gap pattern that produced the original ENG-001: fixes scoped to the specific finding rather than the general pattern. All 17 findings closed. No public API changes; the v1.0 compatibility surface is unchanged. Net +23 tests vs v1.0.1 (782 → 805 passing in the default invocation).

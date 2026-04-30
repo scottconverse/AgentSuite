@@ -112,3 +112,46 @@ def test_drive_returns_immediately_when_stage_is_done(tmp_path):
     store.save(state)
     result = agent._drive(state, writer, store, edits={})
     assert result.stage == "done"
+
+
+def test_cost_summary_provider_not_null(tmp_path):
+    """CR-102: cost_summary.json must have non-null provider after a complete run.
+
+    The fix in base_agent._drive passes ``provider=getattr(self.llm, 'name', None)``
+    to CostTracker so that cost_summary.json reflects the concrete provider name
+    rather than ``null``.
+    """
+    import json
+    from agentsuite.agents.founder.agent import FounderAgent
+    from agentsuite.agents.founder.input_schema import FounderAgentInput
+    from agentsuite.kernel.schema import Constraints
+    from agentsuite.llm.mock import _default_mock_for_cli
+
+    llm = _default_mock_for_cli(provider_name="anthropic")
+    agent = FounderAgent(output_root=tmp_path, llm=llm)
+    inp = FounderAgentInput(
+        agent_name="founder",
+        role_domain="creative-ops",
+        user_request="build creative ops for test startup",
+        business_goal="test startup",
+        constraints=Constraints(),
+    )
+    agent.run(request=inp, run_id="cr102-test")
+
+    cost_summary_path = tmp_path / "runs" / "cr102-test" / "cost_summary.json"
+    assert cost_summary_path.exists(), "cost_summary.json was not written"
+    summary = json.loads(cost_summary_path.read_text(encoding="utf-8"))
+
+    # CR-102: provider must not be null
+    assert summary["provider"] == "anthropic", (
+        f"Expected provider='anthropic', got {summary['provider']!r}"
+    )
+    # CR-102: model at top level reflects the mock's default model
+    assert summary["model"] == "mock-1", (
+        f"Expected model='mock-1', got {summary['model']!r}"
+    )
+    # Each stage entry that was executed should have a non-null model field
+    for entry in summary.get("stages", []):
+        assert entry["model"] is not None, (
+            f"Stage '{entry['stage']}' has model=null in cost_summary.json (CR-102)"
+        )

@@ -131,7 +131,11 @@ class BaseAgent(ABC):
         if state.stage in ("approval", "done"):
             return state
         handlers = self.stage_handlers()
-        cost_tracker = CostTracker(run_id=state.run_id, agent=state.agent)
+        cost_tracker = CostTracker(
+            run_id=state.run_id,
+            agent=state.agent,
+            provider=getattr(getattr(self, "llm", None), "name", None),
+        )
         cost_summary_path = writer.run_dir / "cost_summary.json"
         # Resume idempotency (ADR-0007): when resuming a previously-crashed
         # run, carry forward state.cost_so_far so cap enforcement reflects

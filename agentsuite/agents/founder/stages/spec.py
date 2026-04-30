@@ -10,6 +10,7 @@ from agentsuite.agents.founder.prompt_loader import render_prompt
 from agentsuite.kernel.base_agent import StageContext
 from agentsuite.kernel.schema import Cost, RunState
 from agentsuite.llm.base import LLMProvider, LLMRequest
+from agentsuite.llm.json_extract import extract_json
 
 
 SPEC_ARTIFACTS: list[str] = [
@@ -92,6 +93,7 @@ def spec_stage(state: RunState, ctx: StageContext) -> RunState:
             input_tokens=response.input_tokens,
             output_tokens=response.output_tokens,
             usd=response.usd,
+            model=response.model,
         ))
         ctx.writer.write(f"{stem}.md", response.text, kind="spec", stage="spec")
         artifact_bodies[f"{stem}.md"] = response.text
@@ -106,11 +108,12 @@ def spec_stage(state: RunState, ctx: StageContext) -> RunState:
         input_tokens=consistency_response.input_tokens,
         output_tokens=consistency_response.output_tokens,
         usd=consistency_response.usd,
+        model=consistency_response.model,
     ))
 
     try:
-        report = json.loads(consistency_response.text)
-    except json.JSONDecodeError as exc:
+        report = extract_json(consistency_response.text)
+    except ValueError as exc:
         raise ValueError(f"consistency check produced invalid JSON: {exc}") from exc
 
     ctx.writer.write_json("consistency_report.json", report, kind="data", stage="spec")

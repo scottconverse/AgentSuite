@@ -1,7 +1,6 @@
 """Stage 5 — qa: rubric scoring + revision-instruction capture."""
 from __future__ import annotations
 
-import json
 from typing import cast
 
 from agentsuite.agents.design.input_schema import DesignAgentInput
@@ -11,6 +10,7 @@ from agentsuite.agents.design.stages.spec import SPEC_ARTIFACTS
 from agentsuite.kernel.base_agent import StageContext
 from agentsuite.kernel.schema import Cost, RunState
 from agentsuite.llm.base import LLMProvider, LLMRequest
+from agentsuite.llm.json_extract import extract_json
 
 
 def qa_stage(state: RunState, ctx: StageContext) -> RunState:
@@ -47,11 +47,12 @@ def qa_stage(state: RunState, ctx: StageContext) -> RunState:
         input_tokens=response.input_tokens,
         output_tokens=response.output_tokens,
         usd=response.usd,
+        model=response.model,
     ))
 
     try:
-        parsed = json.loads(response.text)
-    except json.JSONDecodeError as exc:
+        parsed = extract_json(response.text)
+    except ValueError as exc:
         raise ValueError(f"qa stage produced invalid JSON: {exc}") from exc
 
     report = DESIGN_RUBRIC.score(

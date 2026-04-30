@@ -10,6 +10,7 @@ from agentsuite.agents.design.prompt_loader import render_prompt
 from agentsuite.kernel.base_agent import StageContext
 from agentsuite.kernel.schema import Cost, RunState
 from agentsuite.llm.base import LLMProvider, LLMRequest
+from agentsuite.llm.json_extract import extract_json
 
 
 def _read_sources_by_kind(manifest_path: Path) -> dict[str, list[str]]:
@@ -71,11 +72,12 @@ def extract_stage(state: RunState, ctx: StageContext) -> RunState:
         input_tokens=response.input_tokens,
         output_tokens=response.output_tokens,
         usd=response.usd,
+        model=response.model,
     ))
 
     try:
-        parsed = json.loads(response.text)
-    except json.JSONDecodeError as exc:
+        parsed = extract_json(response.text)
+    except ValueError as exc:
         raise ValueError(f"extract stage produced invalid JSON: {exc}") from exc
 
     ctx.writer.write_json("extracted_context.json", parsed, kind="data", stage="extract")
