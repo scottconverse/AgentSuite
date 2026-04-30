@@ -33,7 +33,7 @@ class OpenAIProvider:
 
     def complete(self, request: LLMRequest) -> LLMResponse:
         model = request.model or self.default_model()
-        messages = []
+        messages: list[Any] = []
         if request.system:
             messages.append({"role": "system", "content": request.system})
         messages.append({"role": "user", "content": request.prompt})
@@ -47,7 +47,7 @@ class OpenAIProvider:
             # model support (no reasoning-model code path lives in v1.x today).
             max_tokens=request.max_tokens,
             temperature=request.temperature,
-            messages=messages,  # type: ignore[arg-type]
+            messages=messages,
         )
         text = result.choices[0].message.content or ""
         if result.usage is None:
