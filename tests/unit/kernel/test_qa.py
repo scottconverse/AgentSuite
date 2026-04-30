@@ -46,15 +46,31 @@ def test_rubric_score_rejects_unknown_dimension():
         r.score({"a": 5.0, "unknown": 7.0}, revision_instructions=[])
 
 
-def test_rubric_score_requires_all_dimensions():
+def test_rubric_score_missing_dimensions_assigned_zero():
+    """Missing dimensions no longer raise — they get 0.0 and a revision note."""
     r = QARubric(
         dimensions=[
             RubricDimension(name="a", question="?"),
             RubricDimension(name="b", question="?"),
         ],
     )
-    with pytest.raises(ValueError):
-        r.score({"a": 7.0}, revision_instructions=[])
+    report = r.score({"a": 7.0}, revision_instructions=[])
+    assert report.scores["b"] == 0.0
+    assert any("b" in inst for inst in report.revision_instructions)
+    assert report.passed is False  # 0.0 drags average below 7.0
+
+
+def test_score_assigns_zero_for_missing_dimensions():
+    rubric = QARubric(dimensions=[
+        RubricDimension(name="a", question="q1"),
+        RubricDimension(name="b", question="q2"),
+        RubricDimension(name="c", question="q3"),
+    ])
+    # LLM only returned 2 of 3 dimensions
+    report = rubric.score(scores={"a": 8.0, "b": 7.0}, revision_instructions=[])
+    assert report.scores["c"] == 0.0
+    assert any("c" in r for r in report.revision_instructions)
+    assert report.passed is False  # 0.0 drags average below 7.0
 
 
 def test_qa_report_renders_markdown():

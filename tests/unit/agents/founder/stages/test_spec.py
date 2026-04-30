@@ -2,12 +2,9 @@
 import json
 from pathlib import Path
 
-import pytest
-
 from agentsuite.agents.founder.input_schema import FounderAgentInput
 from agentsuite.agents.founder.stages.spec import (
     SPEC_ARTIFACTS,
-    ConsistencyCheckFailed,
     spec_stage,
 )
 from agentsuite.kernel.artifacts import ArtifactWriter
@@ -98,5 +95,6 @@ def test_spec_fails_on_critical_consistency_mismatch(tmp_path):
     responses["checking 9 artifacts"] = _critical_mismatch_response()
     llm = MockLLMProvider(responses=responses)
     ctx = StageContext(writer=writer, cost_tracker=CostTracker(), edits={"llm": llm})
-    with pytest.raises(ConsistencyCheckFailed):
-        spec_stage(_state(), ctx)
+    new_state = spec_stage(_state(), ctx)
+    assert new_state.requires_revision is True
+    assert new_state.stage == "execute"

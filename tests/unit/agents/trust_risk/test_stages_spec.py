@@ -4,12 +4,9 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import pytest
-
 from agentsuite.agents.trust_risk.input_schema import TrustRiskAgentInput
 from agentsuite.agents.trust_risk.stages.spec import (
     SPEC_ARTIFACTS,
-    ConsistencyCheckFailed,
     spec_stage,
 )
 from agentsuite.kernel.artifacts import ArtifactWriter
@@ -133,8 +130,9 @@ def test_spec_raises_on_critical_consistency_failure(tmp_path: Path) -> None:
     writer = _seed_run_dir(tmp_path)
     llm = MockLLMProvider(responses=_spec_responses(consistency_json=_CONSISTENCY_CRITICAL))
     ctx = StageContext(writer=writer, cost_tracker=CostTracker(), edits={"llm": llm})
-    with pytest.raises(ConsistencyCheckFailed, match="critical"):
-        spec_stage(_make_state(), ctx)
+    new_state = spec_stage(_make_state(), ctx)
+    assert new_state.requires_revision is True
+    assert new_state.stage == "execute"
 
 
 def test_spec_passes_on_warning_consistency(tmp_path: Path) -> None:

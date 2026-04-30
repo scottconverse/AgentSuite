@@ -38,10 +38,6 @@ _ARTIFACT_TEMPLATE: dict[str, str] = {
 }
 
 
-class ConsistencyCheckFailed(RuntimeError):
-    """Raised when the cross-artifact consistency check finds critical mismatches."""
-
-
 def spec_stage(state: RunState, ctx: StageContext) -> RunState:
     """Stage 3 handler: generate 9 spec markdown artifacts + consistency check.
 
@@ -117,10 +113,7 @@ def spec_stage(state: RunState, ctx: StageContext) -> RunState:
     ctx.writer.write_json("consistency_report.json", report, kind="data", stage="spec")
 
     critical = [c for c in report.get("mismatches", []) if c.get("severity") == "critical"]
-    if critical:
-        raise ConsistencyCheckFailed(
-            f"{len(critical)} critical consistency failure(s): "
-            + "; ".join(c.get("detail", "") for c in critical)
-        )
-
-    return state.model_copy(update={"stage": "execute"})
+    return state.model_copy(update={
+        "stage": "execute",
+        "requires_revision": bool(critical),
+    })

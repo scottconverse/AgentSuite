@@ -65,31 +65,25 @@ _LEGACY_7_DIMS = [
 _MISSING_DIMS = {"constraint_adherence", "completeness"}
 
 
-def test_founder_rubric_legacy_7dim_raises_value_error_not_key_error():
-    """A qa_scores dict with only 7 dimensions raises ValueError, not KeyError."""
+def test_founder_rubric_legacy_7dim_assigns_zero_for_missing():
+    """Missing dimensions are assigned 0.0 instead of raising ValueError."""
     legacy_scores = {name: 8.0 for name in _LEGACY_7_DIMS}
-    with pytest.raises(ValueError, match="Missing dimensions"):
-        FOUNDER_RUBRIC.score(legacy_scores, revision_instructions=[])
-
-
-def test_founder_rubric_legacy_7dim_error_names_missing_dims():
-    """The ValueError message identifies the missing dimension names."""
-    legacy_scores = {name: 8.0 for name in _LEGACY_7_DIMS}
-    with pytest.raises(ValueError) as exc_info:
-        FOUNDER_RUBRIC.score(legacy_scores, revision_instructions=[])
-    msg = str(exc_info.value)
+    report = FOUNDER_RUBRIC.score(legacy_scores, revision_instructions=[])
     for dim in _MISSING_DIMS:
-        assert dim in msg, f"Expected missing dim '{dim}' in error: {msg}"
+        assert report.scores[dim] == 0.0, f"Expected 0.0 for missing dim '{dim}'"
+
+
+def test_founder_rubric_legacy_7dim_missing_dims_named_in_revision():
+    """Missing dimension names appear in revision_instructions, not in an exception."""
+    legacy_scores = {name: 8.0 for name in _LEGACY_7_DIMS}
+    report = FOUNDER_RUBRIC.score(legacy_scores, revision_instructions=[])
+    combined = " ".join(report.revision_instructions)
+    for dim in _MISSING_DIMS:
+        assert dim in combined, f"Expected missing dim '{dim}' in revision instructions: {combined}"
 
 
 def test_founder_rubric_legacy_7dim_no_key_error():
-    """Passing 7-dim scores must not bubble up as a KeyError (regression guard)."""
+    """Passing 7-dim scores must not raise KeyError or ValueError (regression guard)."""
     legacy_scores = {name: 7.5 for name in _LEGACY_7_DIMS}
-    try:
-        FOUNDER_RUBRIC.score(legacy_scores, revision_instructions=[])
-    except ValueError:
-        pass  # expected — clear error path
-    except KeyError as e:  # pragma: no cover
-        raise AssertionError(
-            f"Legacy qa_scores caused a KeyError instead of ValueError: {e}"
-        ) from e
+    # Should complete without raising
+    FOUNDER_RUBRIC.score(legacy_scores, revision_instructions=[])

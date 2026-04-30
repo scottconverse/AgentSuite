@@ -1,13 +1,31 @@
-You are a senior marketing strategist conducting a consistency audit across all campaign artifacts for {{ brand_name }}.
+You are checking 9 marketing campaign artifacts for internal consistency.
 
+Brand: {{ brand_name }}
 Campaign goal: {{ campaign_goal }}
 
-Below are excerpts from each campaign artifact produced so far:
-
+Artifact excerpts:
 {% for name, snippet in artifact_snippets.items() %}
-### {{ name }}
+=== {{ name }} ===
 {{ snippet }}
 
 {% endfor %}
 
-Review all artifacts for internal consistency. Check: (1) whether all artifacts serve the same campaign goal stated above, (2) whether messaging is consistent in tone, claims, and positioning across artifacts, (3) whether channel strategies, content calendars, and launch plans are aligned on timing and priorities, (4) whether KPIs in the measurement framework match the objectives stated in the campaign brief, and (5) whether any artifact contradicts or undermines another. Report each inconsistency found with the artifact names involved, the specific conflict, and a recommended resolution. If no inconsistencies are found, state that explicitly with evidence.
+Check for inconsistencies across all artifacts: conflicting messaging or tone, misaligned channel strategies, KPIs that don't match campaign objectives, timing conflicts between content calendar and launch plan, and any artifact that contradicts another.
+
+Return a JSON object:
+{
+  "mismatches": [
+    {
+      "dimension": "messaging" | "tone" | "timeline" | "kpi" | "channel" | "other",
+      "artifacts": ["artifact_a", "artifact_b"],
+      "detail": "description of the conflict",
+      "severity": "critical" | "warning"
+    }
+  ]
+}
+
+"critical" = high-priority inconsistency that should be resolved before use. "warning" = noted but non-blocking.
+
+If no inconsistencies are found, return: {"mismatches": []}
+
+Return ONLY the JSON.

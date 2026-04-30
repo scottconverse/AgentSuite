@@ -11,7 +11,7 @@ from agentsuite.agents.registry import default_registry
 from agentsuite.agents.trust_risk.agent import TrustRiskAgent
 from agentsuite.agents.trust_risk.input_schema import TrustRiskAgentInput
 from agentsuite.agents.trust_risk.rubric import TRUST_RISK_RUBRIC
-from agentsuite.agents.trust_risk.stages.spec import SPEC_ARTIFACTS, ConsistencyCheckFailed
+from agentsuite.agents.trust_risk.stages.spec import SPEC_ARTIFACTS
 from agentsuite.llm.mock import MockLLMProvider, _default_mock_for_cli
 
 
@@ -114,11 +114,8 @@ def test_trust_risk_agent_via_registry(tmp_path: Path) -> None:
 
 
 def test_trust_risk_consistency_check_failure_raises(tmp_path: Path) -> None:
-    """When consistency check returns a critical finding, ConsistencyCheckFailed is raised."""
+    """Critical consistency finding is non-fatal; pipeline continues and report records it."""
     base = _default_mock_for_cli()
-    # Remove the existing key that would match trust-risk consistency check.
-    # TrustRisk spec.py system: "You are checking 9 trust-risk-agent artifacts for consistency."
-    # Default mock key (full string): "You are checking 9 trust-risk-agent artifacts for consistency. Return ONLY JSON."
     existing_key = "You are checking 9 trust-risk-agent artifacts for consistency. Return ONLY JSON."
     patched_responses = {k: v for k, v in base.responses.items() if k != existing_key}
     critical_response = json.dumps({
@@ -140,5 +137,9 @@ def test_trust_risk_consistency_check_failure_raises(tmp_path: Path) -> None:
         risk_domain="cloud infrastructure",
         stakeholder_context="CISO and risk team",
     )
-    with pytest.raises(ConsistencyCheckFailed):
-        agent.run(request=inp, run_id="trust-risk-consistency-fail")
+    state = agent.run(request=inp, run_id="trust-risk-consistency-fail")
+    assert state.stage == "approval"
+
+    run_dir = tmp_path / "runs" / "trust-risk-consistency-fail"
+    report = json.loads((run_dir / "consistency_report.json").read_text())
+    assert any(m.get("severity") == "critical" for m in report.get("mismatches", []))

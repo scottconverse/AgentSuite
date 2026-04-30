@@ -9,7 +9,7 @@ import pytest
 
 from agentsuite.agents.product.agent import ProductAgent
 from agentsuite.agents.product.input_schema import ProductAgentInput
-from agentsuite.agents.product.stages.spec import SPEC_ARTIFACTS, ConsistencyCheckFailed
+from agentsuite.agents.product.stages.spec import SPEC_ARTIFACTS
 from agentsuite.agents.product.template_loader import TEMPLATE_NAMES
 from agentsuite.llm.mock import MockLLMProvider, _default_mock_for_cli
 
@@ -73,11 +73,8 @@ def test_product_pipeline_approval_promotion(tmp_path: Path) -> None:
 
 
 def test_product_consistency_check_failure_raises(tmp_path: Path) -> None:
-    """When consistency check returns a critical finding, ConsistencyCheckFailed is raised."""
+    """Critical consistency finding is non-fatal; pipeline continues and report records it."""
     base = _default_mock_for_cli()
-    # Remove the existing key that would match product consistency check and replace with critical.
-    # Product spec.py system prompt: "You are checking 9 product-agent artifacts for consistency."
-    # Default mock key: "checking 9 product-agent artifacts"
     patched_responses = {
         k: v for k, v in base.responses.items()
         if k != "checking 9 product-agent artifacts"
@@ -103,8 +100,12 @@ def test_product_consistency_check_failure_raises(tmp_path: Path) -> None:
         target_users="QA engineers",
         core_problem="too much manual testing",
     )
-    with pytest.raises(ConsistencyCheckFailed):
-        agent.run(request=inp, run_id="product-consistency-fail")
+    state = agent.run(request=inp, run_id="product-consistency-fail")
+    assert state.stage == "approval"
+
+    run_dir = tmp_path / "runs" / "product-consistency-fail"
+    report = json.loads((run_dir / "consistency_report.json").read_text())
+    assert any(m.get("severity") == "critical" for m in report.get("mismatches", []))
 
 
 def test_product_pipeline_resume_from_spec(tmp_path: Path) -> None:

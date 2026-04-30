@@ -39,10 +39,6 @@ _PROMPT_BY_ARTIFACT: dict[str, str] = {
 }
 
 
-class ConsistencyCheckFailed(RuntimeError):
-    """Raised when the cross-artifact consistency check finds critical mismatches."""
-
-
 def _read_voice_samples(inp: FounderAgentInput) -> str:
     """Concatenate the founder's voice-sample files into a single string for prompting."""
     if not inp.founder_voice_samples:
@@ -119,10 +115,7 @@ def spec_stage(state: RunState, ctx: StageContext) -> RunState:
     ctx.writer.write_json("consistency_report.json", report, kind="data", stage="spec")
 
     critical = [m for m in report.get("mismatches", []) if m.get("severity") == "critical"]
-    if critical:
-        raise ConsistencyCheckFailed(
-            f"{len(critical)} critical mismatch(es): "
-            + "; ".join(m.get("details", "") for m in critical)
-        )
-
-    return state.model_copy(update={"stage": "execute"})
+    return state.model_copy(update={
+        "stage": "execute",
+        "requires_revision": bool(critical),
+    })

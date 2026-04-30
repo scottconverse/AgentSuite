@@ -95,11 +95,11 @@ def test_qa_score_reflects_rubric_result(tmp_path: Path) -> None:
     assert "passed" in data
 
 
-def test_qa_handles_missing_scores_raises(tmp_path: Path) -> None:
-    """Mock LLM returns JSON with only some dimensions; rubric raises ValueError for missing dims."""
+def test_qa_handles_missing_scores_gracefully(tmp_path: Path) -> None:
+    """Mock LLM returns partial scores; missing dims assigned 0.0 and stage completes."""
     writer = _seed_run_dir(tmp_path)
     llm = MockLLMProvider(responses={"scoring 9 engineering-agent": _PARTIAL_SCORES_RESPONSE})
     ctx = StageContext(writer=writer, cost_tracker=CostTracker(), edits={"llm": llm})
-    # Rubric enforces all 9 dimensions — partial scores raise ValueError
-    with pytest.raises(ValueError, match="Missing dimensions"):
-        qa_stage(_make_state(), ctx)
+    result = qa_stage(_make_state(), ctx)
+    assert result.stage == "approval"
+    assert result.requires_revision is True

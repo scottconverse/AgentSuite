@@ -9,7 +9,7 @@ import pytest
 
 from agentsuite.agents.marketing.agent import MarketingAgent
 from agentsuite.agents.marketing.input_schema import MarketingAgentInput
-from agentsuite.agents.marketing.stages.spec import SPEC_ARTIFACTS, ConsistencyCheckFailed
+from agentsuite.agents.marketing.stages.spec import SPEC_ARTIFACTS
 from agentsuite.agents.marketing.template_loader import TEMPLATE_NAMES
 from agentsuite.llm.mock import MockLLMProvider, _default_mock_for_cli
 
@@ -130,7 +130,7 @@ def test_marketing_extract_parse_error_fallback(tmp_path: Path) -> None:
 
 
 def test_marketing_consistency_check_failure_raises(tmp_path: Path) -> None:
-    """When consistency check returns a critical finding, ConsistencyCheckFailed is raised."""
+    """Critical consistency finding is non-fatal; pipeline continues and report records it."""
     base = _default_mock_for_cli()
     patched_responses = dict(base.responses)
     consistency_key = "You are checking 9 marketing-agent artifacts for consistency. Return ONLY JSON."
@@ -154,5 +154,9 @@ def test_marketing_consistency_check_failure_raises(tmp_path: Path) -> None:
         agent_name="marketing",
         role_domain="marketing-ops",
     )
-    with pytest.raises(ConsistencyCheckFailed):
-        agent.run(request=inp, run_id="integration-m-consistency-fail")
+    state = agent.run(request=inp, run_id="integration-m-consistency-fail")
+    assert state.stage == "approval"
+
+    run_dir = tmp_path / "runs" / "integration-m-consistency-fail"
+    report = json.loads((run_dir / "consistency_report.json").read_text())
+    assert any(m.get("severity") == "critical" for m in report.get("mismatches", []))

@@ -7,7 +7,7 @@ import pytest
 
 from agentsuite.agents.founder.agent import FounderAgent
 from agentsuite.agents.founder.input_schema import FounderAgentInput
-from agentsuite.agents.founder.stages.spec import SPEC_ARTIFACTS, ConsistencyCheckFailed
+from agentsuite.agents.founder.stages.spec import SPEC_ARTIFACTS
 from agentsuite.agents.founder.template_loader import TEMPLATE_NAMES
 from agentsuite.kernel.schema import Constraints
 from agentsuite.llm.mock import MockLLMProvider, _default_mock_for_cli
@@ -63,11 +63,8 @@ def test_founder_full_pipeline_emits_promoted_kernel_after_approval(tmp_path):
 
 
 def test_founder_consistency_check_failure_raises(tmp_path: Path) -> None:
-    """When consistency check returns a critical finding, ConsistencyCheckFailed is raised."""
+    """Critical consistency finding is non-fatal; pipeline continues and report records it."""
     base = _default_mock_for_cli()
-    # Remove the existing key that would match the consistency check so our critical one takes effect.
-    # Founder spec.py system prompt contains "checking 9 artifacts for cross-document consistency".
-    # The default mock has "checking 9 artifacts" which would match — remove it and replace.
     patched_responses = {k: v for k, v in base.responses.items() if k != "checking 9 artifacts"}
     critical_response = json.dumps({
         "mismatches": [
@@ -78,7 +75,6 @@ def test_founder_consistency_check_failure_raises(tmp_path: Path) -> None:
             }
         ]
     })
-    # Key must be a substring of the system prompt used by founder spec_stage
     patched_responses["checking 9 artifacts for cross-document consistency"] = critical_response
     llm = MockLLMProvider(responses=patched_responses)
 
@@ -91,8 +87,12 @@ def test_founder_consistency_check_failure_raises(tmp_path: Path) -> None:
         project_slug="pfl",
         constraints=Constraints(),
     )
-    with pytest.raises(ConsistencyCheckFailed):
-        agent.run(request=inp, run_id="founder-consistency-fail")
+    state = agent.run(request=inp, run_id="founder-consistency-fail")
+    assert state.stage == "approval"
+
+    run_dir = tmp_path / "runs" / "founder-consistency-fail"
+    report = json.loads((run_dir / "consistency_report.json").read_text())
+    assert any(m.get("severity") == "critical" for m in report.get("mismatches", []))
 
 
 def test_pipeline_hard_cap_exceeded_propagates(tmp_path):

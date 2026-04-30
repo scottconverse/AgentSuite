@@ -4,12 +4,9 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import pytest
-
 from agentsuite.agents.cio.input_schema import CIOAgentInput
 from agentsuite.agents.cio.stages.spec import (
     SPEC_ARTIFACTS,
-    ConsistencyCheckFailed,
     spec_stage,
 )
 from agentsuite.kernel.artifacts import ArtifactWriter
@@ -134,8 +131,9 @@ def test_spec_consistency_failure_raises(tmp_path: Path) -> None:
     writer = _seed_run_dir(tmp_path)
     llm = MockLLMProvider(responses=_spec_responses(consistency_json=_CONSISTENCY_CRITICAL))
     ctx = StageContext(writer=writer, cost_tracker=CostTracker(), edits={"llm": llm})
-    with pytest.raises(ConsistencyCheckFailed, match="critical"):
-        spec_stage(_make_state(), ctx)
+    new_state = spec_stage(_make_state(), ctx)
+    assert new_state.requires_revision is True
+    assert new_state.stage == "execute"
 
 
 def test_spec_primary_artifact_non_empty(tmp_path: Path) -> None:

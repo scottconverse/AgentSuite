@@ -8,6 +8,16 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 - **v1.1.x** — First minor after GA. Candidates from the rc1 Discussions Ideas board (8th agent, per-day cost cap, GPG signed tags if requested). Plus next-sprint watchlist from the 2026-04-30 audit: extract `register_standard_tools()` to deduplicate per-agent mcp_tools.py (W-08), `_INPUTS_BY_AGENT` parity test (W-02), `agentsuite migrate` stub command (W-05), `SECURITY.md` disclosure policy (W-09).
 
+## [1.0.4] - 2026-04-30
+
+Live-test hardening continued: two additional systemic bugs surfaced by the same Anthropic Sonnet run that motivated v1.0.3, fixed immediately rather than deferred.
+
+### Fixed
+
+- **CR-103 — ConsistencyCheckFailed halted the pipeline on valid LLM output (Critical, systemic):** All 7 agents' spec stages raised `ConsistencyCheckFailed` whenever the consistency check LLM call returned any mismatch with `"severity": "critical"`. This meant a real Sonnet run that correctly identified genuine cross-artifact inconsistencies would crash the pipeline at spec rather than completing and surfacing the finding at approval. Root cause: (a) prompts told the LLM that critical mismatches "fail the run," causing over-classification; (b) the code raised unconditionally on any critical finding. Fix: removed the `ConsistencyCheckFailed` class and raise from all 7 agents' `spec.py` files; replaced with `requires_revision=True` in the returned `RunState`. The pipeline now continues to approval where the reviewer can inspect `consistency_report.json`. Prompt language updated in all 7 consistency-check templates to remove the "fail the run" framing. All 7 unit spec tests and 7 integration spec tests updated to assert the new non-fatal behavior.
+
+- **CR-104 — QA rubric raised ValueError when LLM omitted expected scoring dimensions (Critical, systemic):** `QARubric.score()` raised `ValueError("Missing dimensions: ...")` when the LLM response did not include all expected rubric dimension keys. For the Founder agent, `qa_score.jinja2` asked the LLM to score only 7 of the 9 rubric dimensions (missing `constraint_adherence` and `completeness`), so a real Sonnet run always crashed the QA stage. Fix: (a) `qa_score.jinja2` for the Founder agent updated to explicitly list all 9 required dimension names; (b) `QARubric.score()` made defensive — any missing dimension is now assigned `0.0` and a revision instruction is appended naming the missing dims and instructing re-run or manual review; the rubric then returns a normal `QAReport` (with `requires_revision=True` because 0.0 scores fail the threshold) rather than raising. 6 unit tests updated to assert the new zero-fill-and-continue behavior.
+
 ## [1.0.3] - 2026-04-30
 
 Live-test hardening: two systemic bugs surfaced by a real Anthropic Sonnet run that 805 mock tests did not catch. Both affect the same root-cause class — data captured from LLM responses was not robust to real-world variability.

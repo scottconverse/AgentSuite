@@ -58,15 +58,24 @@ class QARubric(BaseModel):
     ) -> QAReport:
         """Score the rubric against ``scores`` (dimension name → 0..10).
 
-        Raises ``ValueError`` if ``scores`` is missing any dimension or
-        contains an unknown dimension.
+        Raises ``ValueError`` if ``scores`` contains unknown dimensions.
+        Missing dimensions are assigned 0.0 and a revision instruction is
+        appended so the run completes and the low score flags it for revision.
         """
         expected = {d.name for d in self.dimensions}
         provided = set(scores.keys())
         if provided - expected:
             raise ValueError(f"Unknown dimensions: {provided - expected}")
-        if expected - provided:
-            raise ValueError(f"Missing dimensions: {expected - provided}")
+        missing = expected - provided
+        scores = dict(scores)  # mutable copy — do not mutate the caller's dict
+        revision_instructions = list(revision_instructions)  # copy before appending
+        if missing:
+            for dim in missing:
+                scores[dim] = 0.0
+            revision_instructions.append(
+                f"QA scoring incomplete: LLM did not score {sorted(missing)}."
+                " Assigned 0.0 — re-run QA or review manually."
+            )
         weights = {d.name: d.weight for d in self.dimensions}
         weighted = sum(scores[d.name] * weights[d.name] for d in self.dimensions)
         total_weight = sum(weights.values())
