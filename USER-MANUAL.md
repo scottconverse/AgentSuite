@@ -1,6 +1,6 @@
 # AgentSuite User Manual
 
-**Version 0.9.1**
+**Version 1.0.2**
 
 ---
 
@@ -969,6 +969,38 @@ This glossary defines every technical term used in this manual. Terms are listed
 **Value proposition:** A clear statement of the specific benefit your product or service delivers to a customer. A strong value proposition answers: "Why should I choose this over the alternative?"
 
 **Vendor portfolio:** The complete set of technology vendors an organization relies on, with associated spend, contract terms, risk ratings, and strategic importance.
+
+---
+
+## CLI Flags Reference
+
+A quick reference for flags that apply across multiple agents. Agent-specific flags (such as `--business-goal` or `--project-slug`) are documented in each agent's chapter above.
+
+**`--force`** (used with `run` commands)
+Overwrites an existing run directory of the same name instead of failing. By default, if you re-run an agent with the same `--run-id` as a previous run, AgentSuite will refuse to start so it does not destroy your earlier output. Add `--force` only when you are deliberately re-running and want the previous folder replaced.
+
+Example:
+```
+agentsuite founder run --business-goal "Launch Acme invoicing" --project-slug acme --run-id run-acme-1 --force
+```
+
+**`--quiet`** / **`-q`** (global flag)
+Suppresses the per-stage progress output that AgentSuite normally prints while an agent runs. The agent still runs to completion and writes all of its output files — you just see less on screen. Useful when running AgentSuite from a script, a cron job, or any environment where you only care about the final result.
+
+Example:
+```
+agentsuite -q founder run --business-goal "Launch Acme invoicing" --project-slug acme
+```
+
+**`--latest`** (used with `approve`)
+Selects the most recent run automatically, so you do not have to type the `run_id`. AgentSuite looks at the run folders for that agent and picks the one with the newest timestamp. Use this when you just finished a run and want to approve it without copying the auto-generated ID.
+
+Example:
+```
+agentsuite founder approve --latest
+```
+
+If there are no runs yet for that agent, `--latest` will return an error explaining that there is nothing to approve.
 
 ---
 

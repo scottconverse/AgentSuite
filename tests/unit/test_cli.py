@@ -314,3 +314,55 @@ def test_approve_latest_handles_schema_version_error(tmp_path, monkeypatch):
     assert result.exit_code != 0
     assert "Traceback" not in (result.output or "")
     assert "RunStateSchemaVersionError" not in (result.output or "")
+
+
+# ---------------------------------------------------------------------------
+# QA-301 — list-runs commands skip pre-v0.9 schema dirs cleanly
+# ---------------------------------------------------------------------------
+
+def _write_pre_v09_state(tmp_path, run_name="run-old", agent="founder"):
+    """Helper: create a runs/<run_name>/_state.json with schema_version=1."""
+    import json
+
+    runs_dir = tmp_path / "runs"
+    runs_dir.mkdir(parents=True, exist_ok=True)
+    bad_run = runs_dir / run_name
+    bad_run.mkdir()
+    (bad_run / "_state.json").write_text(
+        json.dumps({
+            "schema_version": 1,
+            "run_id": run_name,
+            "agent": agent,
+            "stage": "done",
+        }),
+        encoding="utf-8",
+    )
+    return bad_run
+
+
+def test_cli_list_runs_skips_schema_version_mismatch_dirs(tmp_path, monkeypatch):
+    """Global `list-runs` must exit 0 and not include a pre-v0.9 run."""
+    _write_pre_v09_state(tmp_path, run_name="run-old", agent="founder")
+    monkeypatch.setenv("AGENTSUITE_OUTPUT_DIR", str(tmp_path))
+    result = _runner().invoke(app, ["list-runs"])
+    assert result.exit_code == 0
+    assert "run-old" not in result.stdout
+    # Must not surface a raw traceback
+    assert "Traceback" not in (result.output or "")
+    assert "RunStateSchemaVersionError" not in (result.output or "")
+
+
+def test_cli_founder_list_runs_skips_schema_version_mismatch_dirs(tmp_path, monkeypatch):
+    """Per-agent `<agent> list-runs` must exit 0 and not include a pre-v0.9 run.
+
+    Founder doesn't expose a per-agent list-runs subcommand (has_list_runs=False);
+    cio and trust_risk do. We exercise the CIO per-agent list-runs path here since
+    that is the helper produced by ``_make_list_runs_fn`` in cli.py.
+    """
+    _write_pre_v09_state(tmp_path, run_name="run-old", agent="cio")
+    monkeypatch.setenv("AGENTSUITE_OUTPUT_DIR", str(tmp_path))
+    result = _runner().invoke(app, ["cio", "list-runs"])
+    assert result.exit_code == 0, result.output
+    assert "run-old" not in result.stdout
+    assert "Traceback" not in (result.output or "")
+    assert "RunStateSchemaVersionError" not in (result.output or "")

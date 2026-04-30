@@ -13,7 +13,7 @@ from typing import Any, Callable, Optional
 import typer
 
 from agentsuite.agents.registry import default_registry
-from agentsuite.kernel.state_store import StateStore
+from agentsuite.kernel.state_store import RunStateSchemaVersionError, StateStore
 from agentsuite.llm.base import ProviderNotInstalled
 from agentsuite.llm.resolver import NoProviderConfigured, resolve_provider
 
@@ -163,7 +163,11 @@ def _make_list_runs_fn(agent_name: str) -> Any:
         for d in sorted(runs_dir.iterdir()):
             if not d.is_dir():
                 continue
-            state = StateStore(run_dir=d).load()
+            try:
+                state = StateStore(run_dir=d).load()
+            except RunStateSchemaVersionError:
+                typer.echo(f"Skipping pre-v0.9 run dir {d.name}", err=True)
+                continue
             if state is None or state.agent != agent_name:
                 continue
             out.append({
@@ -225,7 +229,11 @@ def list_runs_cmd(project_slug: Optional[str] = typer.Option(None)) -> None:
     for d in sorted(runs_dir.iterdir()):
         if not d.is_dir():
             continue
-        state = StateStore(run_dir=d).load()
+        try:
+            state = StateStore(run_dir=d).load()
+        except RunStateSchemaVersionError:
+            typer.echo(f"Skipping pre-v0.9 run dir {d.name}", err=True)
+            continue
         if state is None:
             continue
         out.append({

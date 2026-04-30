@@ -117,5 +117,5 @@ def build_cli_spec() -> AgentCLISpec:
         agent_class=ProductAgent,
         primary_artifact="product-requirements-doc.md",
         agent_name="product",
-        next_step_hint="Next: agentsuite product approve --latest --approver <your-name> --project-slug <slug>",
+        next_step_hint="Next: agentsuite product approve --latest --approver YOUR_NAME --project-slug YOUR_SLUG",
     )

@@ -130,7 +130,7 @@ def build_server() -> _ServerWrapper:
             except RunStateSchemaVersionError:
                 _log.warning(
                     "Skipping run dir %s: schema version mismatch "
-                    "(pre-v0.9 run directory — upgrade with `agentsuite migrate`)",
+                    "(pre-v0.9 run directory — delete it and re-run)",
                     d.name,
                 )
                 continue

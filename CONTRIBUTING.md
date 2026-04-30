@@ -134,6 +134,19 @@ semantics). New ADRs follow the template in [`docs/adr/README.md`](docs/adr/READ
 
 For rubric changes specifically, also update [`docs/rubric-audit.md`](docs/rubric-audit.md) — it is the cross-reference source of truth backing ADR-0001.
 
+## Security: path validation
+
+Any code that constructs a filesystem path from a user-supplied `run_id` or `project_slug` MUST use the helpers in `agentsuite/agents/_common.py`:
+
+- `require_run_dir(output_root_fn, run_id)` — returns `output_root / "runs" / run_id` after validating `run_id`
+- `require_kernel_dir(output_root_fn, project_slug)` — returns `output_root / "_kernel" / project_slug` after validating `project_slug`
+
+Both helpers raise `agentsuite.kernel.identifiers.InvalidIdentifier` for path-traversal payloads (`..`, `/etc`, empty string, encoded slashes) before any I/O.
+
+Do NOT write `output_root_fn() / "runs" / run_id` directly. The validation must happen at every callsite that takes either identifier from a remote MCP caller. The kernel layer (`ArtifactWriter`) validates on the write path, but read-path callers must validate themselves before constructing paths for `StateStore.load()`, `Path.rglob()`, or `Path.iterdir()`.
+
+This rule was added after the v1.0.1 ENG-001 audit finding: the kernel-layer validation was correct but the MCP read-path callers bypassed it. See `agentsuite/agents/_common.py` for the canonical implementation.
+
 ## Reporting bugs
 
 Open an issue at https://github.com/scottconverse/AgentSuite/issues with: Python version, OS, full traceback, the command you ran, and the contents of `.agentsuite/runs/<failing-run-id>/_state.json` if applicable.

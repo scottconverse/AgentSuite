@@ -128,5 +128,5 @@ def build_cli_spec() -> AgentCLISpec:
         primary_artifact="it-strategy.md",
         agent_name="cio",
         has_list_runs=True,
-        next_step_hint="Next: agentsuite cio approve --latest --approver <your-name> --project-slug <slug>",
+        next_step_hint="Next: agentsuite cio approve --latest --approver YOUR_NAME --project-slug YOUR_SLUG",
     )

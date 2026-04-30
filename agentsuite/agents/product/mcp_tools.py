@@ -1,6 +1,7 @@
 """MCP tool wrappers for the Product agent."""
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
@@ -8,8 +9,10 @@ from typing import Any, Callable
 from agentsuite.agents._common import require_kernel_dir, require_run_dir
 from agentsuite.agents.product.input_schema import ProductAgentInput
 from agentsuite.kernel.schema import RunState, Stage
-from agentsuite.kernel.state_store import StateStore
+from agentsuite.kernel.state_store import RunStateSchemaVersionError, StateStore
 from agentsuite.mcp_models import ApprovalResult, RunResult, RunSummary
+
+_log = logging.getLogger(__name__)
 
 
 class ProductRunRequest(ProductAgentInput):
@@ -97,7 +100,13 @@ def register_tools(
 
     def product_get_status(run_id: str) -> RunState:
         run_dir = require_run_dir(output_root_fn, run_id)
-        state = StateStore(run_dir=run_dir).load()
+        try:
+            state = StateStore(run_dir=run_dir).load()
+        except RunStateSchemaVersionError as exc:
+            raise ValueError(
+                f"run_id {run_id!r} uses a pre-v0.9 schema — "
+                f"delete the run directory and re-run."
+            ) from exc
         if state is None:
             raise FileNotFoundError(f"No state file for run_id={run_id}")
         return state
@@ -110,7 +119,11 @@ def register_tools(
         for d in sorted(runs_root.iterdir()):
             if not d.is_dir():
                 continue
-            state = StateStore(run_dir=d).load()
+            try:
+                state = StateStore(run_dir=d).load()
+            except RunStateSchemaVersionError:
+                _log.warning("Skipping pre-v0.9 run dir %s", d.name)
+                continue
             if state is None or state.agent != "product":
                 continue
             out.append(RunSummary(

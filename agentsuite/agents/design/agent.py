@@ -118,5 +118,5 @@ def build_cli_spec() -> AgentCLISpec:
         agent_class=DesignAgent,
         primary_artifact="visual-direction.md",
         agent_name="design",
-        next_step_hint="Next: agentsuite design approve --latest --approver <your-name> --project-slug <slug>",
+        next_step_hint="Next: agentsuite design approve --latest --approver YOUR_NAME --project-slug YOUR_SLUG",
     )

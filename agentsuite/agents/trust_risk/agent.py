@@ -131,5 +131,5 @@ def build_cli_spec() -> AgentCLISpec:
         primary_artifact="threat-model.md",
         agent_name="trust_risk",
         has_list_runs=True,
-        next_step_hint="Next: agentsuite trust-risk approve --latest --approver <your-name> --project-slug <slug>",
+        next_step_hint="Next: agentsuite trust-risk approve --latest --approver YOUR_NAME --project-slug YOUR_SLUG",
     )

@@ -224,3 +224,93 @@ def test_cost_report_skips_schema_version_mismatch_dirs(monkeypatch, tmp_path):
     store = StateStore(run_dir=bad_run)
     with pytest.raises(RunStateSchemaVersionError):
         store.load()
+
+
+# ---------------------------------------------------------------------------
+# QA-302 — single-run get_status raises ValueError (not raw RuntimeError)
+#          on RunStateSchemaVersionError
+# ---------------------------------------------------------------------------
+
+def test_founder_get_status_handles_schema_version_error(monkeypatch, tmp_path):
+    """founder_get_status must raise ValueError (not the raw RuntimeError) on a pre-v0.9 state file."""
+    import json
+
+    monkeypatch.setenv("AGENTSUITE_ENABLED_AGENTS", "founder")
+    monkeypatch.setenv("AGENTSUITE_OUTPUT_DIR", str(tmp_path))
+
+    # Create a pre-v0.9 run dir
+    runs_dir = tmp_path / "runs"
+    runs_dir.mkdir(parents=True)
+    bad_run = runs_dir / "run-old"
+    bad_run.mkdir()
+    (bad_run / "_state.json").write_text(json.dumps({
+        "schema_version": 1,
+        "run_id": "run-old",
+        "agent": "founder",
+        "stage": "done",
+    }), encoding="utf-8")
+
+    from agentsuite.agents.founder import mcp_tools as founder_mcp
+    from agentsuite.agents.founder.agent import FounderAgent
+
+    captured_tools: dict = {}
+
+    class _SpyServer:
+        def add_tool(self, name, fn):
+            captured_tools[name] = fn
+
+    founder_mcp.register_tools(
+        _SpyServer(),
+        agent_class=lambda: FounderAgent(output_root=tmp_path),
+        output_root_fn=lambda: tmp_path,
+        expose_stages=False,
+    )
+
+    get_status = captured_tools["agentsuite_founder_get_status"]
+    with pytest.raises(ValueError, match="pre-v0.9 schema"):
+        get_status(run_id="run-old")
+
+
+# ---------------------------------------------------------------------------
+# QA-301 — founder_list_runs skips pre-v0.9 schema run dirs
+# ---------------------------------------------------------------------------
+
+def test_founder_list_runs_skips_schema_version_mismatch_dirs(monkeypatch, tmp_path):
+    """founder_list_runs must skip run dirs with a schema version mismatch (pre-v0.9)."""
+    import json
+
+    monkeypatch.setenv("AGENTSUITE_ENABLED_AGENTS", "founder")
+    monkeypatch.setenv("AGENTSUITE_OUTPUT_DIR", str(tmp_path))
+
+    # Create a pre-v0.9 run dir
+    runs_dir = tmp_path / "runs"
+    runs_dir.mkdir(parents=True)
+    bad_run = runs_dir / "run-old"
+    bad_run.mkdir()
+    (bad_run / "_state.json").write_text(json.dumps({
+        "schema_version": 1,
+        "run_id": "run-old",
+        "agent": "founder",
+        "stage": "done",
+    }), encoding="utf-8")
+
+    from agentsuite.agents.founder import mcp_tools as founder_mcp
+    from agentsuite.agents.founder.agent import FounderAgent
+
+    captured_tools: dict = {}
+
+    class _SpyServer:
+        def add_tool(self, name, fn):
+            captured_tools[name] = fn
+
+    founder_mcp.register_tools(
+        _SpyServer(),
+        agent_class=lambda: FounderAgent(output_root=tmp_path),
+        output_root_fn=lambda: tmp_path,
+        expose_stages=False,
+    )
+
+    list_runs = captured_tools["agentsuite_founder_list_runs"]
+    # Should not raise; should return an empty list (the bad run is skipped)
+    result = list_runs()
+    assert result == []

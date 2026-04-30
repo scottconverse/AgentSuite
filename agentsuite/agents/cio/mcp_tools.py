@@ -1,6 +1,7 @@
 """MCP tool wrappers for the CIO agent."""
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
@@ -8,8 +9,10 @@ from typing import Any, Callable
 from agentsuite.agents._common import require_kernel_dir, require_run_dir
 from agentsuite.agents.cio.input_schema import CIOAgentInput
 from agentsuite.kernel.schema import RunState, Stage
-from agentsuite.kernel.state_store import StateStore
+from agentsuite.kernel.state_store import RunStateSchemaVersionError, StateStore
 from agentsuite.mcp_models import ApprovalResult, RunResult, RunSummary
+
+_log = logging.getLogger(__name__)
 
 SPEC_ARTIFACTS = [
     "it-strategy",
@@ -124,7 +127,11 @@ def register_tools(
         for d in sorted(runs_root.iterdir()):
             if not d.is_dir():
                 continue
-            state = StateStore(run_dir=d).load()
+            try:
+                state = StateStore(run_dir=d).load()
+            except RunStateSchemaVersionError:
+                _log.warning("Skipping pre-v0.9 run dir %s", d.name)
+                continue
             if state is None or state.agent != "cio":
                 continue
             out.append(RunSummary(
@@ -161,7 +168,13 @@ def register_tools(
     def agentsuite_cio_get_qa_scores(run_id: str) -> dict[str, Any]:
         """Get QA scores for a CIO run."""
         run_dir = require_run_dir(output_root_fn, run_id)
-        state = StateStore(run_dir=run_dir).load()
+        try:
+            state = StateStore(run_dir=run_dir).load()
+        except RunStateSchemaVersionError as exc:
+            raise ValueError(
+                f"run_id {run_id!r} uses a pre-v0.9 schema — "
+                f"delete the run directory and re-run."
+            ) from exc
         if state is None:
             return {"error": f"No state file for run_id={run_id}"}
         qa_path = run_dir / "qa-scores.json"
@@ -192,7 +205,13 @@ def register_tools(
     def agentsuite_cio_get_revision_instructions(run_id: str) -> dict[str, Any]:
         """Get revision instructions for a CIO run that requires revision."""
         run_dir = require_run_dir(output_root_fn, run_id)
-        state = StateStore(run_dir=run_dir).load()
+        try:
+            state = StateStore(run_dir=run_dir).load()
+        except RunStateSchemaVersionError as exc:
+            raise ValueError(
+                f"run_id {run_id!r} uses a pre-v0.9 schema — "
+                f"delete the run directory and re-run."
+            ) from exc
         if state is None:
             return {"error": f"No state file for run_id={run_id}"}
         return {
@@ -205,7 +224,13 @@ def register_tools(
     def agentsuite_cio_get_run_status(run_id: str) -> RunState:
         """Get the current status of a CIO run."""
         run_dir = require_run_dir(output_root_fn, run_id)
-        state = StateStore(run_dir=run_dir).load()
+        try:
+            state = StateStore(run_dir=run_dir).load()
+        except RunStateSchemaVersionError as exc:
+            raise ValueError(
+                f"run_id {run_id!r} uses a pre-v0.9 schema — "
+                f"delete the run directory and re-run."
+            ) from exc
         if state is None:
             raise FileNotFoundError(f"No state file for run_id={run_id}")
         return state
