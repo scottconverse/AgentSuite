@@ -8,6 +8,20 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 - **v1.1.x** — First minor after GA. Candidates from the rc1 Discussions Ideas board (8th agent, per-day cost cap, GPG signed tags if requested). Plus next-sprint watchlist from the 2026-04-30 audit: extract `register_standard_tools()` to deduplicate per-agent mcp_tools.py (W-08), `_INPUTS_BY_AGENT` parity test (W-02), `agentsuite migrate` stub command (W-05), `SECURITY.md` disclosure policy (W-09).
 
+## [1.0.5] - 2026-04-30
+
+### Added
+- **Stress test suite** (`tests/stress/`) with 87 parametrized tests covering every real-LLM failure mode:
+  - `test_json_extraction_variants.py` — 44 cases: pure JSON, all fence/language variants, leading prose, truncated and malformed responses
+  - `test_consistency_check_variants.py` — 20 cases: empty/warning/critical mismatches, `mismatches: null`, array-root JSON, non-dict mismatch items, fenced responses
+  - `test_qa_rubric_variants.py` — 35 cases: score type coercion, missing dimensions, null/list/missing `scores` key, format variants
+- `SequentialMockLLMProvider` in `agentsuite/llm/mock.py` for multi-turn failure injection in tests
+
+### Fixed
+- **Score type coercion** (`kernel/qa.py`): real LLMs return `"8.0"` (string) or `null` for scores; these are now coerced to `float` before weighted-sum computation instead of raising `TypeError`
+- **`parsed["scores"]` guard** (all 7 `agents/*/stages/qa.py`): missing key, `null`, and list responses no longer crash the QA stage — they degrade gracefully to empty scores dict
+- **`mismatches: null` guard** (all 7 `agents/*/stages/spec.py`): an explicit JSON `null` for the `mismatches` key no longer returns `None` from `.get()` and bypasses the list check
+
 ## [1.0.4] - 2026-04-30
 
 Live-test hardening continued: two additional systemic bugs surfaced by the same Anthropic Sonnet run that motivated v1.0.3, fixed immediately rather than deferred.
