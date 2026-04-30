@@ -6,12 +6,11 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 ### Roadmap
 
-- **v1.0.2** — All 8 sprint-punchlist items from the 2026-04-30 post-ship audit are included in this release (see below). Real-LLM regen of `examples/sample-output/founder/` (closes CR-01, ~$0.30) and cassette tier (W-01) may also fold in here.
-- **v1.1.x** — First minor after GA. Candidates from the rc1 Discussions Ideas board (8th agent, per-day cost cap, GPG signed tags if requested).
+- **v1.1.x** — First minor after GA. Candidates from the rc1 Discussions Ideas board (8th agent, per-day cost cap, GPG signed tags if requested). Plus next-sprint watchlist from the 2026-04-30 audit: extract `register_standard_tools()` to deduplicate per-agent mcp_tools.py (W-08), `_INPUTS_BY_AGENT` parity test (W-02), `agentsuite migrate` stub command (W-05), `SECURITY.md` disclosure policy (W-09).
 
-## [1.0.2] - Unreleased
+## [1.0.2] - 2026-04-30
 
-Post-ship sprint closing all 8 Critical/Major findings from the 2026-04-30 five-role audit of v1.0.1. No public API changes; the v1.0 compatibility surface is unchanged. Net +4 tests vs v1.0.1 (782 → 786 passing in the default invocation).
+Two-pass sprint closing the 2026-04-30 v1.0.1 post-ship audit AND the inline five-role re-audit run on the post-fix state. Pass 1 closed 8 Critical/Major findings from the original audit. Pass 2 — the user explicitly requested an inline re-audit ("no more 'I don't know why' activity") — surfaced 9 additional findings whose root cause was the same blast-radius gap pattern that produced the original ENG-001: fixes scoped to the specific finding rather than the general pattern. All 17 findings closed. No public API changes; the v1.0 compatibility surface is unchanged. Net +23 tests vs v1.0.1 (782 → 805 passing in the default invocation).
 
 ### Security
 
@@ -28,6 +27,24 @@ Post-ship sprint closing all 8 Critical/Major findings from the 2026-04-30 five-
 ### Added
 
 - **"What next" signal after `run` completes** (UX-202): all 7 agents' `run` commands now emit a `Next: agentsuite <agent> approve --latest ...` hint to stderr after the JSON output, so users know the approval step exists without consulting the manual. Implemented via `AgentCLISpec.next_step_hint` field (default `""`) and a `functools.wraps` wrapper in `_register_agents()`.
+
+### Pass 2 — closure of inline five-role re-audit
+
+Pass 1 (above) closed the 8 v1.0.1 post-ship findings. The user then requested an inline five-role audit ("no agents") of the post-fix state. That audit surfaced 9 additional findings — all instances of the same systemic root cause: the `RunStateSchemaVersionError` fix landed on `agentsuite_cost_report` (the specific punchlist item) but was not swept across the 9 `list_runs` and 14 `get_status` callsites that have the same vulnerability.
+
+#### Fixed
+
+- **`RunStateSchemaVersionError` unhandled in `list_runs` iteration** (QA-301, Critical): `agentsuite list-runs`, `agentsuite <agent> list-runs`, and all 7 MCP `<agent>_list_runs` tools propagated `RunStateSchemaVersionError` as an unhandled exception when any pre-v0.9 run dir existed in the workspace. Day-1 upgrade failure for any user with v0.8.x runs. Wrapped `StateStore.load()` in `try/except RunStateSchemaVersionError` at all 9 sites — same skip-and-continue pattern already correct in `agentsuite_cost_report`.
+- **`RunStateSchemaVersionError` unhandled in single-run `get_status`** (QA-302, Critical): all 7 agents' `*_get_status` / `get_run_status` MCP tools (and trust_risk/cio extended tools `get_qa_scores`, `get_revision_instructions`) propagated raw `RuntimeError` to MCP callers for pre-v0.9 dirs. Now caught and re-raised as `ValueError` with an actionable "delete the run directory and re-run" message.
+- **Ghost `agentsuite migrate` command in error messages** (ENG-102/DOC-305/QA-303): `mcp_server.py:133` warning recommended `agentsuite migrate` which does not exist as a CLI command. Replaced with "delete it and re-run" — the actual recommendation from the underlying `RunStateSchemaVersionError`.
+- **Next-step hint placeholders break copy-paste** (UX-301, Major): UX-202 hint emitted literal angle-bracket placeholders `<your-name>` and `<slug>` which fail when copy-pasted (shell parsing as redirection). Replaced with shell-safe `YOUR_NAME` and `YOUR_SLUG` in all 7 agent hint strings.
+- **Version skew between CHANGELOG and package** (DOC-302/ENG-103, Major): CHANGELOG declared `[1.0.2] - Unreleased` while `pyproject.toml`, `agentsuite/__version__.py`, and `README.md` all said `1.0.1`. Bumped all three sources to `1.0.2` in the same commit so the package self-report matches.
+- **`USER-MANUAL.md` version badge 3 versions stale** (DOC-301, Critical): manual version line was `**Version 0.9.1**`. Updated to `**Version 1.0.2**` and added a new "CLI Flags Reference" section documenting `--quiet` / `-q` and `--latest` flags (`--force` was already covered).
+
+#### Added
+
+- **Path-validation rule documented in CONTRIBUTING.md** (DOC-303, Major): new "Security: path validation" section in `CONTRIBUTING.md` requires any code constructing paths from user-supplied `run_id` or `project_slug` to use `require_run_dir` / `require_kernel_dir` from `agentsuite/agents/_common.py`. References the v1.0.1 ENG-001 history so the rule's purpose is durably documented.
+- **Mechanical regression guards for the schema-version blast radius** (TEST-301, TEST-302, TEST-303): `test_cli_list_runs_skips_schema_version_mismatch_dirs`, `test_cli_<agent>_list_runs_skips_schema_version_mismatch_dirs`, `test_founder_get_status_handles_schema_version_error`, `test_founder_list_runs_skips_schema_version_mismatch_dirs`, plus new `tests/unit/agents/test_common.py` with parametrized traversal tests for `require_run_dir` / `require_kernel_dir` and boundary length tests. +19 tests vs. pass 1 closure (786 → 805).
 
 ## [1.0.1] - 2026-04-29
 
