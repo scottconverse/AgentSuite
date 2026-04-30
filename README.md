@@ -214,7 +214,7 @@ print(state.stage)   # "approval"
 | ![qa](docs/screenshots/qa-report-rendered.svg) | `qa_report.md` rendered. |
 | ![kernel](docs/screenshots/kernel-tree.svg) | `_kernel/<project_slug>/` after approval. |
 
-Browse a complete sample run on GitHub at [`examples/sample-output/founder/`](examples/sample-output/founder/) — every artifact a real Founder run produces, no install required.
+Browse a complete sample run on GitHub at [`examples/sample-output/founder/`](examples/sample-output/founder/) — every artifact a Founder run produces, with the same on-disk shape as a live run; the free-text bodies are deterministic-mock scaffold (see the directory's README for what's authentic vs. scaffold).
 
 ## Architecture
 

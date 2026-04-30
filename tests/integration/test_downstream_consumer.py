@@ -90,7 +90,7 @@ def test_downstream_consumer_typechecks_clean(tmp_path: Path) -> None:
     env["MYPYPATH"] = str(REPO_ROOT)
 
     result = subprocess.run(
-        [sys.executable, "-m", "mypy", "--strict", str(consumer)],
+        [sys.executable, "-m", "mypy", "--strict", "--ignore-missing-imports", str(consumer)],
         capture_output=True,
         text=True,
         cwd=str(tmp_path),

@@ -13,8 +13,8 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 Hotfix sprint addressing the v1.0.0 audit-team findings. 5 Blockers, 9
 Critical fixes, 6 Major cleanup items closed. No public API changes; the
-v1.0 compatibility surface is unchanged. Net +88 tests vs v1.0.0 (689 ->
-777 passing in the default invocation).
+v1.0 compatibility surface is unchanged. Net +93 tests vs v1.0.0 (689 ->
+782 passing in the default invocation).
 
 ### Added
 
@@ -120,7 +120,7 @@ The following are part of the public contract from 1.0.0 onward:
 - **Public API surface:** `agentsuite.agents.<agent>.agent.<Agent>Agent`, `agentsuite.agents.<agent>.input_schema.<Agent>AgentInput`, `agentsuite.kernel.schema.{Constraints, RunState, ArtifactRef, Cost, Stage}`, `agentsuite.kernel.qa.{QARubric, RubricDimension}`, `agentsuite.llm.base.LLMProvider`, `agentsuite.llm.mock.MockLLMProvider`.
 - **`_state.json` schema:** `schema_version: 2`. Future shape changes ship a migrator or raise `RunStateSchemaVersionError` with a documented remediation path.
 - **MCP tool naming:** `<agent>_run`, `<agent>_resume`, `<agent>_approve` (per ADR-0004).
-- **Kernel pipeline:** six stages (`intake → extract → spec → execute → qa → approval`).
+- **Kernel pipeline:** five stages (`intake -> extract -> spec -> execute -> qa`) plus a kernel-managed approval transition.
 
 ## [1.0.0rc1] - 2026-04-29
 

@@ -144,7 +144,47 @@ def build_server() -> _ServerWrapper:
 
 
 def main() -> None:
-    """Entry point for the ``agentsuite-mcp`` console script."""
+    """Entry point for the ``agentsuite-mcp`` console script.
+
+    Handles ``--help`` and ``--version`` directly so the binary surfaces a
+    usable response to the first command every Codex / Claude Code
+    integrator types. Without this, FastMCP.run() takes over stdin and
+    silently exits 0 with no stdout (audit QA-101).
+    """
+    import sys
+    args = sys.argv[1:]
+    if args and args[0] in ("--help", "-h"):
+        from agentsuite.__version__ import __version__
+        help_lines = [
+            "agentsuite-mcp -- AgentSuite MCP server",
+            "",
+            "Usage:",
+            "  agentsuite-mcp                Start the MCP stdio server",
+            "  agentsuite-mcp --help         Show this help",
+            "  agentsuite-mcp --version      Print the package version",
+            "",
+            "Configuration via environment variables:",
+            "  AGENTSUITE_ENABLED_AGENTS    Comma-separated agent names to enable",
+            "                               (default: founder; allowed: founder, design,",
+            "                                product, engineering, marketing, trust_risk, cio)",
+            "  AGENTSUITE_OUTPUT_DIR        Output root for agent runs (default: .agentsuite)",
+            "  AGENTSUITE_LLM_PROVIDER      Force a specific provider (default: auto-detect)",
+            "  AGENTSUITE_EXPOSE_STAGES     Set to 1 to expose advanced stage tools",
+            "  AGENTSUITE_QUIET             Set to 1 to suppress stage-progress lines",
+            "",
+            "MCP wiring: see README.md and docs/USER-MANUAL.md for Codex / Claude Code /",
+            "Cowork client config snippets.",
+            f"Version {__version__}.",
+            "",
+        ]
+        sys.stdout.write("\n".join(help_lines))
+        sys.stdout.flush()
+        return
+    if args and args[0] in ("--version", "-V"):
+        from agentsuite.__version__ import __version__
+        sys.stdout.write(f"agentsuite-mcp {__version__}\n")
+        sys.stdout.flush()
+        return
     server = build_server()
     server.run()
 
