@@ -225,9 +225,10 @@ def test_run_id_defaults_to_unique_value(tmp_path, monkeypatch):
     import json
 
     def _extract_json(output: str) -> dict:
-        """Extract the trailing JSON block from output that may include progress lines."""
+        """Extract the first JSON object from output that may include progress/hint lines."""
         idx = output.index("{")
-        return json.loads(output[idx:])
+        obj, _ = json.JSONDecoder().raw_decode(output, idx)
+        return obj
 
     id1 = _extract_json(r1.output)["run_id"]
     id2 = _extract_json(r2.output)["run_id"]
@@ -280,3 +281,36 @@ def test_force_flag_allows_existing_run(tmp_path, monkeypatch):
     r2 = _runner().invoke(app, base_args + ["--force"])
     assert r2.exit_code == 0, r2.output
     assert "approval" in r2.output
+
+
+# ---------------------------------------------------------------------------
+# UX-201 — approve --latest catches RunStateSchemaVersionError cleanly
+# ---------------------------------------------------------------------------
+
+def test_approve_latest_handles_schema_version_error(tmp_path, monkeypatch):
+    """approve --latest must not produce a raw traceback on RunStateSchemaVersionError."""
+    import json
+
+    # Create a run dir with an old-schema state file
+    runs_dir = tmp_path / "runs"
+    runs_dir.mkdir(parents=True)
+    bad_run = runs_dir / "run-old"
+    bad_run.mkdir()
+    state_file = bad_run / "_state.json"
+    state_file.write_text(json.dumps({
+        "schema_version": 1,
+        "run_id": "run-old",
+        "agent": "founder",
+        "stage": "done",
+    }), encoding="utf-8")
+
+    monkeypatch.setenv("AGENTSUITE_OUTPUT_DIR", str(tmp_path))
+    runner = CliRunner()
+    result = runner.invoke(
+        app,
+        ["founder", "approve", "--latest", "--approver", "test", "--project-slug", "proj"],
+    )
+    # Should exit non-zero but NOT produce a raw traceback
+    assert result.exit_code != 0
+    assert "Traceback" not in (result.output or "")
+    assert "RunStateSchemaVersionError" not in (result.output or "")

@@ -12,7 +12,7 @@ Tone: human, conversational, maintainer-excited. No press-release voice, no bot 
 
 > Hi all — if you found this repo, you're either looking for a way to wire AI agents into Codex / Claude Code / Cowork, or you got linked from somewhere. Either way, glad you're here.
 >
-> AgentSuite is seven role-specific reasoning agents (Founder, Design, Product, Engineering, Marketing, Trust/Risk, CIO) that take vague intent and produce structured, reusable artifacts — brand systems, brief libraries, voice guides, ADRs, IT strategies, threat models, and more. Each agent walks a deterministic six-stage pipeline (intake → extract → spec → execute → qa → approval), persists 26 artifacts to disk, and promotes approved output into a `_kernel/` that downstream agents read. The output is a *system*, not a one-off.
+> AgentSuite is seven role-specific reasoning agents (Founder, Design, Product, Engineering, Marketing, Trust/Risk, CIO) that take vague intent and produce structured, reusable artifacts — brand systems, brief libraries, voice guides, ADRs, IT strategies, threat models, and more. Each agent walks a deterministic five-stage pipeline (intake → extract → spec → execute → qa) with a kernel-managed approval step, persists 26 artifacts to disk, and promotes approved output into a `_kernel/` that downstream agents read. The output is a *system*, not a one-off.
 >
 > Where it is: v1.0.0-rc1 (release candidate). The 7 agents are shipped, golden-tested, and content-snapshot covered. Provider-agnostic (Anthropic / OpenAI / Gemini / local Ollama). MCP-native — the same code surfaces as a CLI, Python library, and MCP server.
 >

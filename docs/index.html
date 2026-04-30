@@ -52,7 +52,7 @@
 
   <main>
   <h2>What it does</h2>
-  <p>AgentSuite codifies the operating system around AI generation. Each agent walks a six-stage pipeline (intake → extract → spec → execute → qa → approval), persists 26 artifacts to disk, and promotes approved output into a long-lived <code>_kernel/</code> that downstream agents consume. The result is a reusable creative-ops or product-ops layer, not a one-off content generator.</p>
+  <p>AgentSuite codifies the operating system around AI generation. Each agent walks a five-stage pipeline (intake → extract → spec → execute → qa) with a kernel-managed approval step, persists 26 artifacts to disk, and promotes approved output into a long-lived <code>_kernel/</code> that downstream agents consume. The result is a reusable creative-ops or product-ops layer, not a one-off content generator.</p>
 
   <h2>Install</h2>
   <pre><code>pip install "agentsuite[anthropic] @ git+https://github.com/scottconverse/AgentSuite.git"
@@ -123,7 +123,7 @@ AGENTSUITE_ENABLED_AGENTS = "founder,design,product,engineering,marketing,trust_
   <h2>Documentation</h2>
   <ul>
     <li><a href="https://github.com/scottconverse/AgentSuite/blob/main/README.md">README</a> — install, quickstart, configuration</li>
-    <li><a href="https://github.com/scottconverse/AgentSuite/blob/main/docs/USER-MANUAL.md">USER-MANUAL.md</a> — plain-language walkthrough</li>
+    <li><a href="https://github.com/scottconverse/AgentSuite/blob/main/USER-MANUAL.md">USER-MANUAL.md</a> — plain-language walkthrough</li>
     <li><a href="https://github.com/scottconverse/AgentSuite/blob/main/docs/README-FULL.pdf">README-FULL.pdf</a> — full reference with architecture diagrams</li>
     <li><a href="https://github.com/scottconverse/AgentSuite/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a> — agent-implementation guide</li>
     <li><a href="https://github.com/scottconverse/AgentSuite/blob/main/CHANGELOG.md">CHANGELOG.md</a></li>

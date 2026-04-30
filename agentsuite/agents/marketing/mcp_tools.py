@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
+from agentsuite.agents._common import require_kernel_dir, require_run_dir
 from agentsuite.agents.marketing.input_schema import MarketingAgentInput
 from agentsuite.kernel.schema import RunState, Stage
 from agentsuite.kernel.state_store import StateStore
@@ -71,13 +72,13 @@ def register_tools(
     def marketing_resume(run_id: str, stage: Stage, edits: dict[str, Any] | None = None) -> RunResult:
         agent = agent_class()
         state = agent.resume(run_id=run_id, stage=stage, edits=edits or {})
-        run_dir = output_root_fn() / "runs" / run_id
+        run_dir = require_run_dir(output_root_fn, run_id)
         return _result_from_state(state, run_dir)
 
     def marketing_approve(run_id: str, approver: str, project_slug: str) -> ApprovalResult:
         agent = agent_class()
         state = agent.approve(run_id=run_id, approver=approver, project_slug=project_slug)
-        kernel_dir = output_root_fn() / "_kernel" / project_slug
+        kernel_dir = require_kernel_dir(output_root_fn, project_slug)
         promoted = [
             str(p.relative_to(output_root_fn()))
             for p in kernel_dir.rglob("*")
@@ -92,7 +93,7 @@ def register_tools(
         )
 
     def marketing_get_status(run_id: str) -> RunState:
-        run_dir = output_root_fn() / "runs" / run_id
+        run_dir = require_run_dir(output_root_fn, run_id)
         state = StateStore(run_dir=run_dir).load()
         if state is None:
             raise FileNotFoundError(f"No state file for run_id={run_id}")
@@ -129,7 +130,7 @@ def register_tools(
             def runner(run_id: str) -> RunResult:
                 agent = agent_class()
                 state = agent.resume(run_id=run_id, stage=stage, edits={})
-                run_dir = output_root_fn() / "runs" / run_id
+                run_dir = require_run_dir(output_root_fn, run_id)
                 return _result_from_state(state, run_dir)
             return runner
 

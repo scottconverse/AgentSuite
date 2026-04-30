@@ -1,18 +1,20 @@
 """``agentsuite`` command-line entry point."""
 from __future__ import annotations
 
+import functools
 import importlib
 import json
 import os
 import sys
 import traceback
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 import typer
 
 from agentsuite.agents.registry import default_registry
 from agentsuite.kernel.state_store import StateStore
+from agentsuite.llm.base import ProviderNotInstalled
 from agentsuite.llm.resolver import NoProviderConfigured, resolve_provider
 
 
@@ -75,6 +77,13 @@ def _resolve_llm_for_cli() -> Any:
     except NoProviderConfigured as e:
         typer.echo(f"Error: {e}", err=True)
         raise typer.Exit(1)
+    except ProviderNotInstalled as e:
+        typer.echo(
+            f"Error: provider library not installed — {e}\n"
+            'Reinstall with the provider extra, e.g.: pip install "agentsuite[anthropic] @ git+https://github.com/scottconverse/AgentSuite.git"',
+            err=True,
+        )
+        raise typer.Exit(1)
 
 
 def _resolve_latest_run_id(agent_name: str) -> str:
@@ -116,16 +125,18 @@ def _make_approve_fn(agent_class: type) -> Any:
         project_slug: str = typer.Option(..., help="Slug for `_kernel/<slug>/` promotion"),
     ) -> None:
         """Approve a completed run and promote artifacts to ``_kernel/``."""
-        if latest:
-            resolved_run_id = _resolve_latest_run_id(agent_name_for_latest)
-        elif run_id is not None:
-            resolved_run_id = run_id
-        else:
-            typer.echo("Error: provide --run-id <id> or --latest.", err=True)
-            raise typer.Exit(1)
         try:
+            if latest:
+                resolved_run_id = _resolve_latest_run_id(agent_name_for_latest)
+            elif run_id is not None:
+                resolved_run_id = run_id
+            else:
+                typer.echo("Error: provide --run-id <id> or --latest.", err=True)
+                raise typer.Exit(1)
             agent = agent_class(output_root=_output_root(), llm=_resolve_llm_for_cli())
             state = agent.approve(run_id=resolved_run_id, approver=approver, project_slug=project_slug)
+        except typer.Exit:
+            raise
         except Exception as exc:
             if _debug_mode:
                 traceback.print_exc()
@@ -165,6 +176,15 @@ def _make_list_runs_fn(agent_name: str) -> Any:
     return list_runs_cmd
 
 
+def _make_run_fn_with_hint(fn: Callable[..., None], hint: str) -> Callable[..., None]:
+    """Return a wrapper that calls *fn* then emits *hint* to stderr."""
+    @functools.wraps(fn)
+    def _wrapper(*args: Any, **kwargs: Any) -> None:
+        fn(*args, **kwargs)
+        typer.echo(hint, err=True)
+    return _wrapper
+
+
 def _register_agents() -> None:
     """Import each agent module, read its AgentCLISpec, and register Typer subcommands."""
     agent_modules = [
@@ -180,7 +200,10 @@ def _register_agents() -> None:
         mod = importlib.import_module(module_path)
         spec = mod.build_cli_spec()
         sub = typer.Typer(name=spec.cli_name, help=spec.help)
-        sub.command("run")(spec.run_fn)
+        _hint = spec.next_step_hint
+        _fn = spec.run_fn
+        run_fn = _make_run_fn_with_hint(_fn, _hint) if _hint else _fn
+        sub.command("run")(run_fn)
         sub.command("approve")(_make_approve_fn(spec.agent_class))
         if spec.has_list_runs:
             agent_name = spec.agent_name or spec.cli_name

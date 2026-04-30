@@ -41,7 +41,7 @@ If signal from #1 and #2 is weak, hold #3 for a week and revise.
 
 > Just shipped v1.0 of AgentSuite, a Python package + MCP server I've been building for the operating layer between intent and AI output.
 >
-> Seven agents (Founder, Design, Product, Engineering, Marketing, Trust/Risk, CIO) each run the same six-stage pipeline (intake → extract → spec → execute → qa → approval) and persist 26 structured artifacts per run. Approved runs promote into a long-lived `_kernel/` directory that downstream agents consume — so the system *accumulates* context instead of starting fresh every time.
+> Seven agents (Founder, Design, Product, Engineering, Marketing, Trust/Risk, CIO) each run the same five-stage pipeline (intake → extract → spec → execute → qa) with a kernel-managed approval step and persist 26 structured artifacts per run. Approved runs promote into a long-lived `_kernel/` directory that downstream agents consume — so the system *accumulates* context instead of starting fresh every time.
 >
 > **Why this might interest r/LocalLLaMA:**
 >
@@ -76,7 +76,7 @@ If signal from #1 and #2 is weak, hold #3 for a week and revise.
 
 **First comment** (post immediately to seed conversation):
 
-> Author here. AgentSuite is the operating layer between intent and AI output. Seven agents (Founder, Design, Product, Engineering, Marketing, Trust/Risk, CIO) walk a deterministic six-stage pipeline (intake → extract → spec → execute → qa → approval) and persist 26 structured artifacts per run. Approved runs promote into a `_kernel/<project>/` directory that downstream agents read.
+> Author here. AgentSuite is the operating layer between intent and AI output. Seven agents (Founder, Design, Product, Engineering, Marketing, Trust/Risk, CIO) walk a deterministic five-stage pipeline (intake → extract → spec → execute → qa) with a kernel-managed approval step, and persist 26 structured artifacts per run. Approved runs promote into a `_kernel/<project>/` directory that downstream agents read.
 >
 > The thesis: AI tools generate fast but not consistently. Without a reusable brand system, brief library, voice guide, or operational playbook on disk, every new asset re-introduces context and drifts on tone. AgentSuite codifies the *system around* generation — the artifacts, the QA scoring, the stage gates, the kernel promotion — instead of the generation itself.
 >

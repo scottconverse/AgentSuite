@@ -119,4 +119,5 @@ def build_cli_spec() -> AgentCLISpec:
         agent_class=EngineeringAgent,
         primary_artifact="architecture-decision-record.md",
         agent_name="engineering",
+        next_step_hint="Next: agentsuite engineering approve --latest --approver <your-name> --project-slug <slug>",
     )

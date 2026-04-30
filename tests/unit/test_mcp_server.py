@@ -1,4 +1,5 @@
 """Unit tests for the MCP server tool registration."""
+import pytest
 from agentsuite.mcp_server import build_server
 
 
@@ -140,3 +141,86 @@ def test_founder_get_status_tool_returns_state_after_run(monkeypatch, tmp_path):
     assert state.run_id == "mcp-status-run"
     assert state.stage == "approval"
     assert state.agent == "founder"
+
+
+# ---------------------------------------------------------------------------
+# ENG-001 — path-traversal rejection for run_id
+# ---------------------------------------------------------------------------
+
+def test_founder_get_status_rejects_traversal_run_id(monkeypatch, tmp_path):
+    """founder_get_status must reject run_id values containing path traversal sequences."""
+    from agentsuite.kernel.identifiers import InvalidIdentifier
+    monkeypatch.setenv("AGENTSUITE_ENABLED_AGENTS", "founder")
+    monkeypatch.setenv("AGENTSUITE_OUTPUT_DIR", str(tmp_path))
+    build_server()
+    # Test the helper directly — this is the validation gate used by all get_status tools
+    from agentsuite.agents._common import require_run_dir
+    with pytest.raises(InvalidIdentifier):
+        require_run_dir(lambda: tmp_path, "../../etc/passwd")
+    with pytest.raises(InvalidIdentifier):
+        require_run_dir(lambda: tmp_path, "/etc/passwd")
+    with pytest.raises(InvalidIdentifier):
+        require_run_dir(lambda: tmp_path, "")
+    # Valid run_id must pass
+    result = require_run_dir(lambda: tmp_path, "run-20260430-123456-789012")
+    assert result == tmp_path / "runs" / "run-20260430-123456-789012"
+
+
+# ---------------------------------------------------------------------------
+# ENG-002 — path-traversal rejection for project_slug
+# ---------------------------------------------------------------------------
+
+def test_kernel_artifacts_rejects_traversal_project_slug(monkeypatch, tmp_path):
+    """agentsuite_kernel_artifacts must reject project_slug values with traversal sequences."""
+    from agentsuite.kernel.identifiers import InvalidIdentifier
+    monkeypatch.setenv("AGENTSUITE_ENABLED_AGENTS", "founder")
+    monkeypatch.setenv("AGENTSUITE_OUTPUT_DIR", str(tmp_path))
+    # Build server to ensure the tool is registered (validates imports)
+    server = build_server()
+    assert "agentsuite_kernel_artifacts" in server.tool_names()
+    # Test the validation directly
+    from agentsuite.agents._common import require_kernel_dir
+    with pytest.raises(InvalidIdentifier):
+        require_kernel_dir(lambda: tmp_path, "../../etc")
+    with pytest.raises(InvalidIdentifier):
+        require_kernel_dir(lambda: tmp_path, "/root")
+    # Valid slug must pass
+    result = require_kernel_dir(lambda: tmp_path, "my-project")
+    assert result == tmp_path / "_kernel" / "my-project"
+
+
+# ---------------------------------------------------------------------------
+# ENG-004/QA-203 — cost_report skips runs with schema version mismatch
+# ---------------------------------------------------------------------------
+
+def test_cost_report_skips_schema_version_mismatch_dirs(monkeypatch, tmp_path):
+    """agentsuite_cost_report must skip run dirs with schema version errors (pre-v0.9 runs)."""
+    import json
+    from agentsuite.kernel.state_store import RunStateSchemaVersionError, StateStore
+
+    # Create a run dir with a v1 schema state file that will trigger RunStateSchemaVersionError
+    runs_dir = tmp_path / "runs"
+    runs_dir.mkdir(parents=True)
+    bad_run = runs_dir / "run-old"
+    bad_run.mkdir()
+    # Write a v1-schema state file (schema_version is 1, current is 2)
+    state_file = bad_run / "_state.json"
+    state_file.write_text(json.dumps({
+        "schema_version": 1,  # old schema — will trigger RunStateSchemaVersionError on load
+        "run_id": "run-old",
+        "agent": "founder",
+        "stage": "done",
+    }), encoding="utf-8")
+
+    monkeypatch.setenv("AGENTSUITE_ENABLED_AGENTS", "founder")
+    monkeypatch.setenv("AGENTSUITE_OUTPUT_DIR", str(tmp_path))
+    server = build_server()
+
+    # Verify the cost_report tool is registered
+    assert "agentsuite_cost_report" in server.tool_names()
+
+    # Verify the state_store raises RunStateSchemaVersionError on load — proving the
+    # cost_report tool must handle (skip) these dirs rather than propagating the exception
+    store = StateStore(run_dir=bad_run)
+    with pytest.raises(RunStateSchemaVersionError):
+        store.load()

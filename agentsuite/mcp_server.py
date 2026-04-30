@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from mcp.server.fastmcp import FastMCP
 
 from agentsuite.agents.registry import UnknownAgent, default_registry
+from agentsuite.kernel.identifiers import validate_project_slug
 from agentsuite.mcp_models import RunSummary
 
 # Registry mapping agent name → dotted module path for its MCP tools.
@@ -99,6 +100,7 @@ def build_server() -> _ServerWrapper:
 
     def agentsuite_kernel_artifacts(project_slug: str) -> dict[str, Any]:
         """List kernel artifacts for a given project."""
+        validate_project_slug(project_slug)
         kernel_dir = _output_root() / "_kernel" / project_slug
         if not kernel_dir.exists():
             return {"artifacts": []}
@@ -115,7 +117,7 @@ def build_server() -> _ServerWrapper:
         runs_dir = _output_root() / "runs"
         if not runs_dir.exists():
             return {"runs": [], "total_usd": 0.0}
-        from agentsuite.kernel.state_store import StateStore
+        from agentsuite.kernel.state_store import RunStateSchemaVersionError, StateStore
 
         runs: list[RunSummary] = []
         total = 0.0
@@ -123,7 +125,15 @@ def build_server() -> _ServerWrapper:
             if not d.is_dir():
                 continue
             store = StateStore(run_dir=d)
-            state = store.load()
+            try:
+                state = store.load()
+            except RunStateSchemaVersionError:
+                _log.warning(
+                    "Skipping run dir %s: schema version mismatch "
+                    "(pre-v0.9 run directory — upgrade with `agentsuite migrate`)",
+                    d.name,
+                )
+                continue
             if state is None:
                 continue
             runs.append(RunSummary(

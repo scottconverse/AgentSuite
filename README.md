@@ -12,7 +12,7 @@ The agents are reasoning agents, not content generators. Output is a reusable sy
 
 ## Why AgentSuite
 
-**For developers wiring AI into Codex / Claude Code / Cowork** who are tired of every generation re-introducing context and drifting on voice. AgentSuite is the operating layer between intent and output: seven role-specific agents that each walk a deterministic six-stage pipeline (intake → extract → spec → execute → qa → approval), persist 26 artifacts per run, and promote approved output into a `_kernel/` that the next run consumes. The output is a reusable creative-ops or product-ops layer — not a one-off asset.
+**For developers wiring AI into Codex / Claude Code / Cowork** who are tired of every generation re-introducing context and drifting on voice. AgentSuite is the operating layer between intent and output: seven role-specific agents that each walk a deterministic five-stage pipeline (intake → extract → spec → execute → qa) with a kernel-managed approval step, persist 26 artifacts per run, and promote approved output into a `_kernel/` that the next run consumes. The output is a reusable creative-ops or product-ops layer — not a one-off asset.
 
 **What makes it different:** the *system around* generation, not the generation itself. Every artifact is on disk, versioned, QA-scored, and reusable. Provider-agnostic (Anthropic / OpenAI / Gemini / local Ollama). MCP-native — agents surface as tools in any MCP-compatible IDE without a separate server.
 
@@ -274,7 +274,7 @@ Full architecture diagram with all agents: see `docs/README-FULL.pdf`.
 
 ## Documentation
 
-- [USER-MANUAL.md](docs/USER-MANUAL.md) — plain-language walkthrough
+- [USER-MANUAL.md](USER-MANUAL.md) — plain-language walkthrough
 - [README-FULL.pdf](docs/README-FULL.pdf) — full reference with architecture diagrams
 - [CONTRIBUTING.md](CONTRIBUTING.md) — dev setup + agent-implementation guide
 - [CHANGELOG.md](CHANGELOG.md) — release notes

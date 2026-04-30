@@ -6,8 +6,28 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 ### Roadmap
 
-- **v1.0.2** — Real-LLM regen of `examples/sample-output/founder/` (closes the structural half of CR-01 with content from a live Anthropic run, ~$0.30). Cassette tier (W-01) and live-tier expansion (W-02) likely fold in here.
+- **v1.0.2** — All 8 sprint-punchlist items from the 2026-04-30 post-ship audit are included in this release (see below). Real-LLM regen of `examples/sample-output/founder/` (closes CR-01, ~$0.30) and cassette tier (W-01) may also fold in here.
 - **v1.1.x** — First minor after GA. Candidates from the rc1 Discussions Ideas board (8th agent, per-day cost cap, GPG signed tags if requested).
+
+## [1.0.2] - Unreleased
+
+Post-ship sprint closing all 8 Critical/Major findings from the 2026-04-30 five-role audit of v1.0.1. No public API changes; the v1.0 compatibility surface is unchanged. Net +4 tests vs v1.0.1 (782 → 786 passing in the default invocation).
+
+### Security
+
+- **MCP read-path traversal validation** (ENG-001/QA-201, ENG-002/QA-202): the v1.0.1 `validate_run_id`/`validate_project_slug` fix was applied only to the kernel write path (`ArtifactWriter`). All 7 agents' `get_status`, stage, resume, and approve MCP tools constructed `output_root / "runs" / run_id` and `output_root / "_kernel" / project_slug` locally, bypassing the validator entirely. New `agentsuite/agents/_common.py` exports `require_run_dir` and `require_kernel_dir` helpers that validate before constructing the path. Wired into every MCP tool function that takes `run_id` or `project_slug` from a remote caller, including `trust_risk` and `cio` extended tools (`get_artifact`, `list_artifacts`, `get_qa_scores`, `get_revision_instructions`). `agentsuite_kernel_artifacts` in `mcp_server.py` also patched (ENG-002). 4 new traversal probe tests added.
+
+### Fixed
+
+- **`agentsuite_cost_report` crashes on pre-v0.9 run directories** (ENG-004/QA-203): `store.load()` inside `agentsuite_cost_report` could raise `RunStateSchemaVersionError` for any run directory written by AgentSuite < v0.9. The exception propagated uncaught through FastMCP, breaking the cost report for every user who upgraded without migrating. Now caught and logged as a warning; the offending directory is skipped and the report continues.
+- **`approve --latest` raw traceback on schema version mismatch** (UX-201): `_resolve_latest_run_id()` in `cli.py` was called outside the `try/except Exception` block in `_make_approve_fn`. A `RunStateSchemaVersionError` from `StateStore.load()` (on any pre-v0.9 run directory) escaped as an unhandled traceback. Moved inside the try block; `typer.Exit` re-raised explicitly so the "no args" error path still exits cleanly.
+- **Documentation drift: "six-stage pipeline"** (DOC-201): "six-stage pipeline (intake → extract → spec → execute → qa → approval)" corrected to "five-stage pipeline (intake → extract → spec → execute → qa) with a kernel-managed approval step" in 7 locations: `README.md`, `docs/index.html`, `docs/community/discussions-seeds.md`, `docs/community/launch-posts.md` (×2), `docs/press-kit/README.md` (×2). Approval is not a pipeline stage — it is a kernel-managed transition between the QA stage and the kernel's promote operation.
+- **Stale `docs/USER-MANUAL.md` link** (DOC-202): `docs/index.html` and `README.md` both linked to `docs/USER-MANUAL.md` (a 652-line v0.2 document describing Design and Marketing as "shipping in v0.2+"). Updated both links to the root `USER-MANUAL.md` (984 lines, covers all 7 agents).
+- **`ProviderNotInstalled` not caught in CLI** (UX-204/QA-204): `_resolve_llm_for_cli` caught `NoProviderConfigured` but not `ProviderNotInstalled` (raised when a provider library is absent). A bare install (`pip install agentsuite` without a provider extra) followed by `agentsuite founder run` would raise an unhandled `ImportError`. Now caught with an actionable "reinstall with provider extra" message.
+
+### Added
+
+- **"What next" signal after `run` completes** (UX-202): all 7 agents' `run` commands now emit a `Next: agentsuite <agent> approve --latest ...` hint to stderr after the JSON output, so users know the approval step exists without consulting the manual. Implemented via `AgentCLISpec.next_step_hint` field (default `""`) and a `functools.wraps` wrapper in `_register_agents()`.
 
 ## [1.0.1] - 2026-04-29
 

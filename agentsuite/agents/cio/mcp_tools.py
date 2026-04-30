@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
+from agentsuite.agents._common import require_kernel_dir, require_run_dir
 from agentsuite.agents.cio.input_schema import CIOAgentInput
 from agentsuite.kernel.schema import RunState, Stage
 from agentsuite.kernel.state_store import StateStore
@@ -100,7 +101,7 @@ def register_tools(
         """Approve a CIO run and promote artifacts to the kernel."""
         agent = agent_class()
         state = agent.approve(run_id=run_id, approver=approver, project_slug=project_slug)
-        kernel_dir = output_root_fn() / "_kernel" / project_slug
+        kernel_dir = require_kernel_dir(output_root_fn, project_slug)
         promoted = [
             str(p.relative_to(output_root_fn()))
             for p in kernel_dir.rglob("*")
@@ -142,7 +143,7 @@ def register_tools(
         digital-transformation-plan, it-governance-framework, enterprise-architecture,
         budget-allocation-model, workforce-development-plan, it-risk-appetite-statement.
         """
-        run_dir = output_root_fn() / "runs" / run_id
+        run_dir = require_run_dir(output_root_fn, run_id)
         artifact_path = run_dir / f"{artifact_name}.md"
         if not artifact_path.exists():
             return {"error": f"Artifact '{artifact_name}' not found in run {run_id}", "path": str(artifact_path)}
@@ -150,7 +151,7 @@ def register_tools(
 
     def agentsuite_cio_list_artifacts(run_id: str) -> dict[str, Any]:
         """List all available artifacts for a CIO run."""
-        run_dir = output_root_fn() / "runs" / run_id
+        run_dir = require_run_dir(output_root_fn, run_id)
         available = [
             name for name in SPEC_ARTIFACTS
             if (run_dir / f"{name}.md").exists()
@@ -159,7 +160,7 @@ def register_tools(
 
     def agentsuite_cio_get_qa_scores(run_id: str) -> dict[str, Any]:
         """Get QA scores for a CIO run."""
-        run_dir = output_root_fn() / "runs" / run_id
+        run_dir = require_run_dir(output_root_fn, run_id)
         state = StateStore(run_dir=run_dir).load()
         if state is None:
             return {"error": f"No state file for run_id={run_id}"}
@@ -190,7 +191,7 @@ def register_tools(
 
     def agentsuite_cio_get_revision_instructions(run_id: str) -> dict[str, Any]:
         """Get revision instructions for a CIO run that requires revision."""
-        run_dir = output_root_fn() / "runs" / run_id
+        run_dir = require_run_dir(output_root_fn, run_id)
         state = StateStore(run_dir=run_dir).load()
         if state is None:
             return {"error": f"No state file for run_id={run_id}"}
@@ -203,7 +204,7 @@ def register_tools(
 
     def agentsuite_cio_get_run_status(run_id: str) -> RunState:
         """Get the current status of a CIO run."""
-        run_dir = output_root_fn() / "runs" / run_id
+        run_dir = require_run_dir(output_root_fn, run_id)
         state = StateStore(run_dir=run_dir).load()
         if state is None:
             raise FileNotFoundError(f"No state file for run_id={run_id}")
@@ -225,7 +226,7 @@ def register_tools(
             def runner(run_id: str) -> RunResult:
                 agent = agent_class()
                 state = agent.resume(run_id=run_id, stage=stage, edits={})
-                run_dir = output_root_fn() / "runs" / run_id
+                run_dir = require_run_dir(output_root_fn, run_id)
                 return _result_from_state(state, run_dir)
             return runner
 

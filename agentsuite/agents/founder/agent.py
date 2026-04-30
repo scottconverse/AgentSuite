@@ -111,4 +111,5 @@ def build_cli_spec() -> AgentCLISpec:
         agent_class=FounderAgent,
         primary_artifact="brand-system.md",
         agent_name="founder",
+        next_step_hint="Next: agentsuite founder approve --latest --approver <your-name> --project-slug <slug>",
     )

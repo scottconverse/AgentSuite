@@ -53,6 +53,7 @@ class AgentCLISpec:
     primary_artifact: str    # filename for the run output summary line
     agent_name: str = ""     # the agent's state.agent value (defaults to cli_name)
     has_list_runs: bool = False  # whether to add a list-runs subcommand
+    next_step_hint: str = ""  # UX-202: hint emitted to stderr after run completes
 
 
 @dataclass

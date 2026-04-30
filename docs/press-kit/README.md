@@ -12,13 +12,13 @@ If you need something not in this kit — high-res renders, custom visualization
 
 ## Two-sentence description
 
-> AgentSuite codifies the operating system around AI generation. Seven agents (Founder, Design, Product, Engineering, Marketing, Trust/Risk, CIO) each walk a deterministic six-stage pipeline (intake → extract → spec → execute → qa → approval), persist 26 artifacts to disk, and promote approved output into a `_kernel/` that downstream agents read.
+> AgentSuite codifies the operating system around AI generation. Seven agents (Founder, Design, Product, Engineering, Marketing, Trust/Risk, CIO) each walk a deterministic five-stage pipeline (intake → extract → spec → execute → qa) with a kernel-managed approval step, persist 26 artifacts to disk, and promote approved output into a `_kernel/` that downstream agents read.
 
 ## Five-paragraph description
 
 > Modern AI tools generate fast. They do not generate consistently. Without a reusable brand system, brief library, and voice guide, every new asset re-introduces context, drifts on tone, and slowly turns into generic SaaS copy. AgentSuite is the operating layer between intent and output — the *system around* generation, not the generation itself.
 >
-> Seven role-specific reasoning agents ship at v1.0: a Founder agent that produces brand systems and brief templates from voice samples and goals; a Design agent that lifts brand fidelity into asset specs; Product, Engineering, Marketing, Trust/Risk, and CIO agents each producing 9 spec artifacts and 8 reusable brief templates in their domain. Every agent walks the same six-stage pipeline (intake → extract → spec → execute → qa → approval) so an operator's mental model stays the same across roles.
+> Seven role-specific reasoning agents ship at v1.0: a Founder agent that produces brand systems and brief templates from voice samples and goals; a Design agent that lifts brand fidelity into asset specs; Product, Engineering, Marketing, Trust/Risk, and CIO agents each producing 9 spec artifacts and 8 reusable brief templates in their domain. Every agent walks the same five-stage pipeline (intake → extract → spec → execute → qa) with a kernel-managed approval step, so an operator's mental model stays the same across roles.
 >
 > Output is structured and on disk. Every run produces a versioned `_state.json`, a per-stage `cost_summary.json`, a `qa_report.md` with rubric scores, and a typed Python API surface that downstream tooling can read. Approved runs promote into a long-lived `_kernel/<project>/` directory that the next run consumes — so context compounds instead of evaporating.
 >

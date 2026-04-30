@@ -123,4 +123,5 @@ def build_cli_spec() -> AgentCLISpec:
         agent_class=MarketingAgent,
         primary_artifact="campaign-brief.md",
         agent_name="marketing",
+        next_step_hint="Next: agentsuite marketing approve --latest --approver <your-name> --project-slug <slug>",
     )
