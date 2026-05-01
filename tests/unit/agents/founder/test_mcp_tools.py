@@ -142,3 +142,49 @@ def test_advanced_stage_tools_added_when_expose_set(tmp_path):
     )
     for stage_tool in ("agentsuite_founder_stage_intake", "agentsuite_founder_stage_extract", "agentsuite_founder_stage_spec", "agentsuite_founder_stage_execute", "agentsuite_founder_stage_qa"):
         assert stage_tool in server.tool_names()
+
+
+# ---------------------------------------------------------------------------
+# UX-002 — founder_approve returns structured dict on RevisionRequired
+# ---------------------------------------------------------------------------
+
+def test_founder_approve_revision_required_returns_structured_error(tmp_path):
+    """founder_approve must return a structured error dict (not raise) on RevisionRequired."""
+    from agentsuite.kernel.schema import AgentRequest, Constraints, RunState
+    from agentsuite.kernel.state_store import StateStore
+
+    # Set up a run that is at approval stage but requires revision
+    run_dir = tmp_path / "runs" / "r-rev"
+    run_dir.mkdir(parents=True)
+    state = RunState(
+        run_id="r-rev",
+        agent="founder",
+        stage="approval",
+        requires_revision=True,
+        inputs=AgentRequest(
+            agent_name="founder",
+            role_domain="creative-ops",
+            user_request="test",
+            constraints=Constraints(),
+        ),
+    )
+    StateStore(run_dir=run_dir).save(state)
+
+    server = _StubServer()
+    register_tools(
+        server,
+        agent_class=lambda: FounderAgent(output_root=tmp_path, llm=MockLLMProvider(responses=_all_responses())),
+        output_root_fn=lambda: tmp_path,
+        expose_stages=False,
+    )
+
+    result = server.tools["agentsuite_founder_approve"](
+        run_id="r-rev", approver="scott", project_slug="pfl"
+    )
+    assert isinstance(result, dict)
+    assert result["error"] == "revision_required"
+    assert "qa_report_path" in result
+    assert "qa_report.md" in result["qa_report_path"]
+    assert "action" in result
+    # Artifacts must NOT have been promoted
+    assert not (tmp_path / "_kernel" / "pfl").exists()

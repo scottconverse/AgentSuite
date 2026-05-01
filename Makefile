@@ -1,6 +1,6 @@
-.PHONY: test test-unit test-integration test-golden test-live cleanroom rerecord-cassettes resnap-golden update-goldens lint
+.PHONY: test test-unit test-integration test-golden test-stress test-live cleanroom rerecord-cassettes resnap-golden update-goldens lint
 
-test: test-unit test-integration test-golden
+test: test-unit test-integration test-golden test-stress
 
 test-unit:
 	pytest tests/unit -v
@@ -10,6 +10,9 @@ test-integration:
 
 test-golden:
 	pytest tests/golden -v
+
+test-stress:
+	pytest tests/stress -v
 
 test-live:
 	RUN_LIVE_TESTS=1 pytest tests/live -v -m live

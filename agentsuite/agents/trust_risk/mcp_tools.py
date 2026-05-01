@@ -8,6 +8,7 @@ from typing import Any, Callable
 
 from agentsuite.agents._common import require_kernel_dir, require_run_dir
 from agentsuite.agents.trust_risk.input_schema import TrustRiskAgentInput
+from agentsuite.kernel.approval import RevisionRequired
 from agentsuite.kernel.schema import RunState, Stage
 from agentsuite.kernel.state_store import RunStateSchemaVersionError, StateStore
 from agentsuite.mcp_models import ApprovalResult, RunResult, RunSummary
@@ -96,10 +97,19 @@ def register_tools(
         run_dir = output_root_fn() / "runs" / run_id
         return _result_from_state(state, run_dir)
 
-    def agentsuite_trust_risk_approve(run_id: str, approver: str, project_slug: str) -> ApprovalResult:
+    def agentsuite_trust_risk_approve(run_id: str, approver: str, project_slug: str) -> ApprovalResult | dict:
         """Approve a trust/risk run and promote artifacts to the kernel."""
         agent = agent_class()
-        state = agent.approve(run_id=run_id, approver=approver, project_slug=project_slug)
+        try:
+            state = agent.approve(run_id=run_id, approver=approver, project_slug=project_slug)
+        except RevisionRequired as e:
+            run_dir = output_root_fn() / "runs" / run_id
+            return {
+                "error": "revision_required",
+                "message": str(e),
+                "qa_report_path": str(run_dir / "qa_report.md"),
+                "action": "Review qa_report.md and re-run the agent to address QA feedback before approving.",
+            }
         kernel_dir = require_kernel_dir(output_root_fn, project_slug)
         promoted = [
             str(p.relative_to(output_root_fn()))
@@ -146,11 +156,15 @@ def register_tools(
         incident-response-plan, compliance-matrix, vendor-risk-assessment, security-policy,
         audit-readiness-report, residual-risk-acceptance.
         """
+        if artifact_name not in SPEC_ARTIFACTS:
+            return {"error": f"Unknown artifact: {artifact_name!r}. Valid: {sorted(SPEC_ARTIFACTS)}"}
         run_dir = require_run_dir(output_root_fn, run_id)
-        artifact_path = run_dir / f"{artifact_name}.md"
-        if not artifact_path.exists():
-            return {"error": f"Artifact '{artifact_name}' not found in run {run_id}", "path": str(artifact_path)}
-        return {"run_id": run_id, "artifact_name": artifact_name, "content": artifact_path.read_text(encoding="utf-8"), "path": str(artifact_path)}
+        resolved = (run_dir / f"{artifact_name}.md").resolve()
+        if not resolved.is_relative_to(run_dir.resolve()):
+            return {"error": f"Invalid artifact_name: {artifact_name!r}"}
+        if not resolved.exists():
+            return {"error": f"Artifact '{artifact_name}' not found in run {run_id}", "path": str(resolved)}
+        return {"run_id": run_id, "artifact_name": artifact_name, "content": resolved.read_text(encoding="utf-8"), "path": str(resolved)}
 
     def agentsuite_trust_risk_list_artifacts(run_id: str) -> dict[str, Any]:
         """List all available artifacts for a trust/risk run."""

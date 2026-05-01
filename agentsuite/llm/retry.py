@@ -3,7 +3,8 @@
 Wraps the synchronous ``complete()`` call with tenacity-based retry logic.
 Transient failures (rate limits, network hiccups, 5xx responses) are retried
 with exponential back-off; non-retriable exceptions (ProviderNotInstalled,
-KeyboardInterrupt, SystemExit) are re-raised immediately.
+KeyboardInterrupt, SystemExit, and provider auth errors) are re-raised
+immediately without consuming retry attempts.
 
 Configuration via environment variables (all optional):
 - ``AGENTSUITE_LLM_MAX_ATTEMPTS``  — total attempts including the first (default: 3)
@@ -34,8 +35,46 @@ _DEFAULT_TIMEOUT_SECS: float = 120.0
 _WAIT_MIN_SECS: float = 1.0
 _WAIT_MAX_SECS: float = 16.0
 
+
+def _build_no_retry_exceptions() -> tuple[type[BaseException], ...]:
+    """Build the tuple of exception types that must never trigger a retry.
+
+    Provider SDK packages are optional extras, so each import is guarded.
+    Auth/permission errors are never transient — retrying them wastes time and
+    produces misleading "Retrying…" log messages before the real error surfaces.
+    """
+    exceptions: list[type[BaseException]] = [
+        ProviderNotInstalled,
+        KeyboardInterrupt,
+        SystemExit,
+    ]
+    try:
+        import anthropic
+        exceptions.append(anthropic.AuthenticationError)
+        exceptions.append(anthropic.PermissionDeniedError)
+    except ImportError:
+        pass
+    try:
+        import openai
+        exceptions.append(openai.AuthenticationError)
+        exceptions.append(openai.PermissionDeniedError)
+    except ImportError:
+        pass
+    try:
+        # google-genai raises ClientError for all 4xx responses, which includes
+        # 401 Unauthorized and 403 Forbidden (bad or revoked API key / quota
+        # exhausted at the project level). 5xx responses raise ServerError,
+        # which IS retriable. Catching ClientError here covers both auth and
+        # bad-request cases — none of which will succeed on a plain retry.
+        from google.genai.errors import ClientError as GeminiClientError
+        exceptions.append(GeminiClientError)
+    except ImportError:
+        pass
+    return tuple(exceptions)
+
+
 # Exception types that must never trigger a retry.
-_NO_RETRY_EXCEPTIONS = (ProviderNotInstalled, KeyboardInterrupt, SystemExit)
+_NO_RETRY_EXCEPTIONS = _build_no_retry_exceptions()
 
 
 def _env_int(key: str, default: int) -> int:

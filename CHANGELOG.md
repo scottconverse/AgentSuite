@@ -8,6 +8,28 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 - **v1.1.x** — First minor after GA. Candidates from the rc1 Discussions Ideas board (8th agent, per-day cost cap, GPG signed tags if requested). Plus next-sprint watchlist from the 2026-04-30 audit: extract `register_standard_tools()` to deduplicate per-agent mcp_tools.py (W-08), `_INPUTS_BY_AGENT` parity test (W-02), `agentsuite migrate` stub command (W-05), `SECURITY.md` disclosure policy (W-09).
 
+## [1.0.6] - 2026-04-30
+
+Sprint 1 — Critical security and reliability hardening. Six Critical findings from the 2026-04-30 five-role audit fully resolved.
+
+### Security
+
+- **ENG-001 — Path traversal in CIO and Trust/Risk MCP artifact tools:** `agentsuite_cio_get_artifact` and `agentsuite_trust_risk_get_artifact` accepted caller-supplied `artifact_name` values that could escape the run directory via `../` sequences. Added two-layer guard: allowlist check (name must be in `SPEC_ARTIFACTS`) plus `resolved.is_relative_to(run_dir.resolve())` containment check. Traversal attempts now return an error dict instead of reading arbitrary files. 16 new unit tests cover traversal rejection, unknown-artifact rejection, and valid artifact access.
+
+### Fixed
+
+- **UX-002 — RevisionRequired uncaught at CLI and MCP boundaries:** `ApprovalGate.approve()` raises `RevisionRequired` when QA scores are below threshold, but the CLI caught only bare `Exception` — producing a raw traceback with no recovery guidance. Each of the 7 agents' approve MCP tools also let the exception propagate uncaught, breaking the MCP caller. `cli.py` now has a dedicated `except RevisionRequired` clause that prints the path to `qa_report.md` and a concrete re-run command before exiting with code 1. All 7 agents' `_approve` MCP handlers now catch `RevisionRequired` and return a structured dict with `"error": "revision_required"`, `"qa_report_path"`, and `"action"` fields.
+- **QA-001 — Authentication errors triggered retry storms:** `RetryingLLMProvider._NO_RETRY_EXCEPTIONS` did not include provider auth/permission errors. A bad API key or revoked token caused up to 3 retry attempts before propagating the error. Replaced the bare tuple with `_build_no_retry_exceptions()` — a lazy-import builder that adds `anthropic.AuthenticationError`, `anthropic.PermissionDeniedError`, `openai.AuthenticationError`, `openai.PermissionDeniedError`, and `google.genai.errors.ClientError` when the respective SDKs are installed. Auth errors now fail immediately. 6 new unit tests verify no-retry behavior per provider type; one regression test confirms transient errors still retry.
+
+### Infrastructure
+
+- **TEST-001 — Stress tests excluded from CI:** `tests/stress/` (87 tests) was present on disk but not included in the `.github/workflows/test.yml` pytest invocation. Added `tests/stress` to CI; added `test-stress` Make target; included `test-stress` in the default `test` target.
+
+### Documentation
+
+- **DOC-002 — USER-MANUAL version stale:** Version header and footer updated from v1.0.2 to v1.0.5.
+- **UX-001/DOC-005 — Landing page stale:** Version badge updated from v1.0.1 to v1.0.5. Stale roadmap "Coming soon" copy replaced with honest current state (all 7 agents shipped; see CHANGELOG for upcoming releases).
+
 ## [1.0.5] - 2026-04-30
 
 ### Added
@@ -588,6 +610,8 @@ Initial release.
 - Single MCP server with env-gated agent enablement (no per-agent server topology).
 
 [Unreleased]: https://github.com/scottconverse/AgentSuite/compare/v0.9.1...HEAD
+[1.0.6]: https://github.com/scottconverse/AgentSuite/compare/v1.0.5...v1.0.6
+
 [0.9.1]: https://github.com/scottconverse/AgentSuite/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/scottconverse/AgentSuite/compare/v0.8.4...v0.9.0
 [0.8.4]: https://github.com/scottconverse/AgentSuite/compare/v0.8.3...v0.8.4

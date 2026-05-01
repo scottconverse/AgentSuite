@@ -13,6 +13,7 @@ from typing import Any, Callable, Optional
 import typer
 
 from agentsuite.agents.registry import default_registry
+from agentsuite.kernel.approval import RevisionRequired
 from agentsuite.kernel.state_store import RunStateSchemaVersionError, StateStore
 from agentsuite.llm.base import ProviderNotInstalled
 from agentsuite.llm.resolver import NoProviderConfigured, resolve_provider
@@ -137,6 +138,19 @@ def _make_approve_fn(agent_class: type) -> Any:
             state = agent.approve(run_id=resolved_run_id, approver=approver, project_slug=project_slug)
         except typer.Exit:
             raise
+        except RevisionRequired:
+            run_dir = _output_root() / "runs" / resolved_run_id
+            qa_report = run_dir / "qa_report.md"
+            typer.echo(
+                "Error: QA flagged this run as requiring revision before approval.\n"
+                f"  Review the QA report: {qa_report}\n"
+                f"  Address the feedback, then re-run the agent:\n"
+                f"    agentsuite <agent> run --run-id {resolved_run_id} --force\n"
+                f"  Once the new run passes QA, approve it:\n"
+                f"    agentsuite <agent> approve --run-id <new-run-id> --approver <you> --project-slug <slug>",
+                err=True,
+            )
+            raise typer.Exit(1)
         except Exception as exc:
             if _debug_mode:
                 traceback.print_exc()

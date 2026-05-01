@@ -8,6 +8,7 @@ from typing import Any, Callable
 
 from agentsuite.agents._common import require_kernel_dir, require_run_dir
 from agentsuite.agents.engineering.input_schema import EngineeringAgentInput
+from agentsuite.kernel.approval import RevisionRequired
 from agentsuite.kernel.schema import RunState, Stage
 from agentsuite.kernel.state_store import RunStateSchemaVersionError, StateStore
 from agentsuite.mcp_models import ApprovalResult, RunResult, RunSummary
@@ -78,9 +79,18 @@ def register_tools(
         run_dir = require_run_dir(output_root_fn, run_id)
         return _result_from_state(state, run_dir)
 
-    def engineering_approve(run_id: str, approver: str, project_slug: str) -> ApprovalResult:
+    def engineering_approve(run_id: str, approver: str, project_slug: str) -> ApprovalResult | dict:
         agent = agent_class()
-        state = agent.approve(run_id=run_id, approver=approver, project_slug=project_slug)
+        try:
+            state = agent.approve(run_id=run_id, approver=approver, project_slug=project_slug)
+        except RevisionRequired as e:
+            run_dir = output_root_fn() / "runs" / run_id
+            return {
+                "error": "revision_required",
+                "message": str(e),
+                "qa_report_path": str(run_dir / "qa_report.md"),
+                "action": "Review qa_report.md and re-run the agent to address QA feedback before approving.",
+            }
         kernel_dir = require_kernel_dir(output_root_fn, project_slug)
         promoted = [
             str(p.relative_to(output_root_fn()))

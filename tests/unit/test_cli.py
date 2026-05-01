@@ -366,3 +366,52 @@ def test_cli_founder_list_runs_skips_schema_version_mismatch_dirs(tmp_path, monk
     assert "run-old" not in result.stdout
     assert "Traceback" not in (result.output or "")
     assert "RunStateSchemaVersionError" not in (result.output or "")
+
+
+# ---------------------------------------------------------------------------
+# UX-002 — RevisionRequired gives actionable error message, not a dead end
+# ---------------------------------------------------------------------------
+
+def _write_revision_required_state(tmp_path, run_id: str = "r-rev", agent: str = "founder") -> None:
+    """Create a run dir whose state has requires_revision=True at approval stage."""
+    from agentsuite.kernel.schema import AgentRequest, Constraints, RunState
+    from agentsuite.kernel.state_store import StateStore
+
+    run_dir = tmp_path / "runs" / run_id
+    run_dir.mkdir(parents=True)
+    state = RunState(
+        run_id=run_id,
+        agent=agent,
+        stage="approval",
+        requires_revision=True,
+        inputs=AgentRequest(
+            agent_name=agent,
+            role_domain="creative-ops",
+            user_request="test",
+            constraints=Constraints(),
+        ),
+    )
+    StateStore(run_dir=run_dir).save(state)
+
+
+def test_cli_approve_revision_required_exits_1_with_actionable_message(tmp_path, monkeypatch):
+    """approve on a requires_revision=True run must exit 1 and show qa_report path + re-run hint."""
+    _write_revision_required_state(tmp_path, run_id="r-rev", agent="founder")
+    monkeypatch.setenv("AGENTSUITE_OUTPUT_DIR", str(tmp_path))
+    monkeypatch.setenv("AGENTSUITE_LLM_PROVIDER_FACTORY", "agentsuite.llm.mock:_default_mock_for_cli")
+    result = _runner().invoke(app, [
+        "founder", "approve",
+        "--run-id", "r-rev",
+        "--approver", "scott",
+        "--project-slug", "pfl",
+    ])
+    assert result.exit_code == 1
+    combined = (result.output or "") + (result.stderr or "")
+    # Must NOT produce a raw traceback
+    assert "Traceback" not in combined
+    assert "RevisionRequired" not in combined
+    # Must mention qa_report so user knows where to look
+    assert "qa_report" in combined
+    # Must give a re-run hint
+    assert "r-rev" in combined
+    assert "agentsuite" in combined
