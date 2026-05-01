@@ -87,7 +87,7 @@ class BaseAgent(ABC):
     name: str = "base"
     qa_rubric: QARubric
 
-    def __init__(self, output_root: Path) -> None:
+    def __init__(self, output_root: Path, llm: Any | None = None) -> None:
         self.output_root = Path(output_root)
 
     @abstractmethod

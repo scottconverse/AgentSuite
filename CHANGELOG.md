@@ -6,7 +6,23 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 ### Roadmap
 
-- **v1.1.x** — First minor after GA. Candidates from the rc1 Discussions Ideas board (8th agent, per-day cost cap, GPG signed tags if requested). Plus next-sprint watchlist from the 2026-04-30 audit: extract `register_standard_tools()` to deduplicate per-agent mcp_tools.py (W-08), `_INPUTS_BY_AGENT` parity test (W-02), `agentsuite migrate` stub command (W-05), `SECURITY.md` disclosure policy (W-09).
+- **v1.1.x** — First minor after GA. Candidates from the rc1 Discussions Ideas board (8th agent, per-day cost cap, GPG signed tags if requested). Plus next-sprint watchlist from the 2026-04-30 audit: extract `register_standard_tools()` to deduplicate per-agent mcp_tools.py (W-08), `_INPUTS_BY_AGENT` parity test (W-02), `SECURITY.md` disclosure policy (W-09).
+
+## [1.0.12] - 2026-05-01
+
+Sprint 6 -- multi-agent pipeline orchestration; audience messaging refresh.
+
+### Added
+
+- **Pipeline orchestration -- chain agents end-to-end:** New `agentsuite pipeline run` CLI command drives a sequence of agents in order, persisting state to `<output-dir>/pipelines/<id>/_pipeline.json`. Supports `--auto-approve` for headless runs; without it, each agent pauses at its approval gate until `agentsuite pipeline approve --pipeline-id <id>` is called. Current step status is queryable via `agentsuite pipeline status --pipeline-id <id>`.
+- **Pipeline MCP tools:** Three new MCP tools -- `agentsuite_pipeline_run`, `agentsuite_pipeline_approve`, `agentsuite_pipeline_status` -- expose the same pipeline workflow to MCP hosts (Claude Code, Cowork, Codex, Antigravity).
+- **Pipeline input resolver:** Unified resolver maps common pipeline inputs (`business_goal`, `project_slug`) to each agent's input schema, with sensible defaults. Agents with required extras (engineering: `tech_stack`+`scale_requirements`; trust_risk: `risk_domain`+`stakeholder_context`; cio: `it_maturity_level`) raise a `ValueError` with an example snippet if extras are missing.
+- **31 new pipeline tests:** `tests/unit/test_pipeline_state_store.py` (7), `tests/unit/test_pipeline_input_resolver.py` (24), `tests/integration/test_pipeline_orchestrator.py` (15) -- covering auto-approve, manual approval gates, state persistence, cost accumulation, and input validation.
+
+### Changed
+
+- **Audience messaging refreshed across docs:** README "Who this is for", USER-MANUAL opening, and landing page updated to address technical founders using AI-native IDEs (Claude Code, Cowork, Codex, Google Antigravity) directly.
+- **`BaseAgent.__init__` now accepts optional `llm` parameter:** Signature extended to `__init__(self, output_root: Path, llm: Any | None = None)` for type-checker compatibility when constructing agents polymorphically via the registry. Concrete agents continue to handle `llm` in their own `__init__`.
 
 ## [1.0.11] - 2026-05-01
 

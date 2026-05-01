@@ -38,7 +38,7 @@ def _force_utf8_io() -> None:
 _force_utf8_io()
 
 app = typer.Typer(
-    help="AgentSuite — reasoning agents for vague intent → precise artifacts"
+    help="AgentSuite -- reasoning agents for vague intent -> precise artifacts"
 )
 
 # Module-level flag toggled by the --debug callback so inner helpers can read it.
@@ -242,6 +242,157 @@ def _register_agents() -> None:
 
 
 _register_agents()
+
+
+def _register_pipeline() -> None:
+    """Register the ``pipeline`` subapp with run / approve / status commands."""
+    pipeline_app = typer.Typer(name="pipeline", help="Multi-agent pipeline commands.")
+
+    @pipeline_app.command("run")
+    def pipeline_run(
+        agents: str = typer.Option(
+            ..., help="Comma-separated agent names in run order (e.g. founder,design,product)"
+        ),
+        project_slug: str = typer.Option(...),
+        business_goal: str = typer.Option(...),
+        inputs_dir: Optional[Path] = typer.Option(None),
+        agent_inputs: Optional[Path] = typer.Option(
+            None, help="JSON file with per-agent extra fields required by Engineering / Trust-Risk / CIO"
+        ),
+        auto_approve: bool = typer.Option(
+            False, "--auto-approve", help="Approve each step automatically without pausing"
+        ),
+        pipeline_id: Optional[str] = typer.Option(None, help="Custom pipeline ID (auto-generated if omitted)"),
+    ) -> None:
+        """Run a multi-agent pipeline end-to-end."""
+        from agentsuite.pipeline.orchestrator import PipelineOrchestrator
+
+        agent_list = [a.strip().replace("-", "_") for a in agents.split(",") if a.strip()]
+        extras: dict[str, Any] = {}
+        if agent_inputs is not None:
+            if not agent_inputs.exists():
+                typer.echo(f"Error: --agent-inputs file {agent_inputs} not found", err=True)
+                raise typer.Exit(1)
+            import json as _json
+            try:
+                extras = _json.loads(agent_inputs.read_text(encoding="utf-8"))
+            except Exception as exc:
+                typer.echo(f"Error: could not parse --agent-inputs: {exc}", err=True)
+                raise typer.Exit(1)
+
+        try:
+            orch = PipelineOrchestrator(output_root=_output_root())
+            state = orch.run(
+                agents=agent_list,
+                project_slug=project_slug,
+                business_goal=business_goal,
+                inputs_dir=inputs_dir,
+                agent_extras=extras,
+                pipeline_id=pipeline_id,
+                auto_approve=auto_approve,
+                llm=_resolve_llm_for_cli(),
+            )
+        except Exception as exc:
+            if _debug_mode:
+                traceback.print_exc()
+            else:
+                typer.echo(f"Error: {exc}", err=True)
+            raise typer.Exit(1)
+
+        typer.echo(json.dumps({
+            "pipeline_id": state.pipeline_id,
+            "status": state.status,
+            "current_step": state.current_step_index,
+            "total_steps": len(state.steps),
+            "total_cost_usd": state.total_cost_usd,
+        }, indent=2))
+        if state.status == "awaiting_approval":
+            current = state.steps[state.current_step_index]
+            typer.echo(
+                f"\nAwaiting approval for {current.agent!r} (run_id: {current.run_id}).\n"
+                f"Review artifacts in .agentsuite/runs/{current.run_id}/, then:\n"
+                f"  agentsuite pipeline approve"
+                f" --pipeline-id {state.pipeline_id} --approver <you>",
+                err=True,
+            )
+
+    @pipeline_app.command("approve")
+    def pipeline_approve(
+        pipeline_id: str = typer.Option(...),
+        approver: str = typer.Option(...),
+    ) -> None:
+        """Approve the current awaiting step and advance the pipeline."""
+        from agentsuite.pipeline.orchestrator import PipelineOrchestrator
+        from agentsuite.pipeline.state_store import PipelineNotFound
+
+        try:
+            orch = PipelineOrchestrator(output_root=_output_root())
+            state = orch.approve(
+                pipeline_id=pipeline_id,
+                approver=approver,
+                llm=_resolve_llm_for_cli(),
+            )
+        except PipelineNotFound:
+            typer.echo(f"Error: pipeline {pipeline_id!r} not found", err=True)
+            raise typer.Exit(1)
+        except Exception as exc:
+            if _debug_mode:
+                traceback.print_exc()
+            else:
+                typer.echo(f"Error: {exc}", err=True)
+            raise typer.Exit(1)
+
+        typer.echo(json.dumps({
+            "pipeline_id": state.pipeline_id,
+            "status": state.status,
+            "current_step": state.current_step_index,
+            "total_steps": len(state.steps),
+        }, indent=2))
+        if state.status == "awaiting_approval":
+            current = state.steps[state.current_step_index]
+            typer.echo(
+                f"\nAwaiting approval for next step: {current.agent!r}"
+                f" (run_id: {current.run_id}).",
+                err=True,
+            )
+
+    @pipeline_app.command("status")
+    def pipeline_status(
+        pipeline_id: str = typer.Option(...),
+    ) -> None:
+        """Show the current status of a pipeline run."""
+        from agentsuite.pipeline.orchestrator import PipelineOrchestrator
+        from agentsuite.pipeline.state_store import PipelineNotFound
+
+        try:
+            orch = PipelineOrchestrator(output_root=_output_root())
+            state = orch.status(pipeline_id=pipeline_id)
+        except PipelineNotFound:
+            typer.echo(f"Error: pipeline {pipeline_id!r} not found", err=True)
+            raise typer.Exit(1)
+
+        typer.echo(json.dumps({
+            "pipeline_id": state.pipeline_id,
+            "status": state.status,
+            "project_slug": state.project_slug,
+            "agents": state.agents,
+            "steps": [
+                {
+                    "agent": s.agent,
+                    "run_id": s.run_id,
+                    "status": s.status,
+                    "cost_usd": s.cost_usd,
+                }
+                for s in state.steps
+            ],
+            "current_step": state.current_step_index,
+            "total_cost_usd": state.total_cost_usd,
+        }, indent=2))
+
+    app.add_typer(pipeline_app, name="pipeline")
+
+
+_register_pipeline()
 
 
 @app.command("list-runs")

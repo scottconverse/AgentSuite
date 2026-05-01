@@ -99,6 +99,10 @@ def build_server() -> _ServerWrapper:
             expose_stages=_expose_stages(),
         )
 
+    # Pipeline tools
+    from agentsuite.pipeline.mcp_tools import register_pipeline_tools
+    register_pipeline_tools(server, output_root_fn=_output_root)
+
     # Cross-agent shared tools
     def agentsuite_list_agents() -> dict[str, Any]:
         """List all enabled agents and all registered agents."""

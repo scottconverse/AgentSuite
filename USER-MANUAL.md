@@ -4,9 +4,7 @@
 
 ---
 
-This manual is written for people who have never installed a Python package, never used a command line, and are not software engineers. Every step is shown exactly as you would type it. Every term is defined the first time it appears.
-
-If you already know your way around a terminal, you can skim the setup sections and jump straight to the agent chapters.
+This manual is written for technical founders and developers who build inside AI-native IDEs — Claude Code, Cowork, Codex, Google Antigravity. If you're comfortable in a terminal and know what an API key is, you're the right reader. Every step is shown in full; skip what you already know.
 
 ---
 
@@ -27,6 +25,7 @@ If you already know your way around a terminal, you can skim the setup sections 
    - Trust/Risk Agent
    - CIO Agent
 8. Reading Your Results
+8b. Chaining Agents (Pipeline)
 9. Configuration Reference
 10. Troubleshooting
 11. Glossary
@@ -77,12 +76,6 @@ AgentSuite uses a large language model — the AI brain — to write the documen
 - **Google Gemini**: https://aistudio.google.com/app/apikey — create an account, create a key
 - **Ollama (local, free, no account needed)**: runs the AI on your own computer — see Step 2b below
 
-**What is a terminal?**
-A terminal (also called a "command prompt" or "command line") is a text-based window where you type instructions directly to your computer.
-- **Windows:** Press the Start button, type "Command Prompt," press Enter.
-- **Mac:** Press Command + Space, type "Terminal," press Enter.
-- **Linux:** Your distribution's terminal application (often Ctrl + Alt + T).
-
 ---
 
 ## 3. Installation
@@ -106,7 +99,7 @@ AgentSuite uses "extras" to install only the AI provider libraries you need. Her
 | `[gemini]` | The `google-generativeai` library | You are using Google Gemini models |
 | `[ollama]` | The `ollama` Python library | You are running models locally via Ollama |
 | `[all]` | All four provider libraries above | You want to switch between providers without reinstalling |
-| `[mcp]` | MCP server dependencies | You are wiring AgentSuite into Claude Code, Codex, or another MCP-compatible tool |
+| `[mcp]` | MCP server dependencies | You are wiring AgentSuite into Claude Code, Cowork, Codex, Google Antigravity, or another MCP-compatible IDE |
 
 Example — install with OpenAI support:
 ```
@@ -807,6 +800,93 @@ A score below 7.0 does not mean the document is useless — it means one specifi
 **overall_pass: false**
 
 If the overall pass is false, at least one document scored below 7.0. You do not have to fix everything before approving — you can approve and edit documents afterward. But be aware that the flagged document has a known gap.
+
+---
+
+## 8b. Chaining Agents (Pipeline)
+
+You can run multiple agents back-to-back in a single command. Each agent completes its full five-stage pipeline; on approval its artifacts are promoted to `_kernel/<project_slug>/`, where the next agent picks them up as prior context.
+
+### Starting a pipeline
+
+```bash
+agentsuite pipeline run \
+  --agents founder,design,product \
+  --project-slug my-startup \
+  --business-goal "Launch a B2B invoicing tool for freelancers"
+```
+
+AgentSuite runs the first agent (founder), then pauses and prints:
+
+```
+Pipeline paused -- awaiting approval for step 1/3 (founder)
+Run ID: pipeline-20260501T120000-abc123
+To approve: agentsuite pipeline approve --pipeline-id pipeline-20260501T120000-abc123
+```
+
+Review the founder output in `.agentsuite/runs/`, then approve to continue:
+
+```bash
+agentsuite pipeline approve --pipeline-id pipeline-20260501T120000-abc123
+```
+
+Repeat for each subsequent agent, or check status at any time:
+
+```bash
+agentsuite pipeline status --pipeline-id pipeline-20260501T120000-abc123
+```
+
+### Auto-approve (headless)
+
+Add `--auto-approve` to skip the gate at every step:
+
+```bash
+agentsuite pipeline run \
+  --agents founder,design,product \
+  --project-slug my-startup \
+  --business-goal "Launch a B2B invoicing tool for freelancers" \
+  --auto-approve
+```
+
+Use this for overnight runs or when you trust all agents to succeed without review.
+
+### Agents that need extra inputs
+
+The `engineering`, `trust_risk`, and `cio` agents require fields that have no sensible default. Pass them via `--agent-inputs` pointing to a JSON file:
+
+```json
+{
+  "engineering": {
+    "tech_stack": "Python + FastAPI",
+    "scale_requirements": "1k RPM, 99.9% uptime"
+  },
+  "trust_risk": {
+    "risk_domain": "SaaS application",
+    "stakeholder_context": "enterprise customers with high compliance requirements"
+  }
+}
+```
+
+```bash
+agentsuite pipeline run \
+  --agents founder,engineering,trust_risk \
+  --project-slug my-startup \
+  --business-goal "Launch a B2B invoicing tool" \
+  --agent-inputs agent-inputs.json \
+  --auto-approve
+```
+
+If a required field is missing, AgentSuite prints a clear error with an example before running any agent.
+
+### Via MCP
+
+In Claude Code, Cowork, Codex, or Antigravity, use the three pipeline tools:
+
+| Tool | What it does |
+|---|---|
+| `agentsuite_pipeline_run` | Start a new pipeline |
+| `agentsuite_pipeline_approve` | Approve the current waiting step |
+| `agentsuite_pipeline_status` | Check pipeline status and step progress |
 
 ---
 

@@ -10,11 +10,17 @@ AgentSuite is a Python package and MCP server. It exposes role-specific agents (
 
 The agents are reasoning agents, not content generators. Output is a reusable system, not a one-off asset.
 
+## Who this is for
+
+Technical founders and developers who build inside AI-native IDEs — Claude Code, Cowork, Codex, Google Antigravity — and are frustrated that every new session starts from scratch. You know your way around a terminal. You have an API key. You want structured, reusable output, not a one-off generation you'll never find again.
+
 ## Why AgentSuite
 
-**For developers wiring AI into Codex / Claude Code / Cowork** who are tired of every generation re-introducing context and drifting on voice. AgentSuite is the operating layer between intent and output: seven role-specific agents that each walk a deterministic five-stage pipeline (intake → extract → spec → execute → qa) with a kernel-managed approval step, persist 26 artifacts per run, and promote approved output into a `_kernel/` that the next run consumes. The output is a reusable creative-ops or product-ops layer — not a one-off asset.
+**The problem:** AI IDEs are great at generating content but terrible at remembering it. Every session re-introduces context, re-drifts on voice, re-argues decisions that were settled last week.
 
-**What makes it different:** the *system around* generation, not the generation itself. Every artifact is on disk, versioned, QA-scored, and reusable. Provider-agnostic (Anthropic / OpenAI / Gemini / local Ollama). MCP-native — agents surface as tools in any MCP-compatible IDE without a separate server.
+**What AgentSuite does:** acts as the operating layer between your intent and your IDE. Seven role-specific agents each walk a five-stage pipeline (intake → extract → spec → execute → qa), persist artifacts to disk, and promote approved output into a `_kernel/` that every subsequent run — and every downstream agent — consumes. Your brand system, your engineering decisions, your risk posture: written once, versioned, reused.
+
+**What makes it different:** the *system around* generation, not the generation itself. Every artifact is on disk, QA-scored, and reusable across sessions. Provider-agnostic (Anthropic / OpenAI / Gemini / local Ollama). MCP-native — agents surface as tools in Claude Code, Cowork, Codex, Google Antigravity, or any MCP-compatible IDE without a separate server.
 
 ## Install
 
@@ -113,6 +119,10 @@ Add to project-root `.mcp.json`:
 
 Restart the harness.
 
+## Quick start (MCP — Google Antigravity)
+
+AgentSuite is MCP-compatible with Google Antigravity. Refer to the Antigravity documentation for the MCP server configuration format, then point it at `uvx agentsuite-mcp` with `AGENTSUITE_ENABLED_AGENTS` set to your desired agent list.
+
 ## What the agents produce
 
 ### Founder agent — 26 artifacts per run:
@@ -193,6 +203,60 @@ print(state.stage)   # "approval"
 ```
 
 `resolve_provider()` auto-detects your API key from environment variables. See [Configuration](#configuration) for the full list of env vars.
+
+## Chaining agents (pipeline)
+
+Run multiple agents back-to-back — each agent's output feeds into the next run's context via the shared `_kernel/<project_slug>/` directory.
+
+**CLI — headless (auto-approve each step):**
+
+```bash
+agentsuite pipeline run \
+  --agents founder,design,product \
+  --project-slug my-startup \
+  --business-goal "Launch a B2B invoicing tool for freelancers" \
+  --auto-approve
+```
+
+**CLI — with approval gates (default):**
+
+```bash
+# Step 1: start the pipeline (pauses after founder)
+agentsuite pipeline run \
+  --agents founder,design,product \
+  --project-slug my-startup \
+  --business-goal "Launch a B2B invoicing tool for freelancers"
+# Prints: pipeline-id: pipeline-20260501T120000-abc123
+
+# Step 2: review founder output, then approve
+agentsuite pipeline approve --pipeline-id pipeline-20260501T120000-abc123
+
+# Repeat approve for each subsequent agent, or check status at any time:
+agentsuite pipeline status --pipeline-id pipeline-20260501T120000-abc123
+```
+
+**Agents requiring extra inputs** (engineering, trust_risk, cio) need a JSON file passed via `--agent-inputs`:
+
+```json
+// agent-inputs.json
+{
+  "engineering": {
+    "tech_stack": "Python + FastAPI",
+    "scale_requirements": "1k RPM, 99.9% uptime"
+  }
+}
+```
+
+```bash
+agentsuite pipeline run \
+  --agents founder,engineering \
+  --project-slug my-startup \
+  --business-goal "Launch a B2B invoicing tool" \
+  --agent-inputs agent-inputs.json \
+  --auto-approve
+```
+
+**MCP** (Claude Code / Cowork / Codex / Antigravity): use `agentsuite_pipeline_run`, `agentsuite_pipeline_approve`, `agentsuite_pipeline_status`.
 
 ## Configuration
 
@@ -277,7 +341,6 @@ Full architecture diagram with all agents: see `docs/README-FULL.pdf`.
 **Roadmap (v1.1.x candidates):**
 - Multi-agent pipelines (chain agents end-to-end)
 - Per-day cost cap
-- `agentsuite migrate` command for run directory schema upgrades
 - 8th agent TBD
 
 ## Documentation

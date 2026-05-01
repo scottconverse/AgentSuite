@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231a1a1a'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='18' font-weight='bold' text-anchor='middle' fill='%23fff'%3EA%3C/text%3E%3C/svg%3E">
   <title>AgentSuite — reasoning agents for vague intent → precise artifacts</title>
-  <meta name="description" content="Seven role-specific reasoning agents that turn vague human intent into precise operating artifacts. Open-source, MIT-licensed, MCP-compatible with Codex, Claude Code, and Cowork.">
+  <meta name="description" content="Seven role-specific reasoning agents that turn vague human intent into precise operating artifacts. Open-source, MIT-licensed, MCP-compatible with Claude Code, Cowork, Codex, and Google Antigravity.">
   <style>
     :root {
       --fg: #1a1a1a;
@@ -47,10 +47,13 @@
 <body>
   <header>
     <h1>AgentSuite <span class="v">v1.0.11</span></h1>
-    <p class="lede">Seven role-specific reasoning agents that turn vague intent into precise operating artifacts. Open-source. MCP-compatible with Codex, Claude Code, and Cowork.</p>
+    <p class="lede">Seven role-specific reasoning agents that turn vague intent into precise operating artifacts — and keep that output alive across sessions. For technical founders and developers building in Claude Code, Cowork, Codex, or Google Antigravity.</p>
   </header>
 
   <main>
+  <h2>Who this is for</h2>
+  <p>Technical founders and developers who build inside AI-native IDEs and are frustrated that every new session starts from scratch. You know your way around a terminal. You have an API key. You want structured, reusable output — not a one-off generation you'll never find again.</p>
+
   <h2>What it does</h2>
   <p>AgentSuite codifies the operating system around AI generation. Each agent walks a five-stage pipeline (intake → extract → spec → execute → qa) with a kernel-managed approval step, persists 26 artifacts to disk, and promotes approved output into a long-lived <code>_kernel/</code> that downstream agents consume. The result is a reusable creative-ops or product-ops layer, not a one-off content generator.</p>
 
@@ -94,6 +97,7 @@ args = ["agentsuite-mcp"]
 AGENTSUITE_ENABLED_AGENTS = "founder,design,product,engineering,marketing,trust_risk,cio"</code></pre>
 
   <p><strong>Claude Code / Cowork</strong> — add to <code>.mcp.json</code>:</p>
+
   <pre><code>{
   "mcpServers": {
     "agentsuite": {
@@ -104,15 +108,17 @@ AGENTSUITE_ENABLED_AGENTS = "founder,design,product,engineering,marketing,trust_
   }
 }</code></pre>
 
+  <p><strong>Google Antigravity</strong> — AgentSuite is MCP-compatible with Google Antigravity. Refer to the <a href="https://antigravity.google/download">Antigravity documentation</a> for the MCP server configuration format, then point it at <code>uvx agentsuite-mcp</code> with <code>AGENTSUITE_ENABLED_AGENTS</code> set to your desired agent list.</p>
+
   <h2>Shipped agents</h2>
   <div class="grid">
-    <div class="card"><h3>v0.1 Founder</h3><p>Brand system, brief library, voice guide, prompt library.</p></div>
-    <div class="card"><h3>v0.2 Design</h3><p>Brief generation + brand QA scoring.</p></div>
-    <div class="card"><h3>v0.3 Product</h3><p>PM intent → UI spec → coding handoff.</p></div>
-    <div class="card"><h3>v0.4 Engineering</h3><p>9 engineering spec artifacts (ADR, system design, API spec, data model, security review, deployment plan, runbook, tech debt register, performance requirements) + 8 brief templates.</p></div>
-    <div class="card"><h3>v0.5 Marketing</h3><p>9 marketing spec artifacts (campaign brief, target audience profile, messaging framework, content calendar, channel strategy, SEO keyword plan, competitive positioning, launch plan, measurement framework) + 8 brief templates.</p></div>
-    <div class="card"><h3>v0.6 Trust/Risk</h3><p>9 trust and risk spec artifacts (threat model, risk register, control framework, incident response plan, compliance matrix, vendor risk assessment, security policy, audit readiness report, residual risk acceptance) + 8 brief templates.</p></div>
-    <div class="card"><h3>v0.7 CIO</h3><p>9 IT strategy and governance artifacts (IT strategy, technology roadmap, vendor portfolio, digital transformation plan, IT governance framework, enterprise architecture, budget allocation model, workforce development plan, IT risk appetite statement) + 8 brief templates.</p></div>
+    <div class="card"><h3>Founder</h3><p>Brand system, brief library, voice guide, prompt library.</p></div>
+    <div class="card"><h3>Design</h3><p>Visual identity, design system, and brand QA scoring.</p></div>
+    <div class="card"><h3>Product</h3><p>PM intent → UI spec → coding handoff.</p></div>
+    <div class="card"><h3>Engineering</h3><p>Architecture decisions, system design, API spec, data model, security review, deployment plan, runbook, tech-debt register, performance requirements + 8 brief templates.</p></div>
+    <div class="card"><h3>Marketing</h3><p>Campaign brief, audience profile, messaging framework, content calendar, channel strategy, SEO keyword plan, competitive positioning, launch plan, measurement framework + 8 brief templates.</p></div>
+    <div class="card"><h3>Trust/Risk</h3><p>Threat model, risk register, control framework, incident response plan, compliance matrix, vendor risk assessment, security policy, audit readiness report, residual risk acceptance + 8 brief templates.</p></div>
+    <div class="card"><h3>CIO</h3><p>IT strategy, technology roadmap, vendor portfolio, digital transformation plan, IT governance framework, enterprise architecture, budget allocation model, workforce development plan, IT risk appetite statement + 8 brief templates.</p></div>
   </div>
 
   <h2>Roadmap</h2>
