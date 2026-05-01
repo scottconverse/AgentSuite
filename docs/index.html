@@ -3,101 +3,145 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231a1a1a'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='18' font-weight='bold' text-anchor='middle' fill='%23fff'%3EA%3C/text%3E%3C/svg%3E">
-  <title>AgentSuite — reasoning agents for vague intent → precise artifacts</title>
-  <meta name="description" content="Seven role-specific reasoning agents that turn vague human intent into precise operating artifacts. Open-source, MIT-licensed, MCP-compatible with Claude Code, Cowork, Codex, and Google Antigravity.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230F172A'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='18' font-weight='bold' text-anchor='middle' fill='%2322C55E'%3EA%3C/text%3E%3C/svg%3E">
+  <title>AgentSuite -- reasoning agents for vague intent, precise artifacts</title>
+  <meta name="description" content="Seven role-specific reasoning agents that turn a business goal into 26 structured artifacts -- brand system, product spec, architecture, marketing plan, risk register, IT strategy. Open-source, MIT-licensed. Works in Claude Code, Cowork, Codex, and Google Antigravity.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --fg: #1a1a1a;
-      --muted: #555;
-      --bg: #fafafa;
-      --accent: #2a4d8f;
-      --code-bg: #f0f0f0;
-      --border: #ddd;
+      --bg:       #0F172A;
+      --surface:  #1E293B;
+      --border:   #334155;
+      --fg:       #F8FAFC;
+      --muted:    #94A3B8;
+      --accent:   #22C55E;
+      --accent-dim: #16A34A;
+      --code-bg:  #1E293B;
     }
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-      max-width: 760px;
+      font-family: "IBM Plex Sans", -apple-system, system-ui, sans-serif;
+      max-width: 800px;
       margin: 0 auto;
       padding: 2.5rem 1.5rem;
       color: var(--fg);
       background: var(--bg);
-      line-height: 1.6;
+      line-height: 1.65;
     }
-    h1 { font-size: 2rem; margin-bottom: 0.25rem; letter-spacing: -0.02em; }
-    h1 .v { font-size: 0.9rem; color: var(--muted); margin-left: 0.5rem; font-weight: normal; }
-    .lede { font-size: 1.15rem; color: var(--muted); margin: 0 0 2rem; }
-    h2 { font-size: 1.25rem; margin-top: 2.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.25rem; }
-    pre { background: var(--code-bg); padding: 1rem; border-radius: 4px; overflow-x: auto; font-size: 0.9rem; }
-    code { background: var(--code-bg); padding: 0.1em 0.3em; border-radius: 3px; font-size: 0.9em; }
-    pre code { background: transparent; padding: 0; }
-    a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; border-bottom: 1px solid transparent; }
+    h1 { font-size: 2rem; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+    h1 .v { font-size: 0.85rem; color: var(--accent); margin-left: 0.5rem; font-weight: 400; font-family: "JetBrains Mono", monospace; }
+    .lede { font-size: 1.1rem; color: var(--muted); margin: 0 0 0.75rem; max-width: 65ch; }
+    .for { font-size: 0.95rem; color: var(--muted); margin-bottom: 2rem; }
+    .for strong { color: var(--fg); }
+    h2 { font-size: 1.15rem; font-weight: 600; margin-top: 2.5rem; margin-bottom: 0.75rem; color: var(--fg); border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+    h3 { font-size: 1rem; font-weight: 500; margin: 1.25rem 0 0.4rem; color: var(--fg); }
+    p { margin-bottom: 0.9rem; color: var(--muted); }
+    p strong { color: var(--fg); }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      padding: 1rem 1.25rem;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 0.875rem;
+      font-family: "JetBrains Mono", monospace;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    code {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      padding: 0.1em 0.35em;
+      border-radius: 3px;
+      font-size: 0.875em;
+      font-family: "JetBrains Mono", monospace;
+    }
+    pre code { background: transparent; border: none; padding: 0; font-size: inherit; }
+    a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 200ms; }
     a:hover { border-bottom-color: var(--accent); }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
-    .card { padding: 1rem; border: 1px solid var(--border); border-radius: 4px; background: white; }
-    .card h3 { margin: 0 0 0.5rem; font-size: 1rem; }
-    .card p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+    a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+    .demo { margin: 1.5rem 0 2.5rem; }
+    .demo img { max-width: 100%; border-radius: 6px; border: 1px solid var(--border); display: block; }
+    .demo-caption { font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 0.75rem 0 1.5rem; }
+    .card { padding: 1rem 1.1rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); }
+    .card h3 { margin: 0 0 0.35rem; font-size: 0.95rem; color: var(--fg); }
+    .card p { margin: 0; color: var(--muted); font-size: 0.875rem; line-height: 1.5; }
+    .cta {
+      display: inline-block;
+      background: var(--accent);
+      color: #0F172A;
+      font-weight: 600;
+      padding: 0.5rem 1.25rem;
+      border-radius: 5px;
+      font-size: 0.95rem;
+      margin: 0.5rem 0 1.5rem;
+      cursor: pointer;
+      transition: background 200ms;
+      border-bottom: none;
+    }
+    .cta:hover { background: var(--accent-dim); border-bottom: none; }
+    .pill { display: inline-block; font-size: 0.75rem; font-family: "JetBrains Mono", monospace; background: var(--surface); border: 1px solid var(--border); border-radius: 3px; padding: 0.1em 0.5em; color: var(--muted); margin-left: 0.4rem; vertical-align: middle; }
     footer { margin-top: 4rem; padding-top: 1rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85rem; }
-    .output-example { margin: 2rem 0; }
-    .output-example pre { border-left: 3px solid var(--accent); background: var(--code-bg); }
-    @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+    @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
   </style>
 </head>
 <body>
   <header>
-    <h1>AgentSuite <span class="v">v1.0.11</span></h1>
-    <p class="lede">Seven role-specific reasoning agents that turn vague intent into precise operating artifacts — and keep that output alive across sessions. For technical founders and developers building in Claude Code, Cowork, Codex, or Google Antigravity.</p>
+    <h1>AgentSuite <span class="v">v1.0.12</span></h1>
+    <p class="lede">Turn a business goal into 26 structured artifacts -- brand system, product spec, architecture, marketing plan, risk register -- in one command.</p>
+    <p class="for">For <strong>technical founders</strong> and <strong>developers</strong> building in Claude Code, Cowork, Codex, or Google Antigravity.</p>
+    <a class="cta" href="https://github.com/scottconverse/AgentSuite">View on GitHub</a>
   </header>
 
   <main>
-  <h2>Who this is for</h2>
-  <p>Technical founders and developers who build inside AI-native IDEs and are frustrated that every new session starts from scratch. You know your way around a terminal. You have an API key. You want structured, reusable output — not a one-off generation you'll never find again.</p>
 
-  <h2>What it does</h2>
-  <p>AgentSuite codifies the operating system around AI generation. Each agent walks a five-stage pipeline (intake → extract → spec → execute → qa) with a kernel-managed approval step, persists 26 artifacts to disk, and promotes approved output into a long-lived <code>_kernel/</code> that downstream agents consume. The result is a reusable creative-ops or product-ops layer, not a one-off content generator.</p>
+  <div class="demo">
+    <img src="screenshots/cli-founder-run.svg" alt="agentsuite founder run -- five stages, JSON summary, cost tracking" />
+    <p class="demo-caption">A real <code>agentsuite founder run</code> end-to-end: five stages, 14 artifacts, cost summary. <a href="https://github.com/scottconverse/AgentSuite/tree/main/examples/sample-output/founder">Browse the full output directory.</a></p>
+  </div>
 
   <h2>Install</h2>
   <pre><code>pip install "agentsuite[anthropic] @ git+https://github.com/scottconverse/AgentSuite.git"
-# other providers: [openai]  [gemini]  [ollama]  [all]
-# or, no install:
-uvx --from "agentsuite[mcp] @ git+https://github.com/scottconverse/AgentSuite.git" agentsuite-mcp</code></pre>
+# other providers: [openai]  [gemini]  [ollama]  [all]</code></pre>
+  <p>Or run without installing via <code>uvx</code> (MCP mode):</p>
+  <pre><code>uvx --from "agentsuite[mcp] @ git+https://github.com/scottconverse/AgentSuite.git" agentsuite-mcp</code></pre>
 
-  <h2>Quick start (CLI)</h2>
+  <h2>Single agent</h2>
   <pre><code>export ANTHROPIC_API_KEY=sk-ant-...
+
 agentsuite founder run \
   --business-goal "Launch PatentForgeLocal v1" \
+  --project-slug pfl
+
+# Review output, then approve to promote to _kernel/pfl/
+agentsuite founder approve --latest --project-slug pfl --approver you</code></pre>
+
+  <h2>Chain agents (pipeline)</h2>
+  <p>Run multiple agents back-to-back. Each agent's approved output feeds the next via <code>_kernel/&lt;slug&gt;/</code>.</p>
+  <pre><code># Headless -- auto-approves each step
+agentsuite pipeline run \
+  --agents founder,design,product \
   --project-slug pfl \
-  --inputs-dir ./examples/patentforgelocal</code></pre>
+  --business-goal "Launch PatentForgeLocal v1" \
+  --auto-approve
 
-  <section class="output-example">
-    <h2>Sample run</h2>
-    <p><img src="screenshots/cli-founder-run.svg" alt="agentsuite founder run end to end" style="max-width:100%;border-radius:6px;border:1px solid var(--border);" /></p>
-    <p>Browse the full output of a Founder run — 14 artifacts, no install required — at <a href="https://github.com/scottconverse/AgentSuite/tree/main/examples/sample-output/founder">examples/sample-output/founder/</a>. The on-disk shape is identical to a live run; the free-text bodies are deterministic-mock scaffold (see the directory README).</p>
+# With review gates (default) -- pauses after each agent
+agentsuite pipeline run \
+  --agents founder,design,product \
+  --project-slug pfl \
+  --business-goal "Launch PatentForgeLocal v1"
 
-    <h3>What you get on disk</h3>
-    <p><img src="screenshots/runs-tree.svg" alt="run directory tree after success" style="max-width:100%;border-radius:6px;border:1px solid var(--border);" /></p>
+# Prints artifact list + approve command. When ready:
+agentsuite pipeline approve --pipeline-id &lt;id&gt;
 
-    <h3>Spec artifacts (rendered, mock-LLM scaffold)</h3>
-    <p><em>The screenshots below are rendered from <strong>deterministic mock-LLM output</strong> -- the artifact <em>shape</em> is real, but the body text is scaffold strings. To see real LLM-generated content, run the agent yourself with a configured provider; see the <a href="https://github.com/scottconverse/AgentSuite/tree/main/examples/sample-output/founder">sample-output README</a>.</em></p>
-    <p><img src="screenshots/brand-system-rendered.svg" alt="brand-system.md rendered (mock-LLM scaffold)" style="max-width:100%;border-radius:6px;border:1px solid var(--border);" /></p>
-    <p><img src="screenshots/qa-report-rendered.svg" alt="qa_report.md rendered (mock-LLM scaffold)" style="max-width:100%;border-radius:6px;border:1px solid var(--border);" /></p>
+# Lost the pipeline ID? List all pipelines:
+agentsuite pipeline list</code></pre>
 
-    <h3>After approval</h3>
-    <p><img src="screenshots/kernel-tree.svg" alt="kernel directory after approval" style="max-width:100%;border-radius:6px;border:1px solid var(--border);" /></p>
-  </section>
-
-  <h2>Quick start (MCP)</h2>
-  <p><strong>Codex</strong> — add to <code>~/.codex/mcp.toml</code>:</p>
-  <pre><code>[servers.agentsuite]
-command = "uvx"
-args = ["agentsuite-mcp"]
-
-[servers.agentsuite.env]
-AGENTSUITE_ENABLED_AGENTS = "founder,design,product,engineering,marketing,trust_risk,cio"</code></pre>
-
-  <p><strong>Claude Code / Cowork</strong> — add to <code>.mcp.json</code>:</p>
-
+  <h2>MCP (Claude Code / Cowork)</h2>
+  <p>Add to <code>.mcp.json</code> in your project root:</p>
   <pre><code>{
   "mcpServers": {
     "agentsuite": {
@@ -108,37 +152,68 @@ AGENTSUITE_ENABLED_AGENTS = "founder,design,product,engineering,marketing,trust_
   }
 }</code></pre>
 
-  <p><strong>Google Antigravity</strong> — AgentSuite is MCP-compatible with Google Antigravity. Refer to the <a href="https://antigravity.google/download">Antigravity documentation</a> for the MCP server configuration format, then point it at <code>uvx agentsuite-mcp</code> with <code>AGENTSUITE_ENABLED_AGENTS</code> set to your desired agent list.</p>
+  <h2>MCP (Codex)</h2>
+  <p>Add to <code>~/.codex/mcp.toml</code>:</p>
+  <pre><code>[servers.agentsuite]
+command = "uvx"
+args = ["agentsuite-mcp"]
 
-  <h2>Shipped agents</h2>
+[servers.agentsuite.env]
+AGENTSUITE_ENABLED_AGENTS = "founder,design,product,engineering,marketing,trust_risk,cio"</code></pre>
+
+  <p><strong>Google Antigravity:</strong> MCP-compatible. Use the same <code>uvx agentsuite-mcp</code> command with <code>AGENTSUITE_ENABLED_AGENTS</code> set. See the <a href="https://antigravity.google/download">Antigravity docs</a> for the config format.</p>
+
+  <h2>What each agent produces</h2>
   <div class="grid">
-    <div class="card"><h3>Founder</h3><p>Brand system, brief library, voice guide, prompt library.</p></div>
-    <div class="card"><h3>Design</h3><p>Visual identity, design system, and brand QA scoring.</p></div>
-    <div class="card"><h3>Product</h3><p>PM intent → UI spec → coding handoff.</p></div>
-    <div class="card"><h3>Engineering</h3><p>Architecture decisions, system design, API spec, data model, security review, deployment plan, runbook, tech-debt register, performance requirements + 8 brief templates.</p></div>
-    <div class="card"><h3>Marketing</h3><p>Campaign brief, audience profile, messaging framework, content calendar, channel strategy, SEO keyword plan, competitive positioning, launch plan, measurement framework + 8 brief templates.</p></div>
-    <div class="card"><h3>Trust/Risk</h3><p>Threat model, risk register, control framework, incident response plan, compliance matrix, vendor risk assessment, security policy, audit readiness report, residual risk acceptance + 8 brief templates.</p></div>
-    <div class="card"><h3>CIO</h3><p>IT strategy, technology roadmap, vendor portfolio, digital transformation plan, IT governance framework, enterprise architecture, budget allocation model, workforce development plan, IT risk appetite statement + 8 brief templates.</p></div>
+    <div class="card">
+      <h3>Founder <span class="pill">14 artifacts</span></h3>
+      <p>Brand system, brief library, voice guide, prompt library, QA report.</p>
+    </div>
+    <div class="card">
+      <h3>Design <span class="pill">14 artifacts</span></h3>
+      <p>Visual identity, design system, component spec, brand QA scoring.</p>
+    </div>
+    <div class="card">
+      <h3>Product <span class="pill">14 artifacts</span></h3>
+      <p>PM intent to UI spec to coding handoff, user story map, acceptance criteria.</p>
+    </div>
+    <div class="card">
+      <h3>Engineering <span class="pill">14 artifacts</span></h3>
+      <p>Architecture decisions, API spec, data model, security review, deployment plan, runbook, tech-debt register.</p>
+    </div>
+    <div class="card">
+      <h3>Marketing <span class="pill">14 artifacts</span></h3>
+      <p>Campaign brief, audience profile, messaging framework, content calendar, channel strategy, SEO plan, launch plan.</p>
+    </div>
+    <div class="card">
+      <h3>Trust / Risk <span class="pill">14 artifacts</span></h3>
+      <p>Threat model, risk register, control framework, incident response plan, compliance matrix, audit readiness report.</p>
+    </div>
+    <div class="card">
+      <h3>CIO <span class="pill">14 artifacts</span></h3>
+      <p>IT strategy, technology roadmap, digital transformation plan, enterprise architecture, budget model, workforce plan.</p>
+    </div>
+    <div class="card">
+      <h3>What stays between sessions</h3>
+      <p>Approved artifacts are promoted to <code>_kernel/&lt;slug&gt;/</code> and picked up automatically by the next agent or session.</p>
+    </div>
   </div>
 
-  <h2>Roadmap</h2>
-  <p>All 7 core agents are shipped and stable. Current focus: multi-agent pipelines to chain agents end-to-end, and per-day cost controls for production safety. See <a href="https://github.com/scottconverse/AgentSuite/blob/main/CHANGELOG.md">CHANGELOG.md</a> for detailed updates — community contributions welcome.</p>
-
   <h2>Documentation</h2>
-  <ul>
-    <li><a href="https://github.com/scottconverse/AgentSuite/blob/main/README.md">README</a> — install, quickstart, configuration</li>
-    <li><a href="https://github.com/scottconverse/AgentSuite/blob/main/USER-MANUAL.md">USER-MANUAL.md</a> — plain-language walkthrough</li>
-    <li><a href="https://github.com/scottconverse/AgentSuite/blob/main/docs/README-FULL.pdf">README-FULL.pdf</a> — full reference with architecture diagrams</li>
-    <li><a href="https://github.com/scottconverse/AgentSuite/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a> — agent-implementation guide</li>
-    <li><a href="https://github.com/scottconverse/AgentSuite/blob/main/CHANGELOG.md">CHANGELOG.md</a></li>
+  <ul style="color:var(--muted);padding-left:1.25rem;line-height:2;">
+    <li><a href="https://github.com/scottconverse/AgentSuite/blob/main/README.md">README</a> -- install, quickstart, pipeline reference, configuration</li>
+    <li><a href="https://github.com/scottconverse/AgentSuite/blob/main/USER-MANUAL.md">USER-MANUAL.md</a> -- plain-language walkthrough, every option explained</li>
+    <li><a href="https://github.com/scottconverse/AgentSuite/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a> -- how to add a new agent</li>
+    <li><a href="https://github.com/scottconverse/AgentSuite/blob/main/CHANGELOG.md">CHANGELOG.md</a> -- full version history</li>
   </ul>
 
   <h2>License</h2>
-  <p>MIT. Source on <a href="https://github.com/scottconverse/AgentSuite">GitHub</a>. Issues + discussion welcome.</p>
+  <p>MIT. Source on <a href="https://github.com/scottconverse/AgentSuite">GitHub</a>. Issues and contributions welcome.</p>
+
+  </main>
 
   <footer>
     <p>AgentSuite is built and maintained by <a href="https://github.com/scottconverse">Scott Converse</a>.</p>
   </footer>
-  </main>
 </body>
 </html>

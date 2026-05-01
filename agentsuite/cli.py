@@ -146,6 +146,10 @@ def _make_approve_fn(agent_class: type) -> Any:
                 typer.echo("Error: provide --run-id <id> or --latest.", err=True)
                 raise typer.Exit(1)
             agent = agent_class(output_root=_output_root(), llm=_resolve_llm_for_cli())
+            run_dir = _output_root() / "runs" / resolved_run_id
+            summary = _artifact_summary(run_dir)
+            if summary:
+                typer.echo(f"\nArtifacts produced:\n{summary}", err=True)
             state = agent.approve(run_id=resolved_run_id, approver=approver, project_slug=project_slug)
         except typer.Exit:
             raise
@@ -244,6 +248,28 @@ def _register_agents() -> None:
 _register_agents()
 
 
+def _artifact_summary(run_dir: Path, max_shown: int = 6) -> str:
+    """Return a short human-readable summary of the artifacts in *run_dir*.
+
+    Lists user-facing files (excludes _state.json, _meta.json and directories).
+    """
+    if not run_dir.exists():
+        return ""
+    files = sorted(
+        f for f in run_dir.iterdir()
+        if f.is_file() and not f.name.startswith("_")
+    )
+    if not files:
+        return ""
+    lines = []
+    for f in files[:max_shown]:
+        size_kb = f.stat().st_size / 1024
+        lines.append(f"  {f.name:<30}  {size_kb:.1f} KB")
+    if len(files) > max_shown:
+        lines.append(f"  (+ {len(files) - max_shown} more in {run_dir})")
+    return "\n".join(lines)
+
+
 def _default_approver() -> str:
     import getpass
     try:
@@ -303,14 +329,31 @@ def _register_pipeline() -> None:
         extras: dict[str, Any] = {}
         if agent_inputs is not None:
             if not agent_inputs.exists():
-                typer.echo(f"Error: --agent-inputs file {agent_inputs} not found", err=True)
+                typer.echo(f"Error: --agent-inputs file not found: {agent_inputs}", err=True)
                 raise typer.Exit(1)
             import json as _json
             try:
-                extras = _json.loads(agent_inputs.read_text(encoding="utf-8"))
-            except Exception as exc:
-                typer.echo(f"Error: could not parse --agent-inputs: {exc}", err=True)
+                raw = _json.loads(agent_inputs.read_text(encoding="utf-8"))
+            except _json.JSONDecodeError as exc:
+                typer.echo(
+                    f"Error: --agent-inputs is not valid JSON.\n"
+                    f"  File: {agent_inputs}\n"
+                    f"  Problem: {exc.msg} at line {exc.lineno}, column {exc.colno}\n"
+                    f"  Expected format: {{\"engineering\": {{\"tech_stack\": \"...\", \"scale_requirements\": \"...\"}}}}",
+                    err=True,
+                )
                 raise typer.Exit(1)
+            except Exception as exc:
+                typer.echo(f"Error: could not read --agent-inputs: {exc}", err=True)
+                raise typer.Exit(1)
+            if not isinstance(raw, dict):
+                typer.echo(
+                    f"Error: --agent-inputs must be a JSON object, got {type(raw).__name__}.\n"
+                    f"  Expected: {{\"<agent-name>\": {{\"field\": \"value\"}}}}",
+                    err=True,
+                )
+                raise typer.Exit(1)
+            extras = raw
 
         on_progress = _make_pipeline_progress(len(agent_list))
         output_root = _output_root()
@@ -346,11 +389,12 @@ def _register_pipeline() -> None:
         if state.status == "awaiting_approval":
             current = state.steps[state.current_step_index]
             run_dir = output_root / "runs" / current.run_id
+            summary = _artifact_summary(run_dir)
+            artifact_block = f"\nProduced by {current.agent!r}:\n{summary}\n" if summary else ""
             typer.echo(
-                f"\nAwaiting approval for {current.agent!r}.\n"
-                f"Review artifacts in {run_dir}, then:\n"
-                f"  agentsuite pipeline approve"
-                f" --pipeline-id {state.pipeline_id}",
+                f"{artifact_block}"
+                f"Awaiting approval. Review, then run:\n"
+                f"  agentsuite pipeline approve --pipeline-id {state.pipeline_id}",
                 err=True,
             )
         elif state.status == "done":
@@ -405,9 +449,11 @@ def _register_pipeline() -> None:
         if state.status == "awaiting_approval":
             current = state.steps[state.current_step_index]
             run_dir = output_root / "runs" / current.run_id
+            summary = _artifact_summary(run_dir)
+            artifact_block = f"\nProduced by {current.agent!r}:\n{summary}\n" if summary else ""
             typer.echo(
-                f"\nAwaiting approval for {current.agent!r}.\n"
-                f"Review artifacts in {run_dir}, then:\n"
+                f"{artifact_block}"
+                f"Awaiting approval. Review, then run:\n"
                 f"  agentsuite pipeline approve --pipeline-id {state.pipeline_id}",
                 err=True,
             )
@@ -450,6 +496,40 @@ def _register_pipeline() -> None:
             "current_step": state.current_step_index,
             "total_cost_usd": state.total_cost_usd,
         }, indent=2))
+
+    @pipeline_app.command("list")
+    def pipeline_list() -> None:
+        """List all pipelines in the current output directory, newest first."""
+        from agentsuite.pipeline.schema import PipelineState
+        from agentsuite.pipeline.state_store import PipelineStateStore
+
+        pipelines_root = _output_root() / "pipelines"
+        if not pipelines_root.exists():
+            typer.echo("[]")
+            return
+
+        out = []
+        for d in pipelines_root.iterdir():
+            if not d.is_dir():
+                continue
+            store = PipelineStateStore(pipelines_root, d.name)
+            try:
+                state = store.load()
+            except Exception:
+                continue
+            out.append({
+                "pipeline_id": state.pipeline_id,
+                "status": state.status,
+                "project_slug": state.project_slug,
+                "agents": state.agents,
+                "current_step": state.current_step_index,
+                "total_steps": len(state.steps),
+                "total_cost_usd": state.total_cost_usd,
+                "updated_at": state.updated_at.isoformat(),
+            })
+
+        out.sort(key=lambda x: str(x["updated_at"]), reverse=True)
+        typer.echo(json.dumps(out, indent=2))
 
     app.add_typer(pipeline_app, name="pipeline")
 

@@ -8,6 +8,21 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 - **v1.1.x** — First minor after GA. Candidates from the rc1 Discussions Ideas board (8th agent, per-day cost cap, GPG signed tags if requested). Plus next-sprint watchlist from the 2026-04-30 audit: extract `register_standard_tools()` to deduplicate per-agent mcp_tools.py (W-08), `_INPUTS_BY_AGENT` parity test (W-02), `SECURITY.md` disclosure policy (W-09).
 
+## [1.0.13] - 2026-05-01
+
+Sprint 7 -- UX completion pass: artifact visibility, pipeline recovery, landing page overhaul.
+
+### Added
+
+- **Artifact summary before every approve prompt:** Both `agentsuite <agent> approve` and `agentsuite pipeline approve` now print the files produced (name + size in KB) before asking for approval. Users see exactly what to review without navigating the filesystem.
+- **`agentsuite pipeline list`:** Lists all pipelines in the output directory sorted newest-first, with status, project slug, agents, step progress, cost, and timestamp. Recovers pipeline IDs after losing a terminal session.
+- **9 new tests:** `tests/unit/test_artifact_summary.py` (7) covering exclude of internal files, max_shown cap, size formatting, empty cases. `tests/integration/test_pipeline_orchestrator.py` (+2) for pipeline list behavior.
+
+### Changed
+
+- **Landing page fully redesigned:** Dark mode (OLED, `#0F172A`), IBM Plex Sans body, JetBrains Mono code. Terminal demo SVG moved into the hero -- first thing visible. Pipeline quick start added. Agent cards updated with artifact counts. Version bumped to v1.0.12.
+- **`--agent-inputs` error messages improved:** JSON parse errors now include file path, line/column of the problem, and an expected-format example. Non-object JSON reports the actual type received.
+
 ## [1.0.12] - 2026-05-01
 
 Sprint 6 -- multi-agent pipeline orchestration; audience messaging refresh.

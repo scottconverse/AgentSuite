@@ -258,6 +258,28 @@ class TestProgressCallback:
         assert ("agent_start", "design") in events
 
 
+class TestPipelineList:
+    def test_list_returns_all_pipelines(self, tmp_path):
+        orch = PipelineOrchestrator(output_root=tmp_path)
+        for slug in ("alpha", "beta"):
+            orch.run(
+                agents=["founder"],
+                project_slug=slug,
+                business_goal="test",
+                auto_approve=True,
+                llm=_default_mock_for_cli(),
+            )
+        from agentsuite.pipeline.state_store import PipelineStateStore
+
+        pipelines_root = tmp_path / "pipelines"
+        ids = [d.name for d in pipelines_root.iterdir() if d.is_dir()]
+        assert len(ids) == 2
+
+    def test_list_empty_when_no_pipelines(self, tmp_path):
+        pipelines_root = tmp_path / "pipelines"
+        assert not pipelines_root.exists()
+
+
 class TestPipelineValidation:
     def test_empty_agents_list_raises(self, tmp_path):
         orch = PipelineOrchestrator(output_root=tmp_path)
