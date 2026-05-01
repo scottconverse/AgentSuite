@@ -42,6 +42,9 @@ tests/.live-output.log
 # Claude Code local state — gate override files, hooks state
 .claude/
 
+# Session handoff notes — local only, updated each session
+HANDOFF.md
+
 # Lighthouse raw reports — regenerate locally
 docs/lighthouse-*.report.html
 docs/lighthouse-*.report.json
