@@ -1,6 +1,6 @@
 # AgentSuite User Manual
 
-**Version 1.0.5**
+**Version 1.0.6**
 
 ---
 
@@ -1013,4 +1013,4 @@ If there are no runs yet for that agent, `--latest` will return an error explain
 
 ---
 
-*AgentSuite v1.0.5 — User Manual*
+*AgentSuite v1.0.6 — User Manual*

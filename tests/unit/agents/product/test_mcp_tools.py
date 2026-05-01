@@ -4,6 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from agentsuite.agents.product.mcp_tools import ProductRunRequest, register_tools
+from agentsuite.llm.mock import MockLLMProvider
 from agentsuite.mcp_server import build_server
 
 
@@ -96,3 +97,49 @@ def test_product_list_runs_filters_by_agent(tmp_path: Path) -> None:
     assert len(runs) == 1
     assert runs[0].run_id == "run-product-001"
     assert runs[0].agent == "product"
+
+
+# ---------------------------------------------------------------------------
+# TEST-004 — product_approve returns structured dict on RevisionRequired
+# ---------------------------------------------------------------------------
+
+def test_product_approve_revision_required_returns_structured_error(tmp_path: Path) -> None:
+    """product_approve must return a structured error dict (not raise) on RevisionRequired."""
+    from agentsuite.agents.product.agent import ProductAgent
+    from agentsuite.kernel.schema import AgentRequest, Constraints, RunState
+    from agentsuite.kernel.state_store import StateStore
+
+    run_dir = tmp_path / "runs" / "r-prd-rev"
+    run_dir.mkdir(parents=True)
+    state = RunState(
+        run_id="r-prd-rev",
+        agent="product",
+        stage="approval",
+        requires_revision=True,
+        inputs=AgentRequest(
+            agent_name="product",
+            role_domain="product",
+            user_request="test",
+            constraints=Constraints(),
+        ),
+    )
+    StateStore(run_dir=run_dir).save(state)
+
+    server = _StubServer()
+    register_tools(
+        server,
+        agent_class=lambda: ProductAgent(output_root=tmp_path, llm=MockLLMProvider(responses={})),
+        output_root_fn=lambda: tmp_path,
+        expose_stages=False,
+    )
+
+    result = server.tools["agentsuite_product_approve"](
+        run_id="r-prd-rev", approver="scott", project_slug="proj"
+    )
+    assert isinstance(result, dict), f"Expected dict, got {type(result)}"
+    assert result["error"] == "revision_required"
+    assert "qa_report_path" in result
+    assert isinstance(result["qa_report_path"], str)
+    assert "action" in result
+    # Artifacts must NOT have been promoted
+    assert not (tmp_path / "_kernel" / "proj").exists()

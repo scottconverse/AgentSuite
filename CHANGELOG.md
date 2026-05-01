@@ -20,15 +20,12 @@ Sprint 1 — Critical security and reliability hardening. Six Critical findings 
 
 - **UX-002 — RevisionRequired uncaught at CLI and MCP boundaries:** `ApprovalGate.approve()` raises `RevisionRequired` when QA scores are below threshold, but the CLI caught only bare `Exception` — producing a raw traceback with no recovery guidance. Each of the 7 agents' approve MCP tools also let the exception propagate uncaught, breaking the MCP caller. `cli.py` now has a dedicated `except RevisionRequired` clause that prints the path to `qa_report.md` and a concrete re-run command before exiting with code 1. All 7 agents' `_approve` MCP handlers now catch `RevisionRequired` and return a structured dict with `"error": "revision_required"`, `"qa_report_path"`, and `"action"` fields.
 - **QA-001 — Authentication errors triggered retry storms:** `RetryingLLMProvider._NO_RETRY_EXCEPTIONS` did not include provider auth/permission errors. A bad API key or revoked token caused up to 3 retry attempts before propagating the error. Replaced the bare tuple with `_build_no_retry_exceptions()` — a lazy-import builder that adds `anthropic.AuthenticationError`, `anthropic.PermissionDeniedError`, `openai.AuthenticationError`, `openai.PermissionDeniedError`, and `google.genai.errors.ClientError` when the respective SDKs are installed. Auth errors now fail immediately. 6 new unit tests verify no-retry behavior per provider type; one regression test confirms transient errors still retry.
+- **DOC-002 — USER-MANUAL version stale:** Version header and footer updated from v1.0.2 to v1.0.6.
+- **UX-001/DOC-005 — Landing page stale:** Version badge updated from v1.0.1 to v1.0.6. Stale roadmap copy replaced with current state (all 7 core agents shipped and stable; multi-agent pipelines and per-day cost controls in focus).
 
-### Infrastructure
+### Added
 
 - **TEST-001 — Stress tests excluded from CI:** `tests/stress/` (87 tests) was present on disk but not included in the `.github/workflows/test.yml` pytest invocation. Added `tests/stress` to CI; added `test-stress` Make target; included `test-stress` in the default `test` target.
-
-### Documentation
-
-- **DOC-002 — USER-MANUAL version stale:** Version header and footer updated from v1.0.2 to v1.0.5.
-- **UX-001/DOC-005 — Landing page stale:** Version badge updated from v1.0.1 to v1.0.5. Stale roadmap "Coming soon" copy replaced with honest current state (all 7 agents shipped; see CHANGELOG for upcoming releases).
 
 ## [1.0.5] - 2026-04-30
 

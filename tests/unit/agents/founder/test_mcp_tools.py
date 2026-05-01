@@ -188,3 +188,54 @@ def test_founder_approve_revision_required_returns_structured_error(tmp_path):
     assert "action" in result
     # Artifacts must NOT have been promoted
     assert not (tmp_path / "_kernel" / "pfl").exists()
+
+
+# ---------------------------------------------------------------------------
+# TEST-002 — RevisionRequired edge cases on founder approve
+# ---------------------------------------------------------------------------
+
+def test_founder_approve_revision_required_missing_qa_report_path(tmp_path):
+    """founder_approve must still return a structured error dict even when qa_report.md is absent.
+
+    The RevisionRequired handler should not raise; the qa_report_path value should be
+    a string path (even if the file doesn't exist on disk yet).
+    """
+    from agentsuite.kernel.schema import AgentRequest, Constraints, RunState
+    from agentsuite.kernel.state_store import StateStore
+
+    # Create a revision-required state without writing qa_report.md to disk
+    run_dir = tmp_path / "runs" / "r-no-qa"
+    run_dir.mkdir(parents=True)
+    state = RunState(
+        run_id="r-no-qa",
+        agent="founder",
+        stage="approval",
+        requires_revision=True,
+        inputs=AgentRequest(
+            agent_name="founder",
+            role_domain="creative-ops",
+            user_request="test",
+            constraints=Constraints(),
+        ),
+    )
+    StateStore(run_dir=run_dir).save(state)
+    # Explicitly confirm qa_report.md is NOT on disk
+    assert not (run_dir / "qa_report.md").exists()
+
+    server = _StubServer()
+    register_tools(
+        server,
+        agent_class=lambda: FounderAgent(output_root=tmp_path, llm=MockLLMProvider(responses=_all_responses())),
+        output_root_fn=lambda: tmp_path,
+        expose_stages=False,
+    )
+
+    # Must return a dict, not raise
+    result = server.tools["agentsuite_founder_approve"](
+        run_id="r-no-qa", approver="scott", project_slug="pfl"
+    )
+    assert isinstance(result, dict), f"Expected dict, got {type(result)}: {result!r}"
+    assert result.get("error") == "revision_required"
+    # qa_report_path must be a string (even though the file doesn't exist yet)
+    assert isinstance(result.get("qa_report_path"), str)
+    assert "action" in result

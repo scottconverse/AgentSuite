@@ -117,3 +117,48 @@ def test_design_get_status_raises_on_missing_run(tmp_path: Path) -> None:
     )
     with pytest.raises(FileNotFoundError):
         server.tools["agentsuite_design_get_status"]("nonexistent-run")
+
+
+# ---------------------------------------------------------------------------
+# TEST-004 — design_approve returns structured dict on RevisionRequired
+# ---------------------------------------------------------------------------
+
+def test_design_approve_revision_required_returns_structured_error(tmp_path: Path) -> None:
+    """design_approve must return a structured error dict (not raise) on RevisionRequired."""
+    from agentsuite.kernel.schema import AgentRequest, Constraints, RunState
+    from agentsuite.kernel.state_store import StateStore
+
+    run_dir = tmp_path / "runs" / "r-des-rev"
+    run_dir.mkdir(parents=True)
+    state = RunState(
+        run_id="r-des-rev",
+        agent="design",
+        stage="approval",
+        requires_revision=True,
+        inputs=AgentRequest(
+            agent_name="design",
+            role_domain="design-ops",
+            user_request="test",
+            constraints=Constraints(),
+        ),
+    )
+    StateStore(run_dir=run_dir).save(state)
+
+    server = _StubServer()
+    register_tools(
+        server,
+        agent_class=lambda: DesignAgent(output_root=tmp_path, llm=MockLLMProvider(responses=_all_responses())),
+        output_root_fn=lambda: tmp_path,
+        expose_stages=False,
+    )
+
+    result = server.tools["agentsuite_design_approve"](
+        run_id="r-des-rev", approver="scott", project_slug="proj"
+    )
+    assert isinstance(result, dict), f"Expected dict, got {type(result)}"
+    assert result["error"] == "revision_required"
+    assert "qa_report_path" in result
+    assert isinstance(result["qa_report_path"], str)
+    assert "action" in result
+    # Artifacts must NOT have been promoted
+    assert not (tmp_path / "_kernel" / "proj").exists()

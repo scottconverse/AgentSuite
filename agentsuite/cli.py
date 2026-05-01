@@ -145,9 +145,9 @@ def _make_approve_fn(agent_class: type) -> Any:
                 "Error: QA flagged this run as requiring revision before approval.\n"
                 f"  Review the QA report: {qa_report}\n"
                 f"  Address the feedback, then re-run the agent:\n"
-                f"    agentsuite <agent> run --run-id {resolved_run_id} --force\n"
+                f"    agentsuite {agent_name_for_latest} run --run-id {resolved_run_id} --force\n"
                 f"  Once the new run passes QA, approve it:\n"
-                f"    agentsuite <agent> approve --run-id <new-run-id> --approver <you> --project-slug <slug>",
+                f"    agentsuite {agent_name_for_latest} approve --run-id NEW_RUN_ID --approver YOUR_NAME --project-slug YOUR_SLUG",
                 err=True,
             )
             raise typer.Exit(1)

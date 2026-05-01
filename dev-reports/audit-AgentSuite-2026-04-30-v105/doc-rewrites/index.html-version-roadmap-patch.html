@@ -1,0 +1,43 @@
+<!-- docs/index.html — Version badge and Roadmap section patch (DOC-005) -->
+<!--
+  Two targeted changes:
+  1. Version badge on line 49: v1.0.1 → v1.0.5
+  2. Roadmap section (lines 118-122): replace stale "v0.8 Next Agent" card
+
+  All other content unchanged.
+-->
+
+<!-- CHANGE 1: Line 49 — version badge -->
+<!-- BEFORE: -->
+<h1>AgentSuite <span class="v">v1.0.1</span></h1>
+
+<!-- AFTER: -->
+<h1>AgentSuite <span class="v">v1.0.5</span></h1>
+
+
+<!-- CHANGE 2: Roadmap section (lines 118-122) -->
+<!-- BEFORE: -->
+  <h2>Roadmap</h2>
+  <div class="grid">
+    <div class="card"><h3>v0.8 Next Agent</h3><p>Coming soon.</p></div>
+  </div>
+
+<!-- AFTER: -->
+  <h2>Roadmap (v1.1.x candidates)</h2>
+  <div class="grid">
+    <div class="card"><h3>8th Agent</h3><p>Next role-specific agent. Community input welcome in <a href="https://github.com/scottconverse/AgentSuite/discussions">Discussions</a>.</p></div>
+    <div class="card"><h3>Per-day cost cap</h3><p>Budget control across multiple runs in a day, not just per-run.</p></div>
+    <div class="card"><h3><code>agentsuite migrate</code></h3><p>CLI command to migrate pre-v0.9 run directories to schema_version 2.</p></div>
+    <div class="card"><h3>GPG-signed tags</h3><p>Optional tag signing for release verification. Requested in Discussions.</p></div>
+  </div>
+  <p style="margin-top:0.5rem;color:var(--muted);font-size:0.9rem;">Full watchlist in <a href="https://github.com/scottconverse/AgentSuite/blob/main/CHANGELOG.md">CHANGELOG.md — Unreleased</a>.</p>
+
+<!--
+  RATIONALE:
+  The roadmap section showed "v0.8 Next Agent — Coming soon" which shipped in April 2026.
+  The project is now at v1.0.5. A prospective user landing on this page would think the
+  project stalled at v0.7 and never shipped v0.8.
+
+  The replacement uses the actual v1.1.x candidates from CHANGELOG [Unreleased] so the
+  page accurately represents what's next rather than what was next 8 versions ago.
+-->

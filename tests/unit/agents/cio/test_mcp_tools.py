@@ -132,3 +132,41 @@ def test_list_runs_empty_when_no_runs(tmp_path: Path) -> None:
     server = _make_server(tmp_path)
     runs = server.tools["agentsuite_cio_list_runs"]()
     assert runs == []
+
+
+# ---------------------------------------------------------------------------
+# TEST-001: parametrized encoded traversal variants
+# ---------------------------------------------------------------------------
+
+@pytest.mark.parametrize("malicious_name", [
+    "../../.env",
+    "..%2F..%2F.env",
+    "..%252F.env",
+    "..%2F../.env",
+    "spec_brief\x00.md",
+    "/etc/passwd",
+    "../../../etc/passwd",
+])
+def test_get_artifact_rejects_all_traversal_variants(tmp_path: Path, malicious_name: str) -> None:
+    """get_artifact must return an error dict for every encoded/raw traversal variant."""
+    server = _make_server(tmp_path)
+    result = server.tools["agentsuite_cio_get_artifact"](
+        run_id="run-safe-001", artifact_name=malicious_name
+    )
+    assert "error" in result, f"Expected error for {malicious_name!r}, got {result!r}"
+
+
+@pytest.mark.parametrize("artifact_name", SPEC_ARTIFACTS)
+def test_get_artifact_accepts_all_valid_names(tmp_path: Path, artifact_name: str) -> None:
+    """get_artifact must accept every name in SPEC_ARTIFACTS when the file exists."""
+    run_id = "run-cio-valid"
+    run_dir = tmp_path / "runs" / run_id
+    run_dir.mkdir(parents=True)
+    (run_dir / f"{artifact_name}.md").write_text(f"# {artifact_name}\nContent.", encoding="utf-8")
+
+    server = _make_server(tmp_path)
+    result = server.tools["agentsuite_cio_get_artifact"](
+        run_id=run_id, artifact_name=artifact_name
+    )
+    assert "error" not in result, f"Unexpected error for {artifact_name!r}: {result.get('error')}"
+    assert result["artifact_name"] == artifact_name
