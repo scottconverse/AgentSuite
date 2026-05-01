@@ -121,6 +121,10 @@ def normalize_model_id(provider: str, model: str) -> str:
     if len(parts) == 2 and len(parts[1]) == 8 and parts[1].isdigit():
         if parts[0] in table:
             return parts[0]
+    # Prefix match: model starts with a known key (e.g. "gemini-2.5-flash-preview-04-17" → "gemini-2.5-flash")
+    for key in sorted(table.keys(), key=len, reverse=True):
+        if model.startswith(key + "-"):
+            return key
     return model
 
 

@@ -200,6 +200,61 @@ If you are using an expensive cloud model, consider switching to a lower-cost ti
 
 ---
 
+## 6. `AGENTSUITE_COST_CAP_USD` set to a non-numeric value
+
+**What it means**
+
+You have set `AGENTSUITE_COST_CAP_USD` to a value that is not a valid number — for example, `ten` or `$5.00` (with a dollar sign). AgentSuite validates this setting before making any AI calls and exits immediately with an error that names the bad value.
+
+The error message will look similar to:
+
+```
+ValueError: AGENTSUITE_COST_CAP_USD must be a valid decimal number (e.g. "5.00" or "10"). Got: "ten"
+```
+
+**How to fix it**
+
+Set the variable to a plain decimal number without currency symbols or units:
+
+```
+# Correct — numeric only
+Windows:   set AGENTSUITE_COST_CAP_USD=10
+Mac/Linux: export AGENTSUITE_COST_CAP_USD=10
+
+# Also correct — decimal form
+Windows:   set AGENTSUITE_COST_CAP_USD=5.00
+Mac/Linux: export AGENTSUITE_COST_CAP_USD=5.00
+
+# Incorrect — these will produce the error above
+set AGENTSUITE_COST_CAP_USD=ten
+set AGENTSUITE_COST_CAP_USD=$10
+set AGENTSUITE_COST_CAP_USD=10 dollars
+```
+
+The default value if the variable is not set is `5.00` (five US dollars).
+
+---
+
+## 7. `list_runs` MCP tool — filtering by project
+
+**What it means**
+
+If you are using AgentSuite via MCP (wired into Claude Code, Codex, or another MCP-compatible tool) and call `list_runs` without a filter, it returns every run across all projects. On a workstation with many projects, the result list can be very long.
+
+**How to filter it**
+
+Pass the optional `project_slug` argument to limit results to a specific project:
+
+```json
+{ "tool": "list_runs", "arguments": { "project_slug": "acme" } }
+```
+
+Replace `"acme"` with the `--project-slug` value you used when running the agent. The filter is exact — it will not match partial names or run IDs that contain the slug.
+
+If you are not sure what slug a run used, omit the filter first and scan the returned list for the `project_slug` field on each entry.
+
+---
+
 ## Getting more help
 
 - **GitHub Issues** — report a bug or ask a question: https://github.com/scottconverse/AgentSuite/issues

@@ -9,7 +9,7 @@ from agentsuite.agents.founder.input_schema import FounderAgentInput
 from agentsuite.agents.founder.prompt_loader import render_prompt
 from agentsuite.kernel.base_agent import StageContext
 from agentsuite.kernel.schema import RunState
-from agentsuite.kernel.stages.spec import SpecStageConfig, kernel_spec_stage
+from agentsuite.kernel.stages.spec import SpecStageConfig, check_path_confinement, kernel_spec_stage
 
 
 SPEC_ARTIFACTS: list[str] = [
@@ -38,14 +38,16 @@ _PROMPT_BY_ARTIFACT: dict[str, str] = {
 }
 
 
-def _read_voice_samples(inp: FounderAgentInput) -> str:
+def _read_voice_samples(inp: FounderAgentInput, project_dir: Path) -> str:
     """Concatenate the founder's voice-sample files into a single string for prompting."""
     if not inp.founder_voice_samples:
         return ""
     parts: list[str] = []
     for path in inp.founder_voice_samples:
+        p = Path(path)
+        check_path_confinement(p, project_dir)
         try:
-            parts.append(Path(path).read_text(encoding="utf-8", errors="replace")[:5000])
+            parts.append(p.read_text(encoding="utf-8", errors="replace")[:5000])
         except OSError:
             continue
     return "\n---\n".join(parts)
@@ -53,7 +55,8 @@ def _read_voice_samples(inp: FounderAgentInput) -> str:
 
 def _build_artifact_prompt(stem: str, extracted: dict[str, Any], state: RunState) -> str:
     inp = cast(FounderAgentInput, state.inputs)
-    voice_samples = _read_voice_samples(inp)
+    project_dir = inp.inputs_dir.resolve() if inp.inputs_dir else Path.cwd()
+    voice_samples = _read_voice_samples(inp, project_dir)
     return render_prompt(
         _PROMPT_BY_ARTIFACT[stem],
         business_goal=inp.business_goal,

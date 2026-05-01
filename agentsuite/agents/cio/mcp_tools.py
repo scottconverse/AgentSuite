@@ -111,8 +111,8 @@ def register_tools(
             return {
                 "error": "revision_required",
                 "message": str(e),
-                "qa_report_path": str(run_dir / "qa_report.md"),
-                "action": "Review qa_report.md and re-run the agent to address QA feedback before approving.",
+                "qa_scores_path": str(run_dir / "qa_scores.json"),
+                "action": "Review qa_scores.json and re-run the agent to address QA feedback before approving.",
             }
         kernel_dir = require_kernel_dir(output_root_fn, project_slug)
         promoted = [
@@ -195,7 +195,7 @@ def register_tools(
             ) from exc
         if state is None:
             return {"error": f"No state file for run_id={run_id}"}
-        qa_path = run_dir / "qa-scores.json"
+        qa_path = run_dir / "qa_scores.json"
         if qa_path.exists():
             import json
             return {"run_id": run_id, "scores": json.loads(qa_path.read_text(encoding="utf-8"))}

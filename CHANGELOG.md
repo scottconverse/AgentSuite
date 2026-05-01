@@ -8,7 +8,31 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 - **v1.1.x** — First minor after GA. Candidates from the rc1 Discussions Ideas board (8th agent, per-day cost cap, GPG signed tags if requested). Plus next-sprint watchlist from the 2026-04-30 audit: extract `register_standard_tools()` to deduplicate per-agent mcp_tools.py (W-08), `_INPUTS_BY_AGENT` parity test (W-02), `agentsuite migrate` stub command (W-05), `SECURITY.md` disclosure policy (W-09).
 
+## [1.0.8] - 2026-04-30
+
+Sprint 2 Remediation — Three Criticals and six high-leverage Majors found in the Sprint 2 scoped audit (2026-04-30) fixed.
+
+### Security
+
+- **ENG-S2-001 — Path traversal in `_read_voice_samples`:** The Founder agent's `_read_voice_samples` function read user-supplied voice sample file paths without calling `check_path_confinement()`. Any file readable by the AgentSuite process could be exfiltrated to the LLM via an MCP call. Added confinement check before each `read_text()` call; paths outside the project directory now raise `ValueError` before any file I/O. Added 2 tests.
+
+### Fixed
+
+- **ENG-S2-002 — Gemini cost/model mismatch:** `LLMResponse.model` reflected the API-returned `model_version` string while `_cost_usd()` still used the request alias. Cost summary showed inconsistent model identifiers and could silently miscalculate cost when the API routed to a sub-version. Both fields now use `actual_model`. Added prefix-match fallback to `normalize_model_id()` so API sub-versions like `gemini-2.5-flash-preview-04-17` resolve to the correct pricing entry.
+- **QA-S2-001 — Cleanroom script broken outside pytest:** `run-cleanroom.sh` exported `AGENTSUITE_LLM_PROVIDER_FACTORY` without `PYTEST_CURRENT_TEST`, triggering the production guard `RuntimeError` when the script was run directly. Added `AGENTSUITE_ALLOW_MOCK_FACTORY=1` export to the cleanroom mocked-mode block and added this variable to the CLI guard condition.
+- **ENG-S2-003 / QA-S2-002 — CIO `get_qa_scores` always returned "not yet available":** `agentsuite_cio_get_qa_scores` read `qa-scores.json` (hyphen) but the kernel writes `qa_scores.json` (underscore). Same bug in `agentsuite_trust_risk_get_qa_scores`. Both fixed to use the correct filename. The MCP-based QA approval gate now works for completed CIO and Trust/Risk runs.
+- **QA-S2-003 — CIO `approve` RevisionRequired response pointed to nonexistent file:** `agentsuite_cio_approve` returned `qa_report_path` pointing to `qa_report.md`, which the CIO agent never writes (`write_qa_report=False`). Changed to `qa_scores_path` pointing to `qa_scores.json`.
+
+### Added
+
+- DOC-S2-002: USER-MANUAL.md Troubleshooting §10 and Glossary updated — `ConsistencyCheckFailed` exception references replaced with current `consistency_report.json` review flow
+- DOC-S2-003: Documented `awaiting_approval` status rename (with migration snippet), `AGENTSUITE_COST_CAP_USD` malformed-value error, and `project_slug` filter for `list_runs` in USER-MANUAL.md and `docs/troubleshooting.md`
+- DOC-S2-004: CHANGELOG [1.0.7] restructured — merged duplicate `### Fixed` sections, renamed `### Documentation` to `### Added`, added `### ⚠ BREAKING` header
+
 ## [1.0.7] - 2026-04-30
+
+### ⚠ BREAKING
+- CLI and MCP JSON output: `status` field now emits `awaiting_approval` instead of `approval` when a run is pending review. Update scripts checking `status == "approval"` to `status in ("approval", "awaiting_approval")` for a safe transition window.
 
 ### Fixed
 - ENG-002: AGENTSUITE_LLM_PROVIDER_FACTORY env var documented as TEST-ONLY; production guard added
@@ -17,14 +41,9 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 - QA-003: AGENTSUITE_COST_CAP_USD now reports an actionable error on malformed values
 - QA-004: Gemini LLMResponse.model field now reflects actual model version used by the API
 - QA-005: Unknown agent name now exits with code 1 and lists valid agent names
-
-### Changed
-- CLI JSON output: `status` field now emits `awaiting_approval` instead of `approval` when a run is pending review (breaking change for scripts parsing this field)
-
-### Fixed
 - UX-006: `list_runs` MCP tool now correctly filters by `project_slug` parameter
 
-### Documentation
+### Added
 - DOC-003: USER-MANUAL.md consistency failure instructions updated to reference `consistency_report.json` review flow (exception no longer raised since v1.0.3)
 - DOC-004: CHANGELOG footer links added for v1.0.0 through v1.0.6
 

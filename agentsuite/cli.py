@@ -75,7 +75,7 @@ def _resolve_llm_for_cli() -> Any:
     # test injection of mock LLM providers. If set outside of pytest, it is a
     # remote code execution vector.
     factory = os.environ.get("AGENTSUITE_LLM_PROVIDER_FACTORY")
-    if factory and not os.environ.get("PYTEST_CURRENT_TEST"):
+    if factory and not os.environ.get("PYTEST_CURRENT_TEST") and not os.environ.get("AGENTSUITE_ALLOW_MOCK_FACTORY"):
         raise RuntimeError(
             "AGENTSUITE_LLM_PROVIDER_FACTORY is set outside of a pytest run. "
             "This environment variable executes arbitrary Python and must only be "

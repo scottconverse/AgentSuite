@@ -42,6 +42,7 @@ if [ "$LIVE_MODE" -eq 1 ]; then
 else
   echo "==> mocked mode: AGENTSUITE_LLM_PROVIDER_FACTORY=agentsuite.llm.mock:_default_mock_for_cli"
   export AGENTSUITE_LLM_PROVIDER_FACTORY="agentsuite.llm.mock:_default_mock_for_cli"
+  export AGENTSUITE_ALLOW_MOCK_FACTORY=1
 fi
 
 "$VENV_BIN/agentsuite" founder run \

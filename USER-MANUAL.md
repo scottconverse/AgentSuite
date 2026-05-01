@@ -224,6 +224,20 @@ After the five stages complete, the run enters an "awaiting approval" state. The
 
 You can approve immediately, or you can edit documents by hand first and then approve. Nothing is locked or permanent until you approve.
 
+**⚠ BREAKING CHANGE — `status` field value (v1.0.7)**
+
+If your scripts or automations read AgentSuite's JSON output to check whether a run is waiting for approval, the `status` field value changed in v1.0.7:
+
+- **Before v1.0.7:** `"status": "approval"`
+- **v1.0.7 and later:** `"status": "awaiting_approval"`
+
+Update any script that checks `status == "approval"` to handle both values during your transition window:
+
+```python
+if status in ("approval", "awaiting_approval"):
+    # run is pending review
+```
+
 ---
 
 ## 6. Enabling Agents
@@ -808,7 +822,7 @@ All AgentSuite settings are controlled through environment variables — setting
 | `OLLAMA_HOST` | Only if Ollama is not on the default port | `http://localhost:11434` | The address where Ollama is running. Change this only if you installed Ollama on a different computer or port. |
 | `AGENTSUITE_ENABLED_AGENTS` | No | `founder` | Comma-separated list of agents to enable. Options: `founder,design,product,engineering,marketing,trust_risk,cio`. |
 | `AGENTSUITE_OUTPUT_DIR` | No | `.agentsuite/` in your current folder | Where AgentSuite writes its output. Change this if you want documents saved somewhere else. |
-| `AGENTSUITE_COST_CAP_USD` | No | `5.00` | Maximum amount in US dollars that a single run can spend on AI API calls. If a run exceeds this, it stops and reports a `HardCapExceeded` error. Raise it if you have large inputs or need longer documents. |
+| `AGENTSUITE_COST_CAP_USD` | No | `5.00` | Maximum amount in US dollars that a single run can spend on AI API calls. If a run exceeds this, it stops and reports a `HardCapExceeded` error. Raise it if you have large inputs or need longer documents. **The value must be a valid decimal number** (e.g., `5.00` or `10`). If a non-numeric value is set (e.g., `ten`), AgentSuite will exit with an error before making any AI calls, naming the bad value and explaining how to fix it. |
 
 **Setting variables on Windows (temporary — for this terminal session only):**
 ```
@@ -825,6 +839,18 @@ export AGENTSUITE_COST_CAP_USD=10
 
 **Setting variables on Mac/Linux (permanent):**
 Add the `export` line to your `~/.zshrc` or `~/.bashrc` file, then run `source ~/.zshrc` (or restart the terminal).
+
+### MCP tool reference
+
+When AgentSuite is wired into Claude Code or another MCP-compatible tool via `[mcp]`, the following MCP tools are available in addition to the CLI:
+
+**`list_runs`** — Lists completed and in-progress runs. Accepts an optional `project_slug` parameter to filter results to a specific project. For example, to see only runs for the `acme` project:
+
+```json
+{ "tool": "list_runs", "arguments": { "project_slug": "acme" } }
+```
+
+Without `project_slug`, all runs across all projects are returned.
 
 ---
 
@@ -844,11 +870,13 @@ AgentSuite could not find any AI provider to use. Check:
 2. Is Ollama running? Type `ollama list` in a second terminal. If it says "command not found," install Ollama first.
 3. Did you type the variable name correctly? It must be exactly `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or `GOOGLE_API_KEY`.
 
-**`ConsistencyCheckFailed`**
+**Consistency issues flagged in `consistency_report.json`**
 
-Two of the nine documents produced by the agent contradict each other — for example, the target audience described in one document does not match the target audience in another. This usually means your inputs were ambiguous.
+If the agent's spec stage detects conflicts between the documents it produced, the run continues to completion but flags the issues in `consistency_report.json` in the run directory. This is not a fatal error — you will receive all output.
 
-Fix: make your required inputs more specific. For example, instead of `--target-users "entrepreneurs"`, try `--target-users "first-time founders building B2B SaaS products with less than $1M in funding."` Then re-run.
+Open `consistency_report.json` in any text editor. It lists the specific mismatches found. You have two options:
+1. Review the mismatches and decide they are acceptable, then approve normally.
+2. Make your inputs more specific to resolve the conflicts, and re-run.
 
 **`HardCapExceeded: $5.00`**
 
@@ -900,7 +928,7 @@ This glossary defines every technical term used in this manual. Terms are listed
 
 **Compliance matrix:** A table that maps each requirement from a regulation or standard (such as SOC 2, HIPAA, or PCI-DSS) to the controls, policies, or evidence that satisfy it. Auditors use this table to verify that nothing has been missed.
 
-**ConsistencyCheckFailed:** An error that occurs when two of the nine documents produced by an agent contradict each other. The fix is to make your inputs more specific and re-run.
+**consistency_report.json:** The output file written by the spec stage when it detects cross-artifact mismatches. It lists the specific conflicts found, each with a severity level (`warning` or `critical`). The run continues to completion regardless — this file is informational. Review entries with `"severity": "critical"` first; if they are acceptable, approve normally. If they indicate a real problem in your inputs, address them and re-run. (Historical note: prior to v1.0.3, a fatal `ConsistencyCheckFailed` exception was raised instead. That exception no longer exists.)
 
 **Digital transformation:** The process of replacing manual, paper-based, or legacy-technology processes with modern digital tools and ways of working. It usually requires changes to processes, skills, and organizational structures, not just technology.
 

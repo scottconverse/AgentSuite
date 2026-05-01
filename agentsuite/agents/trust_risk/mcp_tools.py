@@ -191,7 +191,7 @@ def register_tools(
             ) from exc
         if state is None:
             return {"error": f"No state file for run_id={run_id}"}
-        qa_path = run_dir / "qa-scores.json"
+        qa_path = run_dir / "qa_scores.json"
         if qa_path.exists():
             import json
             return {"run_id": run_id, "scores": json.loads(qa_path.read_text(encoding="utf-8"))}

@@ -2,9 +2,12 @@
 import json
 from pathlib import Path
 
+import pytest
+
 from agentsuite.agents.founder.input_schema import FounderAgentInput
 from agentsuite.agents.founder.stages.spec import (
     SPEC_ARTIFACTS,
+    _read_voice_samples,
     spec_stage,
 )
 from agentsuite.kernel.artifacts import ArtifactWriter
@@ -98,3 +101,41 @@ def test_spec_fails_on_critical_consistency_mismatch(tmp_path):
     new_state = spec_stage(_state(), ctx)
     assert new_state.requires_revision is True
     assert new_state.stage == "execute"
+
+
+# ENG-S2-001: path confinement tests for _read_voice_samples
+
+def test_read_voice_samples_rejects_out_of_project_path(tmp_path: Path) -> None:
+    """ENG-S2-001: _read_voice_samples raises ValueError for a path outside project_dir."""
+    project_dir = tmp_path / "project"
+    project_dir.mkdir()
+    outside_file = tmp_path / "secret.txt"
+    outside_file.write_text("sensitive content", encoding="utf-8")
+
+    inp = FounderAgentInput(
+        agent_name="founder",
+        role_domain="creative-ops",
+        user_request="test",
+        business_goal="test",
+        founder_voice_samples=[outside_file],
+    )
+    with pytest.raises(ValueError, match="outside the project directory"):
+        _read_voice_samples(inp, project_dir)
+
+
+def test_read_voice_samples_accepts_in_project_path(tmp_path: Path) -> None:
+    """ENG-S2-001: _read_voice_samples reads files within project_dir without error."""
+    project_dir = tmp_path / "project"
+    project_dir.mkdir()
+    sample = project_dir / "voice.txt"
+    sample.write_text("Hello founder", encoding="utf-8")
+
+    inp = FounderAgentInput(
+        agent_name="founder",
+        role_domain="creative-ops",
+        user_request="test",
+        business_goal="test",
+        founder_voice_samples=[sample],
+    )
+    result = _read_voice_samples(inp, project_dir)
+    assert "Hello founder" in result
