@@ -180,6 +180,84 @@ class TestPipelineManualApproval:
             orch.approve(pipeline_id=state.pipeline_id, approver="scott")
 
 
+class TestProgressCallback:
+    def test_callback_fires_start_and_done_for_each_agent(self, tmp_path):
+        events: list[tuple[str, str]] = []
+
+        def on_progress(event, step, state):
+            events.append((event, step.agent))
+
+        orch = PipelineOrchestrator(output_root=tmp_path)
+        orch.run(
+            agents=["founder", "design"],
+            project_slug="pfl",
+            business_goal="test",
+            auto_approve=True,
+            llm=_default_mock_for_cli(),
+            on_progress=on_progress,
+        )
+
+        assert events == [
+            ("agent_start", "founder"),
+            ("agent_done", "founder"),
+            ("agent_start", "design"),
+            ("agent_done", "design"),
+        ]
+
+    def test_callback_fires_waiting_on_manual_pause(self, tmp_path):
+        events: list[str] = []
+
+        def on_progress(event, step, state):
+            events.append(event)
+
+        orch = PipelineOrchestrator(output_root=tmp_path)
+        orch.run(
+            agents=["founder", "design"],
+            project_slug="pfl",
+            business_goal="test",
+            auto_approve=False,
+            llm=_default_mock_for_cli(),
+            on_progress=on_progress,
+        )
+
+        assert events == ["agent_start", "agent_waiting"]
+
+    def test_callback_not_required(self, tmp_path):
+        orch = PipelineOrchestrator(output_root=tmp_path)
+        state = orch.run(
+            agents=["founder"],
+            project_slug="pfl",
+            business_goal="test",
+            auto_approve=True,
+            llm=_default_mock_for_cli(),
+        )
+        assert state.status == "done"
+
+    def test_callback_fires_on_approve_for_subsequent_agents(self, tmp_path):
+        events: list[tuple[str, str]] = []
+
+        def on_progress(event, step, state):
+            events.append((event, step.agent))
+
+        orch = PipelineOrchestrator(output_root=tmp_path)
+        state = orch.run(
+            agents=["founder", "design"],
+            project_slug="pfl",
+            business_goal="test",
+            auto_approve=False,
+            llm=_default_mock_for_cli(),
+        )
+        orch.approve(
+            pipeline_id=state.pipeline_id,
+            approver="scott",
+            llm=_default_mock_for_cli(),
+            on_progress=on_progress,
+        )
+
+        # After approve, design runs and pauses — callback fires for design
+        assert ("agent_start", "design") in events
+
+
 class TestPipelineValidation:
     def test_empty_agents_list_raises(self, tmp_path):
         orch = PipelineOrchestrator(output_root=tmp_path)

@@ -244,6 +244,38 @@ def _register_agents() -> None:
 _register_agents()
 
 
+def _default_approver() -> str:
+    import getpass
+    try:
+        return getpass.getuser()
+    except Exception:
+        return "user"
+
+
+def _make_pipeline_progress(total_steps: int) -> Any:
+    import time
+    timers: dict[str, float] = {}
+
+    def on_progress(event: str, step: Any, state: Any) -> None:
+        idx = state.current_step_index
+        label = f"[{idx + 1}/{total_steps}] {step.agent}"
+        if event == "agent_start":
+            timers[step.run_id] = time.monotonic()
+            typer.echo(f"{label}  starting...", err=True)
+        elif event == "agent_done":
+            elapsed = time.monotonic() - timers.get(step.run_id, time.monotonic())
+            typer.echo(
+                f"{label}  done  ${step.cost_usd:.4f}  ({elapsed:.1f}s)", err=True
+            )
+        elif event == "agent_waiting":
+            elapsed = time.monotonic() - timers.get(step.run_id, time.monotonic())
+            typer.echo(
+                f"{label}  ready for review  ({elapsed:.1f}s)", err=True
+            )
+
+    return on_progress
+
+
 def _register_pipeline() -> None:
     """Register the ``pipeline`` subapp with run / approve / status commands."""
     pipeline_app = typer.Typer(name="pipeline", help="Multi-agent pipeline commands.")
@@ -280,8 +312,11 @@ def _register_pipeline() -> None:
                 typer.echo(f"Error: could not parse --agent-inputs: {exc}", err=True)
                 raise typer.Exit(1)
 
+        on_progress = _make_pipeline_progress(len(agent_list))
+        output_root = _output_root()
+
         try:
-            orch = PipelineOrchestrator(output_root=_output_root())
+            orch = PipelineOrchestrator(output_root=output_root)
             state = orch.run(
                 agents=agent_list,
                 project_slug=project_slug,
@@ -291,6 +326,7 @@ def _register_pipeline() -> None:
                 pipeline_id=pipeline_id,
                 auto_approve=auto_approve,
                 llm=_resolve_llm_for_cli(),
+                on_progress=on_progress,
             )
         except Exception as exc:
             if _debug_mode:
@@ -306,31 +342,48 @@ def _register_pipeline() -> None:
             "total_steps": len(state.steps),
             "total_cost_usd": state.total_cost_usd,
         }, indent=2))
+
         if state.status == "awaiting_approval":
             current = state.steps[state.current_step_index]
+            run_dir = output_root / "runs" / current.run_id
             typer.echo(
-                f"\nAwaiting approval for {current.agent!r} (run_id: {current.run_id}).\n"
-                f"Review artifacts in .agentsuite/runs/{current.run_id}/, then:\n"
+                f"\nAwaiting approval for {current.agent!r}.\n"
+                f"Review artifacts in {run_dir}, then:\n"
                 f"  agentsuite pipeline approve"
-                f" --pipeline-id {state.pipeline_id} --approver <you>",
+                f" --pipeline-id {state.pipeline_id}",
+                err=True,
+            )
+        elif state.status == "done":
+            kernel_dir = output_root / "_kernel" / project_slug
+            typer.echo(
+                f"\nPipeline complete. Artifacts in {kernel_dir}",
                 err=True,
             )
 
     @pipeline_app.command("approve")
     def pipeline_approve(
         pipeline_id: str = typer.Option(...),
-        approver: str = typer.Option(...),
+        approver: Optional[str] = typer.Option(
+            None, help="Your name recorded in the approval log (defaults to OS username)"
+        ),
     ) -> None:
         """Approve the current awaiting step and advance the pipeline."""
         from agentsuite.pipeline.orchestrator import PipelineOrchestrator
         from agentsuite.pipeline.state_store import PipelineNotFound
 
+        resolved_approver = approver or _default_approver()
+        output_root = _output_root()
+
         try:
-            orch = PipelineOrchestrator(output_root=_output_root())
+            orch = PipelineOrchestrator(output_root=output_root)
+            # Load state first to know total steps for progress label
+            pre_state = orch.status(pipeline_id=pipeline_id)
+            on_progress = _make_pipeline_progress(len(pre_state.agents))
             state = orch.approve(
                 pipeline_id=pipeline_id,
-                approver=approver,
+                approver=resolved_approver,
                 llm=_resolve_llm_for_cli(),
+                on_progress=on_progress,
             )
         except PipelineNotFound:
             typer.echo(f"Error: pipeline {pipeline_id!r} not found", err=True)
@@ -348,11 +401,20 @@ def _register_pipeline() -> None:
             "current_step": state.current_step_index,
             "total_steps": len(state.steps),
         }, indent=2))
+
         if state.status == "awaiting_approval":
             current = state.steps[state.current_step_index]
+            run_dir = output_root / "runs" / current.run_id
             typer.echo(
-                f"\nAwaiting approval for next step: {current.agent!r}"
-                f" (run_id: {current.run_id}).",
+                f"\nAwaiting approval for {current.agent!r}.\n"
+                f"Review artifacts in {run_dir}, then:\n"
+                f"  agentsuite pipeline approve --pipeline-id {state.pipeline_id}",
+                err=True,
+            )
+        elif state.status == "done":
+            kernel_dir = output_root / "_kernel" / state.project_slug
+            typer.echo(
+                f"\nPipeline complete. Artifacts in {kernel_dir}",
                 err=True,
             )
 

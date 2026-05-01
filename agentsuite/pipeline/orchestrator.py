@@ -4,11 +4,13 @@ from __future__ import annotations
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from agentsuite.pipeline.input_resolver import get_input_class, resolve_agent_input
 from agentsuite.pipeline.schema import PipelineState, PipelineStepState
 from agentsuite.pipeline.state_store import PipelineNotFound, PipelineStateStore
+
+ProgressCallback = Callable[[str, PipelineStepState, PipelineState], None]
 
 
 class PipelineOrchestrator:
@@ -27,6 +29,7 @@ class PipelineOrchestrator:
         pipeline_id: str | None = None,
         auto_approve: bool = False,
         llm: Any | None = None,
+        on_progress: ProgressCallback | None = None,
     ) -> PipelineState:
         """Start a new pipeline. Returns state at awaiting_approval or done."""
         if not agents:
@@ -48,7 +51,7 @@ class PipelineOrchestrator:
         )
         store = PipelineStateStore(self.pipelines_root, pid)
         store.save(state)
-        return self._drive(state, store, llm=llm)
+        return self._drive(state, store, llm=llm, on_progress=on_progress)
 
     def approve(
         self,
@@ -56,6 +59,7 @@ class PipelineOrchestrator:
         pipeline_id: str,
         approver: str,
         llm: Any | None = None,
+        on_progress: ProgressCallback | None = None,
     ) -> PipelineState:
         """Approve current awaiting step, promote artifacts, advance pipeline."""
         store = PipelineStateStore(self.pipelines_root, pipeline_id)
@@ -77,7 +81,7 @@ class PipelineOrchestrator:
 
         state.status = "running"
         store.save(state)
-        return self._drive(state, store, llm=llm)
+        return self._drive(state, store, llm=llm, on_progress=on_progress)
 
     def status(self, *, pipeline_id: str) -> PipelineState:
         """Return current pipeline state."""
@@ -93,6 +97,7 @@ class PipelineOrchestrator:
         store: PipelineStateStore,
         *,
         llm: Any | None,
+        on_progress: ProgressCallback | None = None,
     ) -> PipelineState:
         from agentsuite.agents.registry import default_registry
         registry = default_registry()
@@ -104,6 +109,9 @@ class PipelineOrchestrator:
             state.status = "running"
             state.updated_at = datetime.now(tz=timezone.utc)
             store.save(state)
+
+            if on_progress:
+                on_progress("agent_start", step, state)
 
             agent_name = step.agent
             agent_class = registry.get_class(agent_name)
@@ -130,6 +138,8 @@ class PipelineOrchestrator:
             if state.auto_approve:
                 self._approve_step(step, state=state, approver="pipeline", llm=llm)
                 step.status = "done"
+                if on_progress:
+                    on_progress("agent_done", step, state)
                 state.current_step_index += 1
                 state.updated_at = datetime.now(tz=timezone.utc)
                 store.save(state)
@@ -138,6 +148,8 @@ class PipelineOrchestrator:
                 state.status = "awaiting_approval"
                 state.updated_at = datetime.now(tz=timezone.utc)
                 store.save(state)
+                if on_progress:
+                    on_progress("agent_waiting", step, state)
                 return state
 
         state.status = "done"
