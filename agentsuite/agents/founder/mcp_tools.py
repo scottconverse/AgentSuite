@@ -85,7 +85,7 @@ def register_tools(
         run_dir = require_run_dir(output_root_fn, run_id)
         return _result_from_state(state, run_dir)
 
-    def founder_approve(run_id: str, approver: str, project_slug: str) -> ApprovalResult | dict:
+    def founder_approve(run_id: str, approver: str, project_slug: str) -> ApprovalResult | dict[str, Any]:
         agent = agent_class()
         try:
             state = agent.approve(run_id=run_id, approver=approver, project_slug=project_slug)

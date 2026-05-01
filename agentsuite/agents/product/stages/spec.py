@@ -1,7 +1,6 @@
 ﻿"""Stage 3 — spec: generate 9 markdown spec artifacts + consistency check."""
 from __future__ import annotations
 
-import json
 from typing import Any, cast
 
 from agentsuite.agents.product.input_schema import ProductAgentInput

@@ -14,8 +14,6 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from agentsuite.kernel.base_agent import StageContext
 from agentsuite.kernel.cost import CostTracker
 from agentsuite.kernel.schema import AgentRequest, Constraints, RunState

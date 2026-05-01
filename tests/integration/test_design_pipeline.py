@@ -4,8 +4,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import pytest
-
 from agentsuite.agents.design.agent import DesignAgent
 from agentsuite.agents.design.input_schema import DesignAgentInput
 from agentsuite.agents.design.stages.spec import SPEC_ARTIFACTS

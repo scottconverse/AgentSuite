@@ -101,7 +101,7 @@ def register_tools(
         run_dir = output_root_fn() / "runs" / run_id
         return _result_from_state(state, run_dir)
 
-    def agentsuite_cio_approve(run_id: str, approver: str, project_slug: str) -> ApprovalResult | dict:
+    def agentsuite_cio_approve(run_id: str, approver: str, project_slug: str) -> ApprovalResult | dict[str, Any]:
         """Approve a CIO run and promote artifacts to the kernel."""
         agent = agent_class()
         try:

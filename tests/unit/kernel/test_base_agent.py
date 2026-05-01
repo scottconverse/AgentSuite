@@ -185,11 +185,8 @@ def test_stage_progress_cost_warning_emitted_once(tmp_path):
     # Build an agent that accumulates enough cost to trigger the soft-warn cap
     # during the intake stage.
     from agentsuite.kernel.base_agent import BaseAgent, StageHandler
-    from agentsuite.kernel.cost import CostCap, CostTracker
     from agentsuite.kernel.qa import QARubric, RubricDimension
     from agentsuite.kernel.schema import AgentRequest, Constraints, Cost
-    from agentsuite.kernel.artifacts import ArtifactWriter
-    from agentsuite.kernel.state_store import StateStore
 
     class _CostlyAgent(BaseAgent):
         name = "costly"

@@ -1,7 +1,5 @@
 """Unit tests for the agentsuite CLI."""
 
-import os
-
 import pytest
 from typer.testing import CliRunner
 
