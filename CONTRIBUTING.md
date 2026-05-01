@@ -75,7 +75,7 @@ The kernel is designed for the seven planned agents (Founder, Design, Product, E
 
 ## Testing
 
-The default `pytest` invocation runs 688 of 691 tests; the three deselected tests (cleanroom, live, live_ollama) are gated by markers and documented in [`docs/test-coverage.md`](docs/test-coverage.md). Hard Rule 4a forbids skipped tests at v1.0 — `pytest.skip` and `@pytest.mark.skip` are not used.
+The default `pytest` invocation runs 1066 of 1069 tests; the three deselected tests (cleanroom, live, live_ollama) require special markers and are documented in [`docs/test-coverage.md`](docs/test-coverage.md). Hard Rule 4a forbids skipped tests at v1.0 — `pytest.skip` and `@pytest.mark.skip` are not used.
 
 ## Pre-push gate
 

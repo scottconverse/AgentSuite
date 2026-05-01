@@ -8,6 +8,38 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 - **v1.1.x** — First minor after GA. Candidates from the rc1 Discussions Ideas board (8th agent, per-day cost cap, GPG signed tags if requested). Plus next-sprint watchlist from the 2026-04-30 audit: extract `register_standard_tools()` to deduplicate per-agent mcp_tools.py (W-08), `_INPUTS_BY_AGENT` parity test (W-02), `agentsuite migrate` stub command (W-05), `SECURITY.md` disclosure policy (W-09).
 
+## [1.0.9] - 2026-04-30
+
+Sprint 3 — 15 Minor findings from the 2026-04-30 five-role audit resolved.
+
+### Security
+
+- **ENG-006/QA-007 — `extract_json` rfind fallback could skip valid JSON when prose contains curly braces:** The fallback path in `extract_json` used `str.rfind('}')` which produced an invalid slice when LLM prose contained `{template}` syntax before the real JSON object. Replaced with a forward scan using `json.JSONDecoder().raw_decode()` — finds the first valid JSON object at each `{`/`[` position, handles all nesting correctly. Added 2 stress-test cases.
+
+### Fixed
+
+- **ENG-007 — `CostCap.from_env` accepted zero or negative cap:** Zero cap caused `HardCapExceeded` on the first LLM call; a negative cap silently disabled cost protection entirely. Now raises `ValueError` with an actionable message for any non-positive value.
+- **ENG-008 — `AgentRegistry.get_class` dead second check:** Removed unreachable second `if name not in self._registered` guard — if `enabled_names()` passes, the name is by definition in `_registered`.
+- **QA-006 — Empty primary goal fields accepted on all agents:** Empty strings for `business_goal`, `campaign_goal`, `core_problem`, `problem_domain`, `risk_domain`, `strategic_priorities` were valid — an empty goal produces a run that spends real money generating useless artifacts. Added `Field(min_length=1)` to each agent's primary goal field.
+- **QA-008 — `RevisionRequired` error didn't point to QA report:** The approval error said "Address the QA feedback" but gave no path. Now includes the absolute path to `qa_scores.json` in the error message.
+- **UX-007 — CLI help string used ASCII `--` and `->` instead of Unicode:** Changed `--` to `—` (em-dash) and `->` to `→` in the Typer app description.
+- **UX-008 — `agentsuite-mcp --help` omitted `AGENTSUITE_COST_CAP_USD`:** Operators configuring the MCP server from `--help` output had no way to discover cost cap configuration. Added the env var and its description to the help text.
+
+### Added
+
+- Live test stubs for the 6 remaining agents (design, product, engineering, marketing, trust_risk, cio) in `tests/live/test_remaining_agents_live.py` — gated by `RUN_LIVE_TESTS=1`, to be exercised at next v0.X.0 release.
+
+### Removed
+
+- **ENG-009 — `httpx` unused direct dependency:** `httpx` was listed in `[project] dependencies` but not imported anywhere in production code. Removed — saves users ~4 transitive packages per install.
+- **TEST-005 — Dead VCR cassette infrastructure:** `vcrpy` dev dependency and the `cassette` fixture in `tests/integration/conftest.py` removed. No cassettes had ever been recorded; all integration tests use `MockLLMProvider` directly. The `RECORD_CASSETTES` guards in integration tests removed.
+
+### Documentation
+
+- **DOC-006** — CONTRIBUTING.md test count updated: 688 of 691 → 1066 of 1069 (reflecting stress suite additions)
+- **DOC-007** — README Status section shipped versions extended to v1.0.8; roadmap updated to v1.1.x candidates
+- **TEST-007** — `tests/golden/_helpers.py` scope comment added clarifying that golden tests verify mock-LLM stability, not real-LLM output quality
+
 ## [1.0.8] - 2026-04-30
 
 Sprint 2 Remediation — Three Criticals and six high-leverage Majors found in the Sprint 2 scoped audit (2026-04-30) fixed.
@@ -645,7 +677,9 @@ Initial release.
 - Per-run cost cap only; per-day cap deferred.
 - Single MCP server with env-gated agent enablement (no per-agent server topology).
 
-[Unreleased]: https://github.com/scottconverse/AgentSuite/compare/v1.0.7...HEAD
+[Unreleased]: https://github.com/scottconverse/AgentSuite/compare/v1.0.9...HEAD
+[1.0.9]: https://github.com/scottconverse/AgentSuite/compare/v1.0.8...v1.0.9
+[1.0.8]: https://github.com/scottconverse/AgentSuite/compare/v1.0.7...v1.0.8
 [1.0.7]: https://github.com/scottconverse/AgentSuite/compare/v1.0.6...v1.0.7
 [1.0.6]: https://github.com/scottconverse/AgentSuite/compare/v1.0.5...v1.0.6
 [1.0.5]: https://github.com/scottconverse/AgentSuite/compare/v1.0.4...v1.0.5

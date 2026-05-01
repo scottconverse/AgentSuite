@@ -4,6 +4,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Optional
 
+from pydantic import Field
+
 from agentsuite.kernel.schema import AgentRequest
 
 
@@ -12,7 +14,7 @@ class ProductAgentInput(AgentRequest):
 
     product_name: str
     target_users: str  # who the product is for
-    core_problem: str  # the problem being solved
+    core_problem: str = Field(min_length=1)  # the problem being solved
     inputs_dir: Optional[Path] = None  # research docs, competitive teardowns, etc.
     research_docs: list[Path] = []  # user interviews, surveys, personas
     competitor_docs: list[Path] = []  # competitive teardowns, market maps

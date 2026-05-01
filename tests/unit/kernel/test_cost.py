@@ -215,3 +215,30 @@ def test_from_env_accepts_valid_numeric_string(monkeypatch):
     cap = CostCap.from_env()
     assert cap.hard_kill_usd == pytest.approx(10.0)
     assert cap.soft_warn_usd == pytest.approx(10.0 * 0.2)
+
+
+# --- ENG-007: CostCap.from_env() rejects zero and negative values -----------
+
+
+def test_from_env_raises_on_zero_cap(monkeypatch):
+    """ENG-007: zero cap raises ValueError with 'greater than 0' in message."""
+    monkeypatch.setenv("AGENTSUITE_COST_CAP_USD", "0")
+    with pytest.raises(ValueError) as exc:
+        CostCap.from_env()
+    assert "greater than 0" in str(exc.value)
+
+
+def test_from_env_raises_on_negative_cap(monkeypatch):
+    """ENG-007: negative cap raises ValueError with 'greater than 0' in message."""
+    monkeypatch.setenv("AGENTSUITE_COST_CAP_USD", "-1")
+    with pytest.raises(ValueError) as exc:
+        CostCap.from_env()
+    assert "greater than 0" in str(exc.value)
+
+
+def test_from_env_accepts_positive_cap(monkeypatch):
+    """ENG-007: valid positive cap creates correct CostCap without error."""
+    monkeypatch.setenv("AGENTSUITE_COST_CAP_USD", "5.0")
+    cap = CostCap.from_env()
+    assert cap.hard_kill_usd == pytest.approx(5.0)
+    assert cap.soft_warn_usd == pytest.approx(5.0 * 0.2)

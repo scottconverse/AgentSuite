@@ -56,8 +56,6 @@ class AgentRegistry:
         """Return the registered class for ``name``. Raises UnknownAgent if disabled or unregistered."""
         if name not in self.enabled_names():
             raise UnknownAgent(f"Agent '{name}' is not enabled or not registered")
-        if name not in self._registered:
-            raise UnknownAgent(f"Agent '{name}' is not registered")
         return self._registered[name]
 
 

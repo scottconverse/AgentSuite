@@ -4,12 +4,14 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Optional
 
+from pydantic import Field
+
 from agentsuite.kernel.schema import AgentRequest
 
 
 class MarketingAgentInput(AgentRequest):
     brand_name: str                            # name of the brand or product being marketed
-    campaign_goal: str                         # what the campaign is trying to achieve
+    campaign_goal: str = Field(min_length=1)   # what the campaign is trying to achieve
     target_market: str                         # who the campaign is targeting
     inputs_dir: Optional[Path] = None          # existing brand assets, briefs, research docs
     existing_brand_docs: list[Path] = []       # brand guidelines, positioning docs, style guides

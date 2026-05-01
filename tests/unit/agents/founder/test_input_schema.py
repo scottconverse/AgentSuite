@@ -59,6 +59,16 @@ def test_slug_truncates_to_40_chars():
     assert len(slug) <= 40
 
 
+def test_business_goal_empty_string_rejected():
+    with pytest.raises(ValidationError):
+        FounderAgentInput(
+            agent_name="founder",
+            role_domain="creative-ops",
+            user_request="build me a brand system",
+            business_goal="",
+        )
+
+
 def test_slug_is_alphanumeric_hyphen_only():
     inp = FounderAgentInput(
         agent_name="founder",

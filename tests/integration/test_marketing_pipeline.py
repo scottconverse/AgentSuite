@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import json
-import os
 from pathlib import Path
 
 import pytest
@@ -14,10 +13,6 @@ from agentsuite.agents.marketing.template_loader import TEMPLATE_NAMES
 from agentsuite.llm.mock import MockLLMProvider, _default_mock_for_cli
 
 
-@pytest.mark.skipif(
-    os.environ.get("RECORD_CASSETTES") == "1",
-    reason="Skip when re-recording cassettes",
-)
 def test_marketing_pipeline_full_run(tmp_path: Path) -> None:
     """Full Marketing pipeline integration test against MockLLMProvider."""
     agent = MarketingAgent(output_root=tmp_path, llm=_default_mock_for_cli())

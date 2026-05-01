@@ -89,6 +89,12 @@ def test_user_request_required():
 # 7. existing_it_docs accepts Path objects
 # ---------------------------------------------------------------------------
 
+def test_strategic_priorities_empty_string_rejected():
+    kwargs = _minimal(strategic_priorities="")
+    with pytest.raises(ValidationError):
+        CIOAgentInput(**kwargs)
+
+
 def test_existing_it_docs_accepts_paths():
     paths = [Path("/docs/it_strategy.pdf"), Path("/docs/roadmap.pptx")]
     inp = CIOAgentInput(**_minimal(existing_it_docs=paths))

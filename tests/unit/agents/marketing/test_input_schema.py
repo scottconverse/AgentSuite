@@ -122,6 +122,18 @@ def test_timeline_defaults_to_empty_string():
     assert inp.timeline == ""
 
 
+def test_campaign_goal_empty_string_rejected():
+    with pytest.raises(ValidationError):
+        MarketingAgentInput(
+            agent_name="marketing",
+            role_domain="marketing-ops",
+            user_request="create a campaign",
+            brand_name="Acme Corp",
+            campaign_goal="",
+            target_market="millennials",
+        )
+
+
 def test_channels_defaults_to_empty_string():
     inp = MarketingAgentInput(
         agent_name="marketing",

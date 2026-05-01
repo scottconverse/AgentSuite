@@ -122,6 +122,18 @@ def test_threat_model_scope_defaults_to_empty_string():
     assert inp.threat_model_scope == ""
 
 
+def test_risk_domain_empty_string_rejected():
+    with pytest.raises(ValidationError):
+        TrustRiskAgentInput(
+            agent_name="trust_risk",
+            role_domain="trust-risk-ops",
+            user_request="assess risk posture",
+            product_name="CloudPlatform",
+            risk_domain="",
+            stakeholder_context="engineering team",
+        )
+
+
 def test_compliance_frameworks_defaults_to_empty_string():
     inp = TrustRiskAgentInput(
         agent_name="trust_risk",

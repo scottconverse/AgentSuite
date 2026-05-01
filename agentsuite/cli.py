@@ -38,7 +38,7 @@ def _force_utf8_io() -> None:
 _force_utf8_io()
 
 app = typer.Typer(
-    help="AgentSuite -- reasoning agents for vague intent -> precise artifacts"
+    help="AgentSuite — reasoning agents for vague intent → precise artifacts"
 )
 
 # Module-level flag toggled by the --debug callback so inner helpers can read it.

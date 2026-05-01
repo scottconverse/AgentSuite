@@ -42,9 +42,11 @@ class ApprovalGate:
                 f"Run is at stage '{state.stage}', not 'approval'"
             )
         if state.requires_revision:
+            qa_scores_path = self.writer.run_dir / "qa_scores.json"
             raise RevisionRequired(
-                "QA flagged this run as requiring revision. "
-                "Address the QA feedback and re-run before approving."
+                f"QA flagged this run as requiring revision. "
+                f"Review QA scores: {qa_scores_path}\n"
+                f"Then re-run the agent or manually edit artifacts before approving."
             )
         self.writer.promote(project_slug=project_slug)
         state.stage = "done"

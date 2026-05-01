@@ -34,6 +34,11 @@ class CostCap(BaseModel):
                 f"AGENTSUITE_COST_CAP_USD={raw!r} is not a valid dollar amount. "
                 "Set it to a number like '5.00'."
             )
+        if hard <= 0:
+            raise ValueError(
+                f"AGENTSUITE_COST_CAP_USD must be a positive number greater than 0, "
+                f"got {hard!r}. Example: AGENTSUITE_COST_CAP_USD=10.00"
+            )
         return cls(soft_warn_usd=hard * 0.2, hard_kill_usd=hard)
 
 

@@ -1,6 +1,6 @@
 # AgentSuite Troubleshooting Guide
 
-**Version 1.0.7**
+**Version 1.0.9**
 
 This guide covers the five most common failure modes in AgentSuite, with plain-language explanations and specific steps to resolve each one.
 
@@ -264,4 +264,4 @@ If you are not sure what slug a run used, omit the filter first and scan the ret
 
 ---
 
-*AgentSuite v1.0.7 — Troubleshooting Guide*
+*AgentSuite v1.0.9 — Troubleshooting Guide*

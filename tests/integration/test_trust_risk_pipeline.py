@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import json
-import os
 from pathlib import Path
 
 import pytest
@@ -15,10 +14,6 @@ from agentsuite.agents.trust_risk.stages.spec import SPEC_ARTIFACTS
 from agentsuite.llm.mock import MockLLMProvider, _default_mock_for_cli
 
 
-@pytest.mark.skipif(
-    os.environ.get("RECORD_CASSETTES") == "1",
-    reason="Skip when re-recording cassettes",
-)
 def test_trust_risk_full_pipeline_mock(tmp_path: Path) -> None:
     """Full Trust/Risk pipeline integration test against MockLLMProvider."""
     agent = TrustRiskAgent(output_root=tmp_path, llm=_default_mock_for_cli())
@@ -39,10 +34,6 @@ def test_trust_risk_full_pipeline_mock(tmp_path: Path) -> None:
     assert (run_dir / "qa_scores.json").exists(), "missing qa_scores.json"
 
 
-@pytest.mark.skipif(
-    os.environ.get("RECORD_CASSETTES") == "1",
-    reason="Skip when re-recording cassettes",
-)
 def test_trust_risk_qa_scores_above_threshold(tmp_path: Path) -> None:
     """QA scores must all be >= 7.0 and requires_revision must be False."""
     agent = TrustRiskAgent(output_root=tmp_path, llm=_default_mock_for_cli())
@@ -75,10 +66,6 @@ def test_trust_risk_qa_scores_above_threshold(tmp_path: Path) -> None:
     )
 
 
-@pytest.mark.skipif(
-    os.environ.get("RECORD_CASSETTES") == "1",
-    reason="Skip when re-recording cassettes",
-)
 def test_trust_risk_agent_via_registry(tmp_path: Path) -> None:
     """Trust/Risk agent instantiated via registry produces threat-model artifact."""
     import os as _os

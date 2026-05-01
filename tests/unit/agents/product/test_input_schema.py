@@ -88,6 +88,18 @@ def test_competitor_docs_defaults_to_empty():
     assert inp.competitor_docs == []
 
 
+def test_core_problem_empty_string_rejected():
+    with pytest.raises(ValidationError):
+        ProductAgentInput(
+            agent_name="product",
+            role_domain="product-ops",
+            user_request="create a PRD",
+            product_name="MyProduct",
+            target_users="shoppers",
+            core_problem="",
+        )
+
+
 def test_technical_constraints_defaults_to_empty_string():
     inp = ProductAgentInput(
         agent_name="product",

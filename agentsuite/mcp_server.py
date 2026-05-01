@@ -186,6 +186,8 @@ def main() -> None:
             "  AGENTSUITE_OUTPUT_DIR        Output root for agent runs (default: .agentsuite)",
             "  AGENTSUITE_LLM_PROVIDER      Force a specific provider (default: auto-detect)",
             "  AGENTSUITE_EXPOSE_STAGES     Set to 1 to expose advanced stage tools",
+            "  AGENTSUITE_COST_CAP_USD      Hard kill cap per run in USD (default: 5.00).",
+            "                               Soft warn fires at 20%% of this value.",
             "  AGENTSUITE_QUIET             Set to 1 to suppress stage-progress lines",
             "",
             "MCP wiring: see README.md and docs/USER-MANUAL.md for Codex / Claude Code /",

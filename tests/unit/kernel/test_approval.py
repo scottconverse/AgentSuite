@@ -63,3 +63,20 @@ def test_approve_with_requires_revision_raises(tmp_path):
         gate.approve(approver="scott", project_slug="testproj")
     # Artifacts must NOT have been promoted
     assert not (tmp_path / "_kernel" / "testproj").exists()
+
+
+def test_revision_required_message_includes_qa_scores_path(tmp_path):
+    """RevisionRequired error message must include the path to qa_scores.json."""
+    writer = ArtifactWriter(output_root=tmp_path, run_id="r1")
+    writer.write("brand-system.md", "content", kind="spec", stage="spec")
+    state = RunState(
+        run_id="r1", agent="founder", stage="approval",
+        inputs=_request(), requires_revision=True,
+    )
+    store = StateStore(run_dir=writer.run_dir)
+    store.save(state)
+    gate = ApprovalGate(state_store=store, writer=writer)
+    with pytest.raises(RevisionRequired) as exc_info:
+        gate.approve(approver="scott", project_slug="testproj")
+    message = str(exc_info.value)
+    assert "qa_scores.json" in message, f"Expected 'qa_scores.json' in error message, got: {message!r}"

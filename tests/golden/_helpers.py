@@ -1,3 +1,7 @@
+# Golden tests verify mock-LLM output stability and detect prompt/template drift.
+# They do NOT validate real-LLM output quality — that is the live tier's job.
+# Artifact snapshots are captured from MockLLMProvider output (scaffold strings).
+
 """Helpers for golden tests.
 
 Two assertion shapes, deliberately separated by argument types:

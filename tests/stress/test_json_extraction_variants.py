@@ -45,6 +45,10 @@ from agentsuite.llm.json_extract import extract_json
     # Numbers, booleans, null at various positions
     ('{"score": 8.0, "passed": true, "label": null}',
      {"score": 8.0, "passed": True, "label": None}),
+    # ENG-006/QA-007: prose containing curly braces BEFORE the real JSON object
+    ('The {key} is {value}. Now: {"a": 1}', {"a": 1}),
+    # ENG-006/QA-007: first valid JSON object wins; trailing brace-in-prose is ignored
+    ('{"k":"v"} some prose with }brace{inside', {"k": "v"}),
 ])
 def test_extract_json_accepts(text: str, expected: object) -> None:
     assert extract_json(text) == expected

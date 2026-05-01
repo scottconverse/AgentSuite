@@ -4,12 +4,14 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Optional
 
+from pydantic import Field
+
 from agentsuite.kernel.schema import AgentRequest
 
 
 class TrustRiskAgentInput(AgentRequest):
     product_name: str                              # name of the product or system being assessed
-    risk_domain: str                               # domain of risk being evaluated (e.g. cloud infra, SaaS app)
+    risk_domain: str = Field(min_length=1)         # domain of risk being evaluated (e.g. cloud infra, SaaS app)
     stakeholder_context: str                       # who is affected and what their risk tolerance is
     inputs_dir: Optional[Path] = None              # existing policy docs, audit reports, threat models
     existing_policies: list[Path] = []             # security policies, data governance docs, access control specs

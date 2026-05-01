@@ -95,6 +95,19 @@ def test_existing_codebase_docs_defaults_to_empty():
     assert inp.existing_codebase_docs == []
 
 
+def test_problem_domain_empty_string_rejected():
+    with pytest.raises(ValidationError):
+        EngineeringAgentInput(
+            agent_name="engineering",
+            role_domain="engineering-ops",
+            user_request="design the auth service",
+            system_name="Auth Service",
+            problem_domain="",
+            tech_stack="Python + FastAPI",
+            scale_requirements="10k RPM",
+        )
+
+
 def test_security_requirements_defaults_to_empty_string():
     inp = EngineeringAgentInput(
         agent_name="engineering",

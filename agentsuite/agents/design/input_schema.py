@@ -16,7 +16,7 @@ class DesignAgentInput(AgentRequest):
 
     # Required design-specific
     target_audience: str
-    campaign_goal: str
+    campaign_goal: str = Field(min_length=1)
 
     # Channel — narrows downstream brief shape
     channel: Literal["web", "social", "email", "print", "video", "deck", "other"] = "web"

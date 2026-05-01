@@ -98,6 +98,17 @@ def test_promote_from_kernel_optional():
     assert inp2.promote_from_kernel == "my-project"
 
 
+def test_campaign_goal_empty_string_rejected():
+    with pytest.raises(ValidationError):
+        DesignAgentInput(
+            agent_name="design",
+            role_domain="creative-ops",
+            user_request="create a hero section",
+            target_audience="developers",
+            campaign_goal="",
+        )
+
+
 def test_extra_fields_allowed_for_round_trip():
     inp = DesignAgentInput(
         agent_name="design",

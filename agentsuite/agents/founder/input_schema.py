@@ -19,7 +19,7 @@ class FounderAgentInput(AgentRequest):
     screenshots: list[Path] = Field(default_factory=list)
     explicit_brand_docs: list[Path] = Field(default_factory=list)
     founder_voice_samples: list[Path] = Field(default_factory=list)
-    business_goal: str  # required (overrides AgentRequest's optional)
+    business_goal: str = Field(min_length=1)  # required (overrides AgentRequest's optional)
     project_slug: str | None = None
     current_state: Literal["pre-launch", "launched", "rebrand"] = "pre-launch"
 

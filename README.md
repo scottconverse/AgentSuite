@@ -2,7 +2,7 @@
 
 > Seven role-specific reasoning agents that turn vague intent into precise operating artifacts.
 >
-> **v1.0.8** — Specification Kernel + Founder · Design · Product · Engineering · Marketing · Trust/Risk · CIO Agents
+> **v1.0.9** — Specification Kernel + Founder · Design · Product · Engineering · Marketing · Trust/Risk · CIO Agents
 
 ![AgentSuite founder run](docs/screenshots/cli-founder-run.svg)
 
@@ -268,9 +268,15 @@ Full architecture diagram with all agents: see `docs/README-FULL.pdf`.
 - v0.5.0 — Marketing Agent (campaign brief, audience profile, messaging framework, content calendar, channel strategy, SEO keyword plan, competitive positioning, launch plan, measurement framework)
 - v0.6.0 — Trust/Risk Agent (threat model, risk register, control framework, incident response plan, compliance matrix, vendor risk assessment, security policy, audit readiness report, residual risk acceptance)
 - v0.7.0 — CIO Agent (IT strategy, technology roadmap, vendor portfolio, digital transformation plan, IT governance framework, enterprise architecture, budget allocation model, workforce development plan, IT risk appetite statement)
+- v0.8.0 — path-traversal validation, MCP tool naming fixes, RetryingLLMProvider hardening
+- v0.9.0–v0.9.1 — engineering hardening sprint (676 tests, 7 ADRs, resume idempotency contract)
+- v1.0.0–v1.0.8 — Sprint 2 audit + remediation; 1066 tests green; cleanroom PASS
 
-**Roadmap:**
-- v0.8.0 — next agent
+**Roadmap (v1.1.x candidates):**
+- Multi-agent pipelines (chain agents end-to-end)
+- Per-day cost cap
+- `agentsuite migrate` command for run directory schema upgrades
+- 8th agent TBD
 
 ## Documentation
 

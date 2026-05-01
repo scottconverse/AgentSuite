@@ -1,6 +1,5 @@
 """End-to-end Founder pipeline integration test (mock LLM)."""
 import json
-import os
 from pathlib import Path
 
 import pytest
@@ -13,10 +12,6 @@ from agentsuite.kernel.schema import Constraints
 from agentsuite.llm.mock import MockLLMProvider, _default_mock_for_cli
 
 
-@pytest.mark.skipif(
-    os.environ.get("RECORD_CASSETTES") == "1",
-    reason="Skip when re-recording — see Task 28 docs for the dedicated record path",
-)
 def test_founder_full_pipeline_with_mock_provider(tmp_path):
     """The integration test runs against MockLLMProvider — vcr cassettes are reserved
     for the future real-provider integration path. v0.1.0 ships mock-only integration

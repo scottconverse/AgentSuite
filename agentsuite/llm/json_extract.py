@@ -27,16 +27,18 @@ def extract_json(text: str) -> Any:
         return json.loads(stripped)
     except json.JSONDecodeError:
         pass
-    # Fallback: extract first JSON object or array from text (handles leading prose)
-    for start_char, end_char in (("{", "}"), ("[", "]")):
-        start_idx = stripped.find(start_char)
-        if start_idx >= 0:
-            end_idx = stripped.rfind(end_char)
-            if end_idx > start_idx:
-                try:
-                    return json.loads(stripped[start_idx:end_idx + 1])
-                except json.JSONDecodeError:
-                    pass
+    # Fallback: forward-scan for the first valid JSON object or array.
+    # Uses raw_decode so it correctly handles nesting and ignores curly braces
+    # in prose that appear before the real JSON object.
+    decoder = json.JSONDecoder()
+    for pos, ch in enumerate(stripped):
+        if ch not in ("{", "["):
+            continue
+        try:
+            value, _ = decoder.raw_decode(stripped, pos)
+            return value
+        except json.JSONDecodeError:
+            continue
     raise ValueError(
         f"LLM response is not valid JSON even after stripping fences/prose. "
         f"First 200 chars: {text[:200]!r}"
