@@ -2,7 +2,7 @@
 
 > Seven role-specific reasoning agents that turn vague intent into precise operating artifacts.
 >
-> **v1.0.9** — Specification Kernel + Founder · Design · Product · Engineering · Marketing · Trust/Risk · CIO Agents
+> **v1.0.10** — Specification Kernel + Founder · Design · Product · Engineering · Marketing · Trust/Risk · CIO Agents
 
 ![AgentSuite founder run](docs/screenshots/cli-founder-run.svg)
 
@@ -271,6 +271,7 @@ Full architecture diagram with all agents: see `docs/README-FULL.pdf`.
 - v0.8.0 — path-traversal validation, MCP tool naming fixes, RetryingLLMProvider hardening
 - v0.9.0–v0.9.1 — engineering hardening sprint (676 tests, 7 ADRs, resume idempotency contract)
 - v1.0.0–v1.0.8 — Sprint 2 audit + remediation; 1066 tests green; cleanroom PASS
+- v1.0.9 — Sprint 3 audit + remediation; 12 Nit findings resolved; full 4-sprint audit cycle complete
 
 **Roadmap (v1.1.x candidates):**
 - Multi-agent pipelines (chain agents end-to-end)

@@ -47,6 +47,17 @@ def test_mock_accepts_name_override():
     assert _default_mock_for_cli().name == "mock"
 
 
+def test_mock_longest_match_wins() -> None:
+    """A prompt matching both 'brand' and 'brand-system' must return the brand-system response."""
+    provider = MockLLMProvider(responses={
+        "brand": "brand response",
+        "brand-system": "brand-system response",
+    })
+    req = LLMRequest(prompt="writing brand-system.md", system="", model="mock-1")
+    resp = provider.complete(req)
+    assert resp.text == "brand-system response"
+
+
 # ===========================================================================
 # TEST-002: SequentialMockLLMProvider
 # ===========================================================================

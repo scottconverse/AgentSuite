@@ -245,8 +245,8 @@ if status in ("approval", "awaiting_approval"):
 By default, only the Founder agent is enabled. To use additional agents, you set an environment variable (a setting) that lists the ones you want.
 
 ```
-Windows:   set AGENTSUITE_ENABLED_AGENTS=founder,design,product,engineering,marketing,trust_risk,cio
-Mac/Linux: export AGENTSUITE_ENABLED_AGENTS=founder,design,product,engineering,marketing,trust_risk,cio
+Windows:   set AGENTSUITE_ENABLED_AGENTS=founder,design,product,engineering,marketing,trust-risk,cio
+Mac/Linux: export AGENTSUITE_ENABLED_AGENTS=founder,design,product,engineering,marketing,trust-risk,cio
 ```
 
 You can enable just the ones you need. For example, to enable only the Product and Marketing agents:
@@ -820,7 +820,7 @@ All AgentSuite settings are controlled through environment variables — setting
 | `OPENAI_API_KEY` | One of these four is required | (none) | Your OpenAI GPT API key. Get one at platform.openai.com. |
 | `GOOGLE_API_KEY` | One of these four is required | (none) | Your Google Gemini API key. Also accepted as `GEMINI_API_KEY`. Get one at aistudio.google.com. |
 | `OLLAMA_HOST` | Only if Ollama is not on the default port | `http://localhost:11434` | The address where Ollama is running. Change this only if you installed Ollama on a different computer or port. |
-| `AGENTSUITE_ENABLED_AGENTS` | No | `founder` | Comma-separated list of agents to enable. Options: `founder,design,product,engineering,marketing,trust_risk,cio`. |
+| `AGENTSUITE_ENABLED_AGENTS` | No | `founder` | Comma-separated list of agents to enable. Options: `founder,design,product,engineering,marketing,trust-risk,cio`. |
 | `AGENTSUITE_OUTPUT_DIR` | No | `.agentsuite/` in your current folder | Where AgentSuite writes its output. Change this if you want documents saved somewhere else. |
 | `AGENTSUITE_COST_CAP_USD` | No | `5.00` | Maximum amount in US dollars that a single run can spend on AI API calls. If a run exceeds this, it stops and reports a `HardCapExceeded` error. Raise it if you have large inputs or need longer documents. **The value must be a valid decimal number** (e.g., `5.00` or `10`). If a non-numeric value is set (e.g., `ten`), AgentSuite will exit with an error before making any AI calls, naming the bad value and explaining how to fix it. |
 

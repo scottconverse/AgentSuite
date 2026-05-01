@@ -95,7 +95,7 @@ class CostTracker:
     def summary(self) -> dict[str, Any]:
         """Return a JSON-serializable summary of token + dollar usage.
 
-        Schema (frozen for v0.9.0):
+        Schema (stable as of v1.0.1):
 
         ``run_id, agent, provider, model``: identity fields. ``model`` is
         the latest model recorded under ``self.total.model``; ``None`` if

@@ -134,7 +134,7 @@ def _make_approve_fn(agent_class: type) -> Any:
         run_id: Optional[str] = typer.Option(None, help="Run id to approve (omit with --latest)"),
         latest: bool = typer.Option(False, "--latest", help="Approve the most recently created run."),
         approver: str = typer.Option(..., help="Approver identity"),
-        project_slug: str = typer.Option(..., help="Slug for `_kernel/<slug>/` promotion"),
+        project_slug: str = typer.Option(..., help="Stable slug for artifact promotion (e.g. 'my-app'); approved artifacts go to .agentsuite/_kernel/<slug>/"),
     ) -> None:
         """Approve a completed run and promote artifacts to ``_kernel/``."""
         try:
@@ -191,7 +191,7 @@ def _make_list_runs_fn(agent_name: str) -> Any:
             try:
                 state = StateStore(run_dir=d).load()
             except RunStateSchemaVersionError:
-                typer.echo(f"Skipping pre-v0.9 run dir {d.name}", err=True)
+                typer.echo(f"[WARN] Skipping pre-v0.9 run dir {d.name} — delete it and re-run to include it in results.", err=True)
                 continue
             if state is None or state.agent != agent_name:
                 continue
@@ -285,7 +285,7 @@ def agents_cmd() -> None:
         raise SystemExit(1)
     typer.echo(json.dumps({
         "enabled": enabled,
-        "all_registered": reg.registered_names(),
+        "registered": reg.registered_names(),
     }, indent=2))
 
 

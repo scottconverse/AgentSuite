@@ -3,6 +3,9 @@ from __future__ import annotations
 
 import json
 import logging
+import os
+import sys
+import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
@@ -31,8 +34,6 @@ def _emit_stage_progress(stage: Stage, elapsed_s: float, total_usd: float) -> No
     so the line stays clean: ``[OK] intake complete  (0.2s)`` rather than
     ``[OK] intake complete  (0.2s, $0.0000)``.
     """
-    import os
-    import sys
     if os.environ.get("AGENTSUITE_QUIET", "").lower() in {"1", "true", "yes"}:
         return
     cost_str = f", ${total_usd:.4f}" if total_usd > 0 else ""
@@ -162,8 +163,6 @@ class BaseAgent(ABC):
                     pass
         ctx = StageContext(writer=writer, cost_tracker=cost_tracker, edits=edits)
         start_idx = PIPELINE_ORDER.index(state.stage) if state.stage in PIPELINE_ORDER else 0
-        import sys
-        import time
         for stage in PIPELINE_ORDER[start_idx:]:
             if stage not in handlers:
                 raise NotImplementedError(f"Agent {self.name} missing handler for stage '{stage}'")

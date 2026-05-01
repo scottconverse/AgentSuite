@@ -77,7 +77,7 @@ def build_server() -> _ServerWrapper:
     except UnknownAgent as e:
         raise RuntimeError(
             f"AGENTSUITE_ENABLED_AGENTS contains an unknown agent name: {e}. "
-            "Valid agents: founder, design, product, engineering, marketing, trust_risk, cio"
+            "Valid agents: founder, design, product, engineering, marketing, trust-risk, cio"
         ) from e
 
     # Per-agent tools
@@ -102,7 +102,7 @@ def build_server() -> _ServerWrapper:
     # Cross-agent shared tools
     def agentsuite_list_agents() -> dict[str, Any]:
         """List all enabled agents and all registered agents."""
-        return {"enabled": enabled, "all_registered": sorted(registry._registered.keys())}
+        return {"enabled": enabled, "registered": sorted(registry._registered.keys())}
 
     def agentsuite_kernel_artifacts(project_slug: str) -> dict[str, Any]:
         """List kernel artifacts for a given project."""
@@ -182,7 +182,7 @@ def main() -> None:
             "Configuration via environment variables:",
             "  AGENTSUITE_ENABLED_AGENTS    Comma-separated agent names to enable",
             "                               (default: founder; allowed: founder, design,",
-            "                                product, engineering, marketing, trust_risk, cio)",
+            "                                product, engineering, marketing, trust-risk, cio)",
             "  AGENTSUITE_OUTPUT_DIR        Output root for agent runs (default: .agentsuite)",
             "  AGENTSUITE_LLM_PROVIDER      Force a specific provider (default: auto-detect)",
             "  AGENTSUITE_EXPOSE_STAGES     Set to 1 to expose advanced stage tools",

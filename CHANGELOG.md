@@ -8,6 +8,30 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 - **v1.1.x** — First minor after GA. Candidates from the rc1 Discussions Ideas board (8th agent, per-day cost cap, GPG signed tags if requested). Plus next-sprint watchlist from the 2026-04-30 audit: extract `register_standard_tools()` to deduplicate per-agent mcp_tools.py (W-08), `_INPUTS_BY_AGENT` parity test (W-02), `agentsuite migrate` stub command (W-05), `SECURITY.md` disclosure policy (W-09).
 
+## [1.0.10] - 2026-04-30
+
+Sprint 4 — 12 Nit findings from the 2026-04-30 five-role audit resolved. Full audit cycle (57 findings across 4 sprints) complete.
+
+### Changed
+
+- **UX-010 — `all_registered` renamed to `registered` in agent list JSON output:** `agentsuite agents` CLI command and MCP `agentsuite_list_agents` tool now return `{"enabled": [...], "registered": [...]}`. The `all_registered` key is removed. Callers should update any key references accordingly.
+- **UX-009 — Pre-v0.9 run dir skip messages now include `[WARN]` prefix and recovery hint:** `agentsuite list-runs` now emits `[WARN] Skipping pre-v0.9 run dir <name> — delete it and re-run to include it in results.` instead of a bare skip message.
+- **QA-010 — `--project-slug` help text clarified:** The `agentsuite <agent> approve` command's `--project-slug` option now explains that approved artifacts are promoted to `.agentsuite/_kernel/<slug>/`, with an example.
+
+### Fixed
+
+- **ENG-012 — Lazy stdlib imports in `base_agent.py` moved to module level:** `import os`, `import sys`, and `import time` were imported inside function bodies as a defensive holdover. Moved to module-level imports; no behavior change.
+- **ENG-013 — `AgentRegistry.DEFAULT_ENABLED` type annotation added:** Added `str` annotation and a `# comma-separated; e.g. "founder,design"` comment to clarify the accepted format.
+- **ENG-014 — Stale `cost.py` schema comment updated:** `CostCap.summary()` docstring said "schema frozen for v0.9.0" but the `model` field was added in v1.0.1. Updated to "stable as of v1.0.1".
+- **QA-009 — `agentsuite-mcp --help` used `trust_risk` (underscore) for agent name:** Help text now consistently uses `trust-risk` (hyphen) to match the README, USER-MANUAL, and CLI documentation.
+- **DOC-010 — USER-MANUAL.md `AGENTSUITE_ENABLED_AGENTS` examples used `trust_risk`:** All env var value examples in the user manual now use `trust-risk` (hyphen) consistently with the README.
+- **DOC-011 — Landing page MCP install snippet missing `[mcp]` extra:** `docs/index.html` MCP install command now uses `uvx --from "agentsuite[mcp] @ git+..."` to match the README and ensure the MCP server dependencies are installed.
+- **TEST-009 — Longest-match-first rule in `MockLLMProvider` had no test:** Added `test_mock_longest_match_wins` to `tests/unit/llm/test_mock.py`. A prompt matching both `"brand"` and `"brand-system"` must return the `brand-system` response.
+
+### Refactored
+
+- **ENG-010 — `_default_mock_for_cli` split into per-agent `build_mock_responses()` helpers:** The 140-line monolith in `agentsuite/llm/mock.py` with 14 lazy imports is replaced by a 23-line assembler. Each agent now provides `build_mock_responses() -> dict[str, str]` in its own `testing.py` module. Adding an 8th agent no longer requires editing `mock.py`.
+
 ## [1.0.9] - 2026-04-30
 
 Sprint 3 — 15 Minor findings from the 2026-04-30 five-role audit resolved.
@@ -677,7 +701,8 @@ Initial release.
 - Per-run cost cap only; per-day cap deferred.
 - Single MCP server with env-gated agent enablement (no per-agent server topology).
 
-[Unreleased]: https://github.com/scottconverse/AgentSuite/compare/v1.0.9...HEAD
+[Unreleased]: https://github.com/scottconverse/AgentSuite/compare/v1.0.10...HEAD
+[1.0.10]: https://github.com/scottconverse/AgentSuite/compare/v1.0.9...v1.0.10
 [1.0.9]: https://github.com/scottconverse/AgentSuite/compare/v1.0.8...v1.0.9
 [1.0.8]: https://github.com/scottconverse/AgentSuite/compare/v1.0.7...v1.0.8
 [1.0.7]: https://github.com/scottconverse/AgentSuite/compare/v1.0.6...v1.0.7

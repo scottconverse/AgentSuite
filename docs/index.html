@@ -46,7 +46,7 @@
 </head>
 <body>
   <header>
-    <h1>AgentSuite <span class="v">v1.0.9</span></h1>
+    <h1>AgentSuite <span class="v">v1.0.10</span></h1>
     <p class="lede">Seven role-specific reasoning agents that turn vague intent into precise operating artifacts. Open-source. MCP-compatible with Codex, Claude Code, and Cowork.</p>
   </header>
 
@@ -58,7 +58,7 @@
   <pre><code>pip install "agentsuite[anthropic] @ git+https://github.com/scottconverse/AgentSuite.git"
 # other providers: [openai]  [gemini]  [ollama]  [all]
 # or, no install:
-uvx --from git+https://github.com/scottconverse/AgentSuite.git agentsuite-mcp</code></pre>
+uvx --from "agentsuite[mcp] @ git+https://github.com/scottconverse/AgentSuite.git" agentsuite-mcp</code></pre>
 
   <h2>Quick start (CLI)</h2>
   <pre><code>export ANTHROPIC_API_KEY=sk-ant-...

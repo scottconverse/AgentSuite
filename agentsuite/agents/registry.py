@@ -14,7 +14,7 @@ class UnknownAgent(KeyError):
 class AgentRegistry:
     """Maps agent names to BaseAgent subclasses, gated by AGENTSUITE_ENABLED_AGENTS env."""
 
-    DEFAULT_ENABLED = "founder"
+    DEFAULT_ENABLED: str = "founder"  # comma-separated; e.g. "founder,design"
 
     def __init__(self) -> None:
         self._registered: dict[str, Type[BaseAgent]] = {}
