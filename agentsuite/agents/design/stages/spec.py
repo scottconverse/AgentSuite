@@ -1,15 +1,14 @@
-"""Stage 3 — spec: generate 9 markdown spec artifacts + consistency check."""
+﻿"""Stage 3 — spec: generate 9 markdown spec artifacts + consistency check."""
 from __future__ import annotations
 
 import json
-from typing import cast
+from typing import Any, cast
 
 from agentsuite.agents.design.input_schema import DesignAgentInput
 from agentsuite.agents.design.prompt_loader import render_prompt
 from agentsuite.kernel.base_agent import StageContext
-from agentsuite.kernel.schema import Cost, RunState
-from agentsuite.llm.base import LLMProvider, LLMRequest
-from agentsuite.llm.json_extract import extract_json
+from agentsuite.kernel.schema import RunState
+from agentsuite.kernel.stages.spec import SpecStageConfig, kernel_spec_stage
 
 
 SPEC_ARTIFACTS: list[str] = [
@@ -69,21 +68,8 @@ _CHANNEL_FORMAT: dict[str, str] = {
 }
 
 
-def spec_stage(state: RunState, ctx: StageContext) -> RunState:
-    """Stage 3 handler: generate 9 spec markdown artifacts + consistency check.
-
-    Reads extracted_context.json, calls LLM once per artifact, then runs a
-    consistency check. Raises ConsistencyCheckFailed if any mismatch is critical.
-    Advances to 'execute' on success.
-    """
+def _build_artifact_prompt(stem: str, extracted: dict[str, Any], state: RunState) -> str:
     inp = cast(DesignAgentInput, state.inputs)
-    llm: LLMProvider = ctx.edits["llm"]
-
-    extracted = json.loads(
-        (ctx.writer.run_dir / "extracted_context.json").read_text(encoding="utf-8")
-    )
-
-    # Build superset of all possible template variables
     brand_voice = extracted.get("brand_voice", {})
     brand_voice_str = (
         json.dumps(brand_voice, indent=2) if isinstance(brand_voice, dict) else str(brand_voice)
@@ -110,50 +96,35 @@ def spec_stage(state: RunState, ctx: StageContext) -> RunState:
         "delivery_format": _CHANNEL_FORMAT.get(channel, "TBD"),
         "platform_targets": channel,
     }
+    return render_prompt(_PROMPT_BY_ARTIFACT[stem], **template_vars)
 
-    artifact_bodies: dict[str, str] = {}
 
-    for stem in SPEC_ARTIFACTS:
-        prompt_name = _PROMPT_BY_ARTIFACT[stem]
-        prompt = render_prompt(prompt_name, **template_vars)
-        response = llm.complete(LLMRequest(
-            prompt=prompt,
-            system=f"You are writing {stem}.md for a designer. Return ONLY markdown.",
-            temperature=0.2,
-        ))
-        ctx.cost_tracker.add(Cost(
-            input_tokens=response.input_tokens,
-            output_tokens=response.output_tokens,
-            usd=response.usd,
-            model=response.model,
-        ))
-        ctx.writer.write(f"{stem}.md", response.text, kind="spec", stage="spec")
-        artifact_bodies[f"{stem}.md"] = response.text
+def _artifact_system_msg(stem: str) -> str:
+    return f"You are writing {stem}.md for a designer. Return ONLY markdown."
 
-    consistency_prompt = render_prompt("consistency_check", artifacts=artifact_bodies)
-    consistency_response = llm.complete(LLMRequest(
-        prompt=consistency_prompt,
-        system="You are checking 9 artifacts for design consistency. Return ONLY JSON.",
-        temperature=0.0,
-    ))
-    ctx.cost_tracker.add(Cost(
-        input_tokens=consistency_response.input_tokens,
-        output_tokens=consistency_response.output_tokens,
-        usd=consistency_response.usd,
-        model=consistency_response.model,
-    ))
 
-    try:
-        report = extract_json(consistency_response.text)
-    except ValueError as exc:
-        raise ValueError(f"consistency check produced invalid JSON: {exc}") from exc
+def _build_consistency_prompt(artifact_snippets: dict[str, str], state: RunState) -> str:
+    # Design passes full artifact bodies (not snippets) keyed as {stem.md: content}
+    # artifact_snippets has {f"{stem}.md": content} due to snippet_key_fn below
+    return render_prompt("consistency_check", artifacts=artifact_snippets)
 
-    ctx.writer.write_json("consistency_report.json", report, kind="data", stage="spec")
 
-    mismatches_raw = report.get("mismatches") if isinstance(report, dict) else None
-    mismatches = mismatches_raw if isinstance(mismatches_raw, list) else []
-    critical = [m for m in mismatches if isinstance(m, dict) and m.get("severity") == "critical"]
-    return state.model_copy(update={
-        "stage": "execute",
-        "requires_revision": bool(critical),
-    })
+_SPEC_CONFIG = SpecStageConfig(
+    spec_artifacts=SPEC_ARTIFACTS,
+    build_artifact_prompt_fn=_build_artifact_prompt,
+    artifact_system_msg_fn=_artifact_system_msg,
+    build_consistency_prompt_fn=_build_consistency_prompt,
+    consistency_system_msg="You are checking 9 artifacts for design consistency. Return ONLY JSON.",
+    artifact_snippet_truncate=10_000_000,  # full content — original passes complete bodies
+    snippet_key_fn=lambda s: f"{s}.md",
+)
+
+
+def spec_stage(state: RunState, ctx: StageContext) -> RunState:
+    """Stage 3 handler: generate 9 spec markdown artifacts + consistency check.
+
+    Reads extracted_context.json, calls LLM once per artifact, then runs a
+    consistency check. Raises ConsistencyCheckFailed if any mismatch is critical.
+    Advances to 'execute' on success.
+    """
+    return kernel_spec_stage(_SPEC_CONFIG, state, ctx)

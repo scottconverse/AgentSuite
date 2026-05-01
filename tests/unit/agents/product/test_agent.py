@@ -50,6 +50,29 @@ def test_product_agent_registered_in_default_registry():
     assert registry.get_class("product") is ProductAgent
 
 
+# ---------------------------------------------------------------------------
+# UX-004 — _stage_to_status maps "approval" → "awaiting_approval"
+# ---------------------------------------------------------------------------
+
+def test_stage_to_status_approval_maps_to_awaiting_approval():
+    """CLI JSON status: 'approval' stage must emit 'awaiting_approval'."""
+    from agentsuite.agents.product.agent import _stage_to_status
+    assert _stage_to_status("approval") == "awaiting_approval"
+
+
+def test_stage_to_status_done_passes_through():
+    """CLI JSON status: 'done' stage must emit 'done' unchanged."""
+    from agentsuite.agents.product.agent import _stage_to_status
+    assert _stage_to_status("done") == "done"
+
+
+def test_stage_to_status_other_stages_pass_through():
+    """CLI JSON status: intermediate stages pass through unchanged."""
+    from agentsuite.agents.product.agent import _stage_to_status
+    for stage in ("intake", "extract", "spec", "execute", "qa"):
+        assert _stage_to_status(stage) == stage
+
+
 def test_product_agent_accepts_valid_input(tmp_path):
     """Smoke test: intake stage runs without error and advances to 'extract'."""
     agent = ProductAgent(output_root=tmp_path, llm=MockLLMProvider(responses={}))

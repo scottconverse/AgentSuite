@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agentsuite"
-version = "1.0.6"
+version = "1.0.7"
 description = "Seven role-specific reasoning agents that turn vague intent into precise operating artifacts"
 authors = [{name = "Scott Converse"}]
 license = {text = "MIT"}

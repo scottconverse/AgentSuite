@@ -74,6 +74,13 @@ class CIOAgent(BaseAgent):
         }
 
 
+def _stage_to_status(stage: str) -> str:
+    """Map internal stage names to user-facing status values."""
+    if stage == "approval":
+        return "awaiting_approval"
+    return stage
+
+
 def build_cli_spec() -> AgentCLISpec:
     """Return the CLI spec for the CIO agent."""
     import json
@@ -117,7 +124,7 @@ def build_cli_spec() -> AgentCLISpec:
         typer.echo(json.dumps({
             "run_id": result.run_id,
             "primary_path": str(_output_root() / "runs" / result.run_id / "it-strategy.md"),
-            "status": result.stage,
+            "status": _stage_to_status(result.stage),
         }, indent=2))
 
     return AgentCLISpec(

@@ -123,6 +123,63 @@ def test_design_get_status_raises_on_missing_run(tmp_path: Path) -> None:
 # TEST-004 — design_approve returns structured dict on RevisionRequired
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# UX-006 — design_list_runs filters by project_slug
+# ---------------------------------------------------------------------------
+
+def test_design_list_runs_filters_by_project_slug(tmp_path: Path) -> None:
+    """design_list_runs(project_slug='x') must return only runs with project_slug == 'x'."""
+    from agentsuite.agents.design.input_schema import DesignAgentInput
+    from agentsuite.kernel.schema import RunState, Cost
+    from agentsuite.kernel.state_store import StateStore
+
+    def _make_run(run_id: str, project_slug: str | None) -> None:
+        run_dir = tmp_path / "runs" / run_id
+        run_dir.mkdir(parents=True)
+        inp = DesignAgentInput(
+            agent_name="design",
+            role_domain="design-ops",
+            user_request="test",
+            target_audience="devs",
+            campaign_goal="test goal",
+            project_slug=project_slug,
+        )
+        state = RunState(
+            run_id=run_id,
+            agent="design",
+            stage="approval",
+            inputs=inp,
+            cost_so_far=Cost(),
+        )
+        StateStore(run_dir=run_dir).save(state)
+
+    _make_run("d-slug-a", "slug-a")
+    _make_run("d-slug-b", "slug-b")
+    _make_run("d-no-slug", None)
+
+    server = _StubServer()
+    register_tools(
+        server,
+        agent_class=lambda: _agent_factory(tmp_path),
+        output_root_fn=lambda: tmp_path,
+        expose_stages=False,
+    )
+
+    # Filter by slug-a
+    runs = server.tools["agentsuite_design_list_runs"](project_slug="slug-a")
+    assert len(runs) == 1, f"Expected 1, got {len(runs)}: {[r.run_id for r in runs]}"
+    assert runs[0].run_id == "d-slug-a"
+
+    # Filter by slug-b
+    runs = server.tools["agentsuite_design_list_runs"](project_slug="slug-b")
+    assert len(runs) == 1
+    assert runs[0].run_id == "d-slug-b"
+
+    # No filter — all 3
+    runs = server.tools["agentsuite_design_list_runs"](project_slug=None)
+    assert len(runs) == 3
+
+
 def test_design_approve_revision_required_returns_structured_error(tmp_path: Path) -> None:
     """design_approve must return a structured error dict (not raise) on RevisionRequired."""
     from agentsuite.kernel.schema import AgentRequest, Constraints, RunState

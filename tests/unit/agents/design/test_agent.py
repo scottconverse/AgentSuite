@@ -78,6 +78,29 @@ def test_design_agent_produces_qa_report(tmp_path):
     assert (run_dir / "qa_scores.json").exists()
 
 
+# ---------------------------------------------------------------------------
+# UX-004 — _stage_to_status maps "approval" → "awaiting_approval"
+# ---------------------------------------------------------------------------
+
+def test_stage_to_status_approval_maps_to_awaiting_approval():
+    """CLI JSON status: 'approval' stage must emit 'awaiting_approval'."""
+    from agentsuite.agents.design.agent import _stage_to_status
+    assert _stage_to_status("approval") == "awaiting_approval"
+
+
+def test_stage_to_status_done_passes_through():
+    """CLI JSON status: 'done' stage must emit 'done' unchanged."""
+    from agentsuite.agents.design.agent import _stage_to_status
+    assert _stage_to_status("done") == "done"
+
+
+def test_stage_to_status_other_stages_pass_through():
+    """CLI JSON status: intermediate stages pass through unchanged."""
+    from agentsuite.agents.design.agent import _stage_to_status
+    for stage in ("intake", "extract", "spec", "execute", "qa"):
+        assert _stage_to_status(stage) == stage
+
+
 def test_design_agent_cost_tracked(tmp_path):
     agent = DesignAgent(output_root=tmp_path, llm=MockLLMProvider(responses=_all_responses()))
     state = agent.run(request=_request(), run_id="r1")

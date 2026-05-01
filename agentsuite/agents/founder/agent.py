@@ -65,6 +65,13 @@ class FounderAgent(BaseAgent):
         }
 
 
+def _stage_to_status(stage: str) -> str:
+    """Map internal stage names to user-facing status values."""
+    if stage == "approval":
+        return "awaiting_approval"
+    return stage
+
+
 def build_cli_spec() -> AgentCLISpec:
     """Return the CLI spec for the Founder agent."""
     import json
@@ -101,7 +108,7 @@ def build_cli_spec() -> AgentCLISpec:
         typer.echo(json.dumps({
             "run_id": state.run_id,
             "primary_path": str(_output_root() / "runs" / state.run_id / "brand-system.md"),
-            "status": state.stage,
+            "status": _stage_to_status(state.stage),
         }, indent=2))
 
     return AgentCLISpec(

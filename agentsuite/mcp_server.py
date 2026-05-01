@@ -72,7 +72,13 @@ def build_server() -> _ServerWrapper:
     server = _ServerWrapper(mcp)
 
     registry = default_registry()
-    enabled = registry.enabled_names()
+    try:
+        enabled = registry.enabled_names()
+    except UnknownAgent as e:
+        raise RuntimeError(
+            f"AGENTSUITE_ENABLED_AGENTS contains an unknown agent name: {e}. "
+            "Valid agents: founder, design, product, engineering, marketing, trust_risk, cio"
+        ) from e
 
     # Per-agent tools
     for name in enabled:

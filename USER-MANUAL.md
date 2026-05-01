@@ -1,6 +1,6 @@
 # AgentSuite User Manual
 
-**Version 1.0.6**
+**Version 1.0.7**
 
 ---
 
@@ -322,7 +322,7 @@ Replace `"Your Name"` with your actual name and `acme` with a short lowercase la
 | Error | What it means | What to do |
 |---|---|---|
 | `NoProviderConfigured` | No API key found and Ollama is not running | Set your API key (Section 4) or start Ollama (Section 4b) |
-| `ConsistencyCheckFailed` | Two documents contradict each other | Make your `--business-goal` more specific, then re-run |
+| Consistency check failed | The consistency check failed; AgentSuite creates `consistency_report.json` in the run directory | Open it, review the gaps it identifies, address them in your inputs, and re-run the agent |
 | `HardCapExceeded: $5.00` | The run exceeded the cost safety limit | Raise the cap: `set AGENTSUITE_COST_CAP_USD=10` |
 | `extract stage produced invalid JSON` | The AI returned malformed output | Re-run — this is almost always transient |
 
@@ -389,7 +389,7 @@ agentsuite design approve --run-id run-cli --approver "Your Name" --project-slug
 | Error | What it means | What to do |
 |---|---|---|
 | `NoProviderConfigured` | No API key found and Ollama is not running | Set your API key (Section 4) or start Ollama (Section 4b) |
-| `ConsistencyCheckFailed` | Two design documents contradict each other | Make your `--design-brief` more specific, then re-run |
+| Consistency check failed | The consistency check failed; AgentSuite creates `consistency_report.json` in the run directory | Open it, review the gaps it identifies, address them in your inputs, and re-run the agent |
 | `HardCapExceeded: $5.00` | The run exceeded the cost safety limit | Raise the cap: `set AGENTSUITE_COST_CAP_USD=10` |
 | `extract stage produced invalid JSON` | The AI returned malformed output | Re-run — this is almost always transient |
 
@@ -456,7 +456,7 @@ agentsuite product approve --run-id run-cli --approver "Your Name" --project-slu
 | Error | What it means | What to do |
 |---|---|---|
 | `NoProviderConfigured` | No API key found and Ollama is not running | Set your API key (Section 4) or start Ollama (Section 4b) |
-| `ConsistencyCheckFailed` | Two documents contradict each other (for example, different target users in the PRD versus the persona map) | Make your `--target-users` and `--core-problem` descriptions more specific, then re-run |
+| Consistency check failed | The consistency check failed; AgentSuite creates `consistency_report.json` in the run directory | Open it, review the gaps it identifies, address them in your inputs, and re-run the agent |
 | Low QA scores (below 7.0) | A document is missing important detail or is too vague | Open `qa_scores.json`, read `revision_instructions`, edit the document by hand or add more input context and re-run |
 | `HardCapExceeded: $5.00` | The run exceeded the cost safety limit | Raise the cap: `set AGENTSUITE_COST_CAP_USD=10` |
 | `extract stage produced invalid JSON` | The AI returned malformed output | Re-run — this is almost always transient |
@@ -526,7 +526,7 @@ agentsuite engineering approve --run-id run-cli --approver "Your Name" --project
 | Error | What it means | What to do |
 |---|---|---|
 | `NoProviderConfigured` | No API key found and Ollama is not running | Set your API key (Section 4) or start Ollama (Section 4b) |
-| `ConsistencyCheckFailed` | Two documents contradict each other (for example, different scale targets in system-design vs. performance-requirements) | Make your `--scale-requirements` and `--tech-stack` descriptions more specific, then re-run |
+| Consistency check failed | The consistency check failed; AgentSuite creates `consistency_report.json` in the run directory | Open it, review the gaps it identifies, address them in your inputs, and re-run the agent |
 | Low QA scores (below 7.0) | A document is missing important detail | Open `qa_scores.json`, read `revision_instructions`, edit or re-run |
 | `HardCapExceeded: $5.00` | The run exceeded the cost safety limit | Raise the cap: `set AGENTSUITE_COST_CAP_USD=10` |
 | `extract stage produced invalid JSON` | The AI returned malformed output | Re-run — this is almost always transient |
@@ -600,7 +600,7 @@ agentsuite marketing approve --run-id run-cli --approver "Your Name" --project-s
 | Error | What it means | What to do |
 |---|---|---|
 | `NoProviderConfigured` | No API key found and Ollama is not running | Set your API key (Section 4) or start Ollama (Section 4b) |
-| `ConsistencyCheckFailed` | Two documents contradict each other (for example, the channel strategy targets a different audience than the audience profile) | Make your `--campaign-goal` and `--target-market` descriptions more specific, then re-run |
+| Consistency check failed | The consistency check failed; AgentSuite creates `consistency_report.json` in the run directory | Open it, review the gaps it identifies, address them in your inputs, and re-run the agent |
 | Low QA scores (below 7.0) | A document is missing important detail | Open `qa_scores.json`, read `revision_instructions`, edit or re-run |
 | `HardCapExceeded: $5.00` | The run exceeded the cost safety limit | Raise the cap: `set AGENTSUITE_COST_CAP_USD=10` |
 | `extract stage produced invalid JSON` | The AI returned malformed output | Re-run — this is almost always transient |
@@ -672,7 +672,7 @@ agentsuite trust-risk approve --run-id run-cli --approver "Your Name" --project-
 | Error | What it means | What to do |
 |---|---|---|
 | `NoProviderConfigured` | No API key found and Ollama is not running | Set your API key (Section 4) or start Ollama (Section 4b) |
-| `ConsistencyCheckFailed` | Two documents contradict each other (for example, the threat model lists a control that the control framework does not include) | Make your `--risk-domain` and `--stakeholder-context` descriptions more specific, then re-run |
+| Consistency check failed | The consistency check failed; AgentSuite creates `consistency_report.json` in the run directory | Open it, review the gaps it identifies, address them in your inputs, and re-run the agent |
 | Low QA scores (below 7.0) | A document is missing important detail | Open `qa_scores.json`, read `revision_instructions`, edit or re-run |
 | `HardCapExceeded: $5.00` | The run exceeded the cost safety limit | Raise the cap: `set AGENTSUITE_COST_CAP_USD=10` |
 | `extract stage produced invalid JSON` | The AI returned malformed output | Re-run — this is almost always transient |
@@ -743,7 +743,7 @@ agentsuite cio approve --run-id run-cli --approver "Your Name" --project-slug ac
 | Error | What it means | What to do |
 |---|---|---|
 | `NoProviderConfigured` | No API key found and Ollama is not running | Set your API key (Section 4) or start Ollama (Section 4b) |
-| `ConsistencyCheckFailed` | Two documents contradict each other (for example, the budget model allocates more to transformation than the maturity level supports) | Make your `--strategic-priorities` and `--it-maturity-level` descriptions more specific, then re-run |
+| Consistency check failed | The consistency check failed; AgentSuite creates `consistency_report.json` in the run directory | Open it, review the gaps it identifies, address them in your inputs, and re-run the agent |
 | Low QA scores (below 7.0) | A document is missing important detail | Open `qa_scores.json`, read `revision_instructions`, edit or re-run |
 | `HardCapExceeded: $5.00` | The run exceeded the cost safety limit | Raise the cap: `set AGENTSUITE_COST_CAP_USD=10` |
 | `extract stage produced invalid JSON` | The AI returned malformed output | Re-run — this is almost always transient |
@@ -1013,4 +1013,4 @@ If there are no runs yet for that agent, `--latest` will return an error explain
 
 ---
 
-*AgentSuite v1.0.6 — User Manual*
+*AgentSuite v1.0.7 — User Manual*

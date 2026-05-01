@@ -1,5 +1,7 @@
 """Unit tests for the agentsuite CLI."""
 
+import os
+
 import pytest
 from typer.testing import CliRunner
 
@@ -415,3 +417,44 @@ def test_cli_approve_revision_required_exits_1_with_actionable_message(tmp_path,
     # Must give a re-run hint
     assert "r-rev" in combined
     assert "agentsuite" in combined
+
+
+# ---------------------------------------------------------------------------
+# ENG-002 — AGENTSUITE_LLM_PROVIDER_FACTORY production guard
+# ---------------------------------------------------------------------------
+
+def test_provider_factory_outside_pytest_raises_runtime_error(monkeypatch):
+    """AGENTSUITE_LLM_PROVIDER_FACTORY set without PYTEST_CURRENT_TEST must raise RuntimeError."""
+    monkeypatch.setenv("AGENTSUITE_LLM_PROVIDER_FACTORY", "agentsuite.llm.mock:_default_mock_for_cli")
+    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
+    from agentsuite.cli import _resolve_llm_for_cli
+    with pytest.raises(RuntimeError, match="AGENTSUITE_LLM_PROVIDER_FACTORY is set outside of a pytest run"):
+        _resolve_llm_for_cli()
+
+
+def test_provider_factory_inside_pytest_does_not_raise(monkeypatch):
+    """AGENTSUITE_LLM_PROVIDER_FACTORY set WITH PYTEST_CURRENT_TEST must not raise (normal test path)."""
+    monkeypatch.setenv("AGENTSUITE_LLM_PROVIDER_FACTORY", "agentsuite.llm.mock:_default_mock_for_cli")
+    monkeypatch.setenv("PYTEST_CURRENT_TEST", "tests/unit/test_cli.py::test_something (call)")
+    from agentsuite.cli import _resolve_llm_for_cli
+    # Should return a mock provider without raising
+    provider = _resolve_llm_for_cli()
+    assert provider is not None
+
+
+# ---------------------------------------------------------------------------
+# QA-005 — UnknownAgent produces actionable error message, exits code 1
+# ---------------------------------------------------------------------------
+
+def test_unknown_agent_name_exits_1_with_actionable_message(monkeypatch):
+    """Setting AGENTSUITE_ENABLED_AGENTS to an unknown agent name must exit 1 with a clear message."""
+    monkeypatch.setenv("AGENTSUITE_ENABLED_AGENTS", "unknownagent")
+    result = _runner().invoke(app, ["agents"])
+    assert result.exit_code == 1
+    combined = (result.output or "") + (result.stderr or "")
+    # Must NOT produce a raw traceback
+    assert "Traceback" not in combined
+    assert "UnknownAgent" not in combined
+    # Must provide the valid agent list
+    assert "founder" in combined
+    assert "Valid agents" in combined

@@ -140,6 +140,10 @@ def register_tools(
                 continue
             if state is None or state.agent != "trust_risk":
                 continue
+            if project_slug is not None:
+                run_slug = getattr(state.inputs, "project_slug", None)
+                if run_slug != project_slug:
+                    continue
             out.append(RunSummary(
                 run_id=state.run_id,
                 agent=state.agent,

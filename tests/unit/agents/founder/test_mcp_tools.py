@@ -194,6 +194,62 @@ def test_founder_approve_revision_required_returns_structured_error(tmp_path):
 # TEST-002 — RevisionRequired edge cases on founder approve
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# UX-006 — founder_list_runs filters by project_slug
+# ---------------------------------------------------------------------------
+
+def test_founder_list_runs_filters_by_project_slug(tmp_path):
+    """founder_list_runs(project_slug='x') must return only runs with project_slug == 'x'."""
+    from agentsuite.agents.founder.input_schema import FounderAgentInput
+    from agentsuite.kernel.schema import RunState, Cost
+    from agentsuite.kernel.state_store import StateStore
+
+    def _make_run(run_id: str, project_slug: str | None) -> None:
+        run_dir = tmp_path / "runs" / run_id
+        run_dir.mkdir(parents=True)
+        inp = FounderAgentInput(
+            agent_name="founder",
+            role_domain="creative-ops",
+            user_request="test",
+            business_goal="test",
+            project_slug=project_slug,
+        )
+        state = RunState(
+            run_id=run_id,
+            agent="founder",
+            stage="approval",
+            inputs=inp,
+            cost_so_far=Cost(),
+        )
+        StateStore(run_dir=run_dir).save(state)
+
+    _make_run("r-slug-a", "slug-a")
+    _make_run("r-slug-b", "slug-b")
+    _make_run("r-no-slug", None)
+
+    server = _StubServer()
+    register_tools(
+        server,
+        agent_class=lambda: _agent_factory(tmp_path),
+        output_root_fn=lambda: tmp_path,
+        expose_stages=False,
+    )
+
+    # Filter by slug-a — must return only r-slug-a
+    runs = server.tools["agentsuite_founder_list_runs"](project_slug="slug-a")
+    assert len(runs) == 1, f"Expected 1 run for slug-a, got {len(runs)}: {[r.run_id for r in runs]}"
+    assert runs[0].run_id == "r-slug-a"
+
+    # Filter by slug-b — must return only r-slug-b
+    runs = server.tools["agentsuite_founder_list_runs"](project_slug="slug-b")
+    assert len(runs) == 1
+    assert runs[0].run_id == "r-slug-b"
+
+    # No filter — must return all 3 runs
+    runs = server.tools["agentsuite_founder_list_runs"](project_slug=None)
+    assert len(runs) == 3
+
+
 def test_founder_approve_revision_required_missing_qa_report_path(tmp_path):
     """founder_approve must still return a structured error dict even when qa_report.md is absent.
 

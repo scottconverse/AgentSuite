@@ -1,4 +1,4 @@
-"""Stage 4 — qa: rubric scoring + revision-instruction capture."""
+﻿"""Stage 4 — qa: rubric scoring + revision-instruction capture."""
 from __future__ import annotations
 
 from typing import cast
@@ -8,9 +8,29 @@ from agentsuite.agents.cio.prompt_loader import render_prompt
 from agentsuite.agents.cio.rubric import CIO_RUBRIC
 from agentsuite.agents.cio.stages.spec import SPEC_ARTIFACTS
 from agentsuite.kernel.base_agent import StageContext
-from agentsuite.kernel.schema import Cost, RunState
-from agentsuite.llm.base import LLMProvider, LLMRequest
-from agentsuite.llm.json_extract import extract_json
+from agentsuite.kernel.schema import RunState
+from agentsuite.kernel.stages.qa import QAStageConfig, kernel_qa_stage
+
+
+def _build_prompt(artifact_snippets: dict[str, str], state: RunState) -> str:
+    inp = cast(CIOAgentInput, state.inputs)
+    return render_prompt(
+        "qa_score",
+        organization_name=inp.organization_name,
+        strategic_priorities=inp.strategic_priorities,
+        artifact_snippets=artifact_snippets,
+    )
+
+
+_QA_CONFIG = QAStageConfig(
+    rubric=CIO_RUBRIC,
+    build_prompt_fn=_build_prompt,
+    system_msg="You are scoring 9 CIO artifacts. Return ONLY JSON.",
+    spec_artifacts=SPEC_ARTIFACTS,
+    write_qa_report=False,   # CIO writes only qa_scores.json, not qa_report.md
+    artifact_key_fn=lambda s: s,  # CIO keys snippets by bare stem (no .md extension)
+    artifact_truncate=500,   # CIO reads truncated content
+)
 
 
 def qa_stage(state: RunState, ctx: StageContext) -> RunState:
@@ -22,50 +42,4 @@ def qa_stage(state: RunState, ctx: StageContext) -> RunState:
 
     Raises ValueError if the LLM response isn't valid JSON.
     """
-    inp = cast(CIOAgentInput, state.inputs)
-    llm: LLMProvider = ctx.edits["llm"]
-
-    artifact_snippets: dict[str, str] = {}
-    for stem in SPEC_ARTIFACTS:
-        path = ctx.writer.run_dir / f"{stem}.md"
-        if path.exists():
-            artifact_snippets[stem] = path.read_text(encoding="utf-8")[:500]
-
-    prompt = render_prompt(
-        "qa_score",
-        organization_name=inp.organization_name,
-        strategic_priorities=inp.strategic_priorities,
-        artifact_snippets=artifact_snippets,
-    )
-    response = llm.complete(LLMRequest(
-        prompt=prompt,
-        system="You are scoring 9 CIO artifacts. Return ONLY JSON.",
-        temperature=0.0,
-    ))
-    ctx.cost_tracker.add(Cost(
-        input_tokens=response.input_tokens,
-        output_tokens=response.output_tokens,
-        usd=response.usd,
-        model=response.model,
-    ))
-
-    try:
-        parsed = extract_json(response.text)
-    except ValueError as exc:
-        raise ValueError(f"qa stage produced invalid JSON: {exc}") from exc
-
-    if not isinstance(parsed, dict):
-        parsed = {}
-    raw_scores = parsed.get("scores")
-    if not isinstance(raw_scores, dict):
-        raw_scores = {}
-    raw_revisions = parsed.get("revision_instructions")
-    if not isinstance(raw_revisions, list):
-        raw_revisions = []
-    report = CIO_RUBRIC.score(scores=raw_scores, revision_instructions=raw_revisions)
-    ctx.writer.write_json("qa_scores.json", report.model_dump(), kind="data", stage="qa")
-
-    return state.model_copy(update={
-        "stage": "approval",
-        "requires_revision": report.requires_revision,
-    })
+    return kernel_qa_stage(_QA_CONFIG, state, ctx)

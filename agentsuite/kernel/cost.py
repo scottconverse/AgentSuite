@@ -27,7 +27,13 @@ class CostCap(BaseModel):
         raw = os.environ.get("AGENTSUITE_COST_CAP_USD")
         if raw is None:
             return cls()
-        hard = float(raw)
+        try:
+            hard = float(raw)
+        except ValueError:
+            raise ValueError(
+                f"AGENTSUITE_COST_CAP_USD={raw!r} is not a valid dollar amount. "
+                "Set it to a number like '5.00'."
+            )
         return cls(soft_warn_usd=hard * 0.2, hard_kill_usd=hard)
 
 

@@ -1,16 +1,15 @@
-"""Stage 3 — spec: generate the 9 markdown spec artifacts + consistency check."""
+﻿"""Stage 3 — spec: generate the 9 markdown spec artifacts + consistency check."""
 from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import cast
+from typing import Any, cast
 
 from agentsuite.agents.founder.input_schema import FounderAgentInput
 from agentsuite.agents.founder.prompt_loader import render_prompt
 from agentsuite.kernel.base_agent import StageContext
-from agentsuite.kernel.schema import Cost, RunState
-from agentsuite.llm.base import LLMProvider, LLMRequest
-from agentsuite.llm.json_extract import extract_json
+from agentsuite.kernel.schema import RunState
+from agentsuite.kernel.stages.spec import SpecStageConfig, kernel_spec_stage
 
 
 SPEC_ARTIFACTS: list[str] = [
@@ -52,6 +51,41 @@ def _read_voice_samples(inp: FounderAgentInput) -> str:
     return "\n---\n".join(parts)
 
 
+def _build_artifact_prompt(stem: str, extracted: dict[str, Any], state: RunState) -> str:
+    inp = cast(FounderAgentInput, state.inputs)
+    voice_samples = _read_voice_samples(inp)
+    return render_prompt(
+        _PROMPT_BY_ARTIFACT[stem],
+        business_goal=inp.business_goal,
+        extracted_context_json=json.dumps(extracted, indent=2),
+        voice_samples=voice_samples,
+    )
+
+
+def _artifact_system_msg(stem: str) -> str:
+    # System line includes the artifact filename so MockLLMProvider keying works in tests
+    return f"You are writing {stem}.md for a founder/operator. Return ONLY markdown."
+
+
+def _build_consistency_prompt(artifact_snippets: dict[str, str], state: RunState) -> str:
+    # founder passes full bodies (not snippets) as {f"{stem}.md": content}
+    # convert from bare stem keys back to "{stem}.md" keys for the render_prompt call
+    bodies_with_ext = {f"{k}.md": v for k, v in artifact_snippets.items()}
+    return render_prompt("consistency_check", artifacts=bodies_with_ext)
+
+
+_SPEC_CONFIG = SpecStageConfig(
+    spec_artifacts=SPEC_ARTIFACTS,
+    build_artifact_prompt_fn=_build_artifact_prompt,
+    artifact_system_msg_fn=_artifact_system_msg,
+    build_consistency_prompt_fn=_build_consistency_prompt,
+    consistency_system_msg="You are checking 9 artifacts for cross-document consistency. Return ONLY JSON.",
+    # Use full artifact bodies for consistency check (no truncation)
+    artifact_snippet_truncate=10_000_000,  # effectively unlimited
+    snippet_key_fn=lambda s: s,
+)
+
+
 def spec_stage(state: RunState, ctx: StageContext) -> RunState:
     """Stage 3 handler: generate 9 spec markdown artifacts + run consistency check.
 
@@ -61,63 +95,4 @@ def spec_stage(state: RunState, ctx: StageContext) -> RunState:
     ``ConsistencyCheckFailed`` if any mismatch has severity == "critical".
     Advances stage to "execute" on success.
     """
-    inp = cast(FounderAgentInput, state.inputs)
-    llm: LLMProvider = ctx.edits["llm"]
-
-    extracted = json.loads(
-        (ctx.writer.run_dir / "extracted_context.json").read_text(encoding="utf-8")
-    )
-    voice_samples = _read_voice_samples(inp)
-
-    artifact_bodies: dict[str, str] = {}
-
-    for stem in SPEC_ARTIFACTS:
-        prompt_name = _PROMPT_BY_ARTIFACT[stem]
-        prompt = render_prompt(
-            prompt_name,
-            business_goal=inp.business_goal,
-            extracted_context_json=json.dumps(extracted, indent=2),
-            voice_samples=voice_samples,
-        )
-        # System line includes the artifact filename so MockLLMProvider keying works in tests
-        response = llm.complete(LLMRequest(
-            prompt=prompt,
-            system=f"You are writing {stem}.md for a founder/operator. Return ONLY markdown.",
-            temperature=0.2,
-        ))
-        ctx.cost_tracker.add(Cost(
-            input_tokens=response.input_tokens,
-            output_tokens=response.output_tokens,
-            usd=response.usd,
-            model=response.model,
-        ))
-        ctx.writer.write(f"{stem}.md", response.text, kind="spec", stage="spec")
-        artifact_bodies[f"{stem}.md"] = response.text
-
-    consistency_prompt = render_prompt("consistency_check", artifacts=artifact_bodies)
-    consistency_response = llm.complete(LLMRequest(
-        prompt=consistency_prompt,
-        system="You are checking 9 artifacts for cross-document consistency. Return ONLY JSON.",
-        temperature=0.0,
-    ))
-    ctx.cost_tracker.add(Cost(
-        input_tokens=consistency_response.input_tokens,
-        output_tokens=consistency_response.output_tokens,
-        usd=consistency_response.usd,
-        model=consistency_response.model,
-    ))
-
-    try:
-        report = extract_json(consistency_response.text)
-    except ValueError as exc:
-        raise ValueError(f"consistency check produced invalid JSON: {exc}") from exc
-
-    ctx.writer.write_json("consistency_report.json", report, kind="data", stage="spec")
-
-    mismatches_raw = report.get("mismatches") if isinstance(report, dict) else None
-    mismatches = mismatches_raw if isinstance(mismatches_raw, list) else []
-    critical = [m for m in mismatches if isinstance(m, dict) and m.get("severity") == "critical"]
-    return state.model_copy(update={
-        "stage": "execute",
-        "requires_revision": bool(critical),
-    })
+    return kernel_spec_stage(_SPEC_CONFIG, state, ctx)

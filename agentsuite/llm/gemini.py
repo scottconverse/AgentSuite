@@ -53,7 +53,7 @@ class GeminiProvider:
         out_tokens: int = (usage.candidates_token_count or 0) if usage else 0
         return LLMResponse(
             text=text,
-            model=model,
+            model=getattr(result, 'model_version', None) or model,
             input_tokens=in_tokens,
             output_tokens=out_tokens,
             usd=_cost_usd(model, in_tokens, out_tokens),

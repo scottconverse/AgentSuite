@@ -135,6 +135,55 @@ def test_list_runs_empty_when_no_runs(tmp_path: Path) -> None:
 
 
 # ---------------------------------------------------------------------------
+# UX-006 — cio_list_runs filters by project_slug
+# ---------------------------------------------------------------------------
+
+def test_cio_list_runs_filters_by_project_slug(tmp_path: Path) -> None:
+    """agentsuite_cio_list_runs(project_slug='x') must return only matching runs."""
+    from agentsuite.agents.cio.input_schema import CIOAgentInput
+    from agentsuite.kernel.schema import RunState, Cost
+    from agentsuite.kernel.state_store import StateStore
+
+    def _make_run(run_id: str, project_slug: str | None) -> None:
+        run_dir = tmp_path / "runs" / run_id
+        run_dir.mkdir(parents=True)
+        inp = CIOAgentInput(
+            agent_name="cio",
+            role_domain="cio-ops",
+            user_request="test",
+            organization_name="AcmeCorp",
+            strategic_priorities="Cloud migration",
+            it_maturity_level="Level 2",
+            project_slug=project_slug,
+        )
+        state = RunState(
+            run_id=run_id,
+            agent="cio",
+            stage="approval",
+            inputs=inp,
+            cost_so_far=Cost(),
+        )
+        StateStore(run_dir=run_dir).save(state)
+
+    _make_run("cio-slug-a", "slug-a")
+    _make_run("cio-slug-b", "slug-b")
+    _make_run("cio-no-slug", None)
+
+    server = _make_server(tmp_path)
+
+    runs = server.tools["agentsuite_cio_list_runs"](project_slug="slug-a")
+    assert len(runs) == 1, f"Expected 1, got {len(runs)}: {[r.run_id for r in runs]}"
+    assert runs[0].run_id == "cio-slug-a"
+
+    runs = server.tools["agentsuite_cio_list_runs"](project_slug="slug-b")
+    assert len(runs) == 1
+    assert runs[0].run_id == "cio-slug-b"
+
+    runs = server.tools["agentsuite_cio_list_runs"](project_slug=None)
+    assert len(runs) == 3
+
+
+# ---------------------------------------------------------------------------
 # TEST-001: parametrized encoded traversal variants
 # ---------------------------------------------------------------------------
 
@@ -170,3 +219,102 @@ def test_get_artifact_accepts_all_valid_names(tmp_path: Path, artifact_name: str
     )
     assert "error" not in result, f"Unexpected error for {artifact_name!r}: {result.get('error')}"
     assert result["artifact_name"] == artifact_name
+
+
+# ---------------------------------------------------------------------------
+# TEST-003: list_runs returns correct structure
+# ---------------------------------------------------------------------------
+
+def test_cio_list_runs_returns_run_summary_after_run(tmp_path: Path) -> None:
+    """list_runs must return a RunSummary entry for each cio run in the output dir."""
+    from agentsuite.kernel.schema import AgentRequest, Constraints, RunState
+    from agentsuite.kernel.state_store import StateStore
+
+    run_id = "r-cio-list-001"
+    run_dir = tmp_path / "runs" / run_id
+    run_dir.mkdir(parents=True)
+    StateStore(run_dir=run_dir).save(RunState(
+        run_id=run_id,
+        agent="cio",
+        stage="approval",
+        inputs=AgentRequest(
+            agent_name="cio",
+            role_domain="cio-ops",
+            user_request="test",
+            constraints=Constraints(),
+        ),
+    ))
+
+    server = _make_server(tmp_path)
+    runs = server.tools["agentsuite_cio_list_runs"]()
+    assert len(runs) == 1
+    assert runs[0].run_id == run_id
+    assert runs[0].agent == "cio"
+
+
+def test_cio_list_runs_excludes_other_agent_runs(tmp_path: Path) -> None:
+    """list_runs must NOT return runs belonging to a different agent."""
+    from agentsuite.kernel.schema import AgentRequest, Constraints, RunState
+    from agentsuite.kernel.state_store import StateStore
+
+    for run_id, agent_name in [
+        ("r-cio-mine", "cio"),
+        ("r-eng-other", "engineering"),
+    ]:
+        run_dir = tmp_path / "runs" / run_id
+        run_dir.mkdir(parents=True)
+        StateStore(run_dir=run_dir).save(RunState(
+            run_id=run_id,
+            agent=agent_name,
+            stage="approval",
+            inputs=AgentRequest(
+                agent_name=agent_name,
+                role_domain="ops",
+                user_request="test",
+                constraints=Constraints(),
+            ),
+        ))
+
+    server = _make_server(tmp_path)
+    runs = server.tools["agentsuite_cio_list_runs"]()
+    assert all(r.agent == "cio" for r in runs)
+    assert len(runs) == 1
+
+
+# ---------------------------------------------------------------------------
+# TEST-003: get_run_status round-trip
+# ---------------------------------------------------------------------------
+
+def test_cio_get_run_status_returns_expected_fields(tmp_path: Path) -> None:
+    """get_run_status must return a RunState with the correct run_id, agent, and stage."""
+    from agentsuite.kernel.schema import AgentRequest, Constraints, RunState
+    from agentsuite.kernel.state_store import StateStore
+
+    run_id = "r-cio-status"
+    run_dir = tmp_path / "runs" / run_id
+    run_dir.mkdir(parents=True)
+    StateStore(run_dir=run_dir).save(RunState(
+        run_id=run_id,
+        agent="cio",
+        stage="approval",
+        inputs=AgentRequest(
+            agent_name="cio",
+            role_domain="cio-ops",
+            user_request="test",
+            constraints=Constraints(),
+        ),
+    ))
+
+    server = _make_server(tmp_path)
+    result = server.tools["agentsuite_cio_get_run_status"](run_id)
+
+    assert result.run_id == run_id
+    assert result.agent == "cio"
+    assert result.stage == "approval"
+
+
+def test_cio_get_run_status_raises_on_missing_run(tmp_path: Path) -> None:
+    """get_run_status must raise FileNotFoundError for an unknown run_id."""
+    server = _make_server(tmp_path)
+    with pytest.raises(FileNotFoundError):
+        server.tools["agentsuite_cio_get_run_status"]("nonexistent-run")

@@ -10,9 +10,10 @@ import traceback
 from pathlib import Path
 from typing import Any, Callable, Optional
 
+import click
 import typer
 
-from agentsuite.agents.registry import default_registry
+from agentsuite.agents.registry import UnknownAgent, default_registry
 from agentsuite.kernel.approval import RevisionRequired
 from agentsuite.kernel.state_store import RunStateSchemaVersionError, StateStore
 from agentsuite.llm.base import ProviderNotInstalled
@@ -69,7 +70,17 @@ def _resolve_llm_for_cli() -> Any:
     Honors ``AGENTSUITE_LLM_PROVIDER_FACTORY`` env var (``"module:fn"``) for
     test-only injection. Falls back to the standard provider resolver.
     """
+    # NOTE: TEST-ONLY. Never set AGENTSUITE_LLM_PROVIDER_FACTORY in production.
+    # This env var executes arbitrary Python via importlib. It exists solely for
+    # test injection of mock LLM providers. If set outside of pytest, it is a
+    # remote code execution vector.
     factory = os.environ.get("AGENTSUITE_LLM_PROVIDER_FACTORY")
+    if factory and not os.environ.get("PYTEST_CURRENT_TEST"):
+        raise RuntimeError(
+            "AGENTSUITE_LLM_PROVIDER_FACTORY is set outside of a pytest run. "
+            "This environment variable executes arbitrary Python and must only be "
+            "used in tests. Unset it before running AgentSuite."
+        )
     if factory:
         module_name, fn_name = factory.split(":", 1)
         return getattr(importlib.import_module(module_name), fn_name)()
@@ -263,8 +274,17 @@ def list_runs_cmd(project_slug: Optional[str] = typer.Option(None)) -> None:
 def agents_cmd() -> None:
     """List enabled and registered agents."""
     reg = default_registry()
+    try:
+        enabled = reg.enabled_names()
+    except UnknownAgent:
+        click.echo(
+            "Unknown agent name. Valid agents: "
+            "founder, design, product, engineering, marketing, trust_risk, cio",
+            err=True,
+        )
+        raise SystemExit(1)
     typer.echo(json.dumps({
-        "enabled": reg.enabled_names(),
+        "enabled": enabled,
         "all_registered": reg.registered_names(),
     }, indent=2))
 

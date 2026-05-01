@@ -26,16 +26,17 @@ def _emit_stage_progress(stage: Stage, elapsed_s: float, total_usd: float) -> No
     Silenced when ``AGENTSUITE_QUIET`` is set (the CLI's ``--quiet`` flag
     exports this). Always writes to ``sys.stderr`` so the CLI's JSON stdout
     stays clean for shell-piping. Never raises.
+
+    The cost portion is omitted when *total_usd* is zero (e.g. Ollama runs)
+    so the line stays clean: ``[OK] intake complete  (0.2s)`` rather than
+    ``[OK] intake complete  (0.2s, $0.0000)``.
     """
     import os
     import sys
     if os.environ.get("AGENTSUITE_QUIET", "").lower() in {"1", "true", "yes"}:
         return
-    line = (
-        "[OK] " + stage + " complete  ("
-        + format(elapsed_s, "0.1f") + "s, $"
-        + format(total_usd, "0.4f") + ")"
-    )
+    cost_str = f", ${total_usd:.4f}" if total_usd > 0 else ""
+    line = f"[OK] {stage} complete  ({elapsed_s:.1f}s{cost_str})"
     try:
         sys.stderr.write(line + chr(10))
         sys.stderr.flush()
@@ -161,12 +162,14 @@ class BaseAgent(ABC):
                     pass
         ctx = StageContext(writer=writer, cost_tracker=cost_tracker, edits=edits)
         start_idx = PIPELINE_ORDER.index(state.stage) if state.stage in PIPELINE_ORDER else 0
+        import sys
         import time
         for stage in PIPELINE_ORDER[start_idx:]:
             if stage not in handlers:
                 raise NotImplementedError(f"Agent {self.name} missing handler for stage '{stage}'")
             cost_tracker.current_stage = stage
             stage_start = time.monotonic()
+            warned_before = cost_tracker.warned
             try:
                 state = handlers[stage](state, ctx)
                 state.artifacts = writer.refs()
@@ -175,6 +178,17 @@ class BaseAgent(ABC):
                 # Persist cost_summary.json after every successful stage so a
                 # crashed run still leaves an authoritative cost record on disk.
                 cost_tracker.save_summary(cost_summary_path)
+                # ENG-005/UX-003: surface cost warning to stderr the first time
+                # the soft cap is crossed so operators see it immediately.
+                if cost_tracker.warned and not warned_before:
+                    try:
+                        sys.stderr.write(
+                            f"Warning: cost cap approaching. "
+                            f"Current spend: ${cost_tracker.total.usd:.4f}\n"
+                        )
+                        sys.stderr.flush()
+                    except Exception:  # noqa: BLE001 — defensive
+                        pass
                 # UX-006/QA-005: emit one stderr line per completed stage so
                 # the CLI does not appear hung during long LLM phases.
                 _emit_stage_progress(stage, time.monotonic() - stage_start, state.cost_so_far.usd)

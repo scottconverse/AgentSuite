@@ -112,6 +112,29 @@ def test_wrap_with_schema_input(tmp_path):
     assert next_state.inputs.organization_name == "AcmeCorp"
 
 
+# ---------------------------------------------------------------------------
+# UX-004 — _stage_to_status maps "approval" → "awaiting_approval"
+# ---------------------------------------------------------------------------
+
+def test_stage_to_status_approval_maps_to_awaiting_approval():
+    """CLI JSON status: 'approval' stage must emit 'awaiting_approval'."""
+    from agentsuite.agents.cio.agent import _stage_to_status
+    assert _stage_to_status("approval") == "awaiting_approval"
+
+
+def test_stage_to_status_done_passes_through():
+    """CLI JSON status: 'done' stage must emit 'done' unchanged."""
+    from agentsuite.agents.cio.agent import _stage_to_status
+    assert _stage_to_status("done") == "done"
+
+
+def test_stage_to_status_other_stages_pass_through():
+    """CLI JSON status: intermediate stages pass through unchanged."""
+    from agentsuite.agents.cio.agent import _stage_to_status
+    for stage in ("intake", "extract", "spec", "execute", "qa"):
+        assert _stage_to_status(stage) == stage
+
+
 def test_agent_registered():
     """CIOAgent appears in the default registry."""
     import os

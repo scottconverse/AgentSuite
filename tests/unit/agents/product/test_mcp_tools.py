@@ -103,6 +103,62 @@ def test_product_list_runs_filters_by_agent(tmp_path: Path) -> None:
 # TEST-004 — product_approve returns structured dict on RevisionRequired
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# UX-006 — product_list_runs filters by project_slug
+# ---------------------------------------------------------------------------
+
+def test_product_list_runs_filters_by_project_slug(tmp_path: Path) -> None:
+    """product_list_runs(project_slug='x') must return only runs with project_slug == 'x'."""
+    from agentsuite.agents.product.input_schema import ProductAgentInput
+    from agentsuite.kernel.schema import RunState, Cost
+    from agentsuite.kernel.state_store import StateStore
+
+    def _make_run(run_id: str, project_slug: str | None) -> None:
+        run_dir = tmp_path / "runs" / run_id
+        run_dir.mkdir(parents=True)
+        # project_slug passes through AgentRequest extra="allow"
+        inp = ProductAgentInput(
+            agent_name="product",
+            role_domain="product",
+            user_request="test",
+            product_name="MyProduct",
+            target_users="devs",
+            core_problem="test",
+            project_slug=project_slug,
+        )
+        state = RunState(
+            run_id=run_id,
+            agent="product",
+            stage="approval",
+            inputs=inp,
+            cost_so_far=Cost(),
+        )
+        StateStore(run_dir=run_dir).save(state)
+
+    _make_run("p-slug-a", "slug-a")
+    _make_run("p-slug-b", "slug-b")
+    _make_run("p-no-slug", None)
+
+    server = _StubServer()
+    register_tools(
+        server,
+        agent_class=lambda: None,
+        output_root_fn=lambda: tmp_path,
+        expose_stages=False,
+    )
+
+    runs = server.tools["agentsuite_product_list_runs"](project_slug="slug-a")
+    assert len(runs) == 1, f"Expected 1, got {len(runs)}: {[r.run_id for r in runs]}"
+    assert runs[0].run_id == "p-slug-a"
+
+    runs = server.tools["agentsuite_product_list_runs"](project_slug="slug-b")
+    assert len(runs) == 1
+    assert runs[0].run_id == "p-slug-b"
+
+    runs = server.tools["agentsuite_product_list_runs"](project_slug=None)
+    assert len(runs) == 3
+
+
 def test_product_approve_revision_required_returns_structured_error(tmp_path: Path) -> None:
     """product_approve must return a structured error dict (not raise) on RevisionRequired."""
     from agentsuite.agents.product.agent import ProductAgent

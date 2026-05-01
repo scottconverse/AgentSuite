@@ -8,6 +8,26 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 - **v1.1.x** — First minor after GA. Candidates from the rc1 Discussions Ideas board (8th agent, per-day cost cap, GPG signed tags if requested). Plus next-sprint watchlist from the 2026-04-30 audit: extract `register_standard_tools()` to deduplicate per-agent mcp_tools.py (W-08), `_INPUTS_BY_AGENT` parity test (W-02), `agentsuite migrate` stub command (W-05), `SECURITY.md` disclosure policy (W-09).
 
+## [1.0.7] - 2026-04-30
+
+### Fixed
+- ENG-002: AGENTSUITE_LLM_PROVIDER_FACTORY env var documented as TEST-ONLY; production guard added
+- ENG-004: Path confinement for user-supplied file paths in kernel spec stage
+- ENG-005/UX-003: Cost warning surfaced to stderr; zero-cost stage progress no longer shows $0.0000
+- QA-003: AGENTSUITE_COST_CAP_USD now reports an actionable error on malformed values
+- QA-004: Gemini LLMResponse.model field now reflects actual model version used by the API
+- QA-005: Unknown agent name now exits with code 1 and lists valid agent names
+
+### Changed
+- CLI JSON output: `status` field now emits `awaiting_approval` instead of `approval` when a run is pending review (breaking change for scripts parsing this field)
+
+### Fixed
+- UX-006: `list_runs` MCP tool now correctly filters by `project_slug` parameter
+
+### Documentation
+- DOC-003: USER-MANUAL.md consistency failure instructions updated to reference `consistency_report.json` review flow (exception no longer raised since v1.0.3)
+- DOC-004: CHANGELOG footer links added for v1.0.0 through v1.0.6
+
 ## [1.0.6] - 2026-04-30
 
 Sprint 1 — Critical security and reliability hardening. Six Critical findings from the 2026-04-30 five-role audit fully resolved.
@@ -606,9 +626,15 @@ Initial release.
 - Per-run cost cap only; per-day cap deferred.
 - Single MCP server with env-gated agent enablement (no per-agent server topology).
 
-[Unreleased]: https://github.com/scottconverse/AgentSuite/compare/v0.9.1...HEAD
+[Unreleased]: https://github.com/scottconverse/AgentSuite/compare/v1.0.7...HEAD
+[1.0.7]: https://github.com/scottconverse/AgentSuite/compare/v1.0.6...v1.0.7
 [1.0.6]: https://github.com/scottconverse/AgentSuite/compare/v1.0.5...v1.0.6
-
+[1.0.5]: https://github.com/scottconverse/AgentSuite/compare/v1.0.4...v1.0.5
+[1.0.4]: https://github.com/scottconverse/AgentSuite/compare/v1.0.3...v1.0.4
+[1.0.3]: https://github.com/scottconverse/AgentSuite/compare/v1.0.2...v1.0.3
+[1.0.2]: https://github.com/scottconverse/AgentSuite/compare/v1.0.1...v1.0.2
+[1.0.1]: https://github.com/scottconverse/AgentSuite/compare/v1.0.0...v1.0.1
+[1.0.0]: https://github.com/scottconverse/AgentSuite/compare/v0.9.1...v1.0.0
 [0.9.1]: https://github.com/scottconverse/AgentSuite/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/scottconverse/AgentSuite/compare/v0.8.4...v0.9.0
 [0.8.4]: https://github.com/scottconverse/AgentSuite/compare/v0.8.3...v0.8.4

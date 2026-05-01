@@ -1,15 +1,14 @@
-"""Stage 3 — spec: generate 9 markdown spec artifacts + consistency check."""
+﻿"""Stage 3 — spec: generate 9 markdown spec artifacts + consistency check."""
 from __future__ import annotations
 
 import json
-from typing import cast
+from typing import Any, cast
 
 from agentsuite.agents.cio.input_schema import CIOAgentInput
 from agentsuite.agents.cio.prompt_loader import render_prompt
 from agentsuite.kernel.base_agent import StageContext
-from agentsuite.kernel.schema import Cost, RunState
-from agentsuite.llm.base import LLMProvider, LLMRequest
-from agentsuite.llm.json_extract import extract_json
+from agentsuite.kernel.schema import RunState
+from agentsuite.kernel.stages.spec import SpecStageConfig, kernel_spec_stage
 
 
 SPEC_ARTIFACTS: list[str] = [
@@ -25,6 +24,45 @@ SPEC_ARTIFACTS: list[str] = [
 ]
 
 
+def _build_artifact_prompt(stem: str, extracted: dict[str, Any], state: RunState) -> str:
+    inp = cast(CIOAgentInput, state.inputs)
+    template_vars: dict[str, object] = {
+        "organization_name": inp.organization_name,
+        "strategic_priorities": inp.strategic_priorities,
+        "it_maturity_level": inp.it_maturity_level,
+        "extracted_context": json.dumps(extracted),
+        "budget_context": inp.budget_context,
+        "digital_initiatives": inp.digital_initiatives,
+        "regulatory_environment": inp.regulatory_environment,
+    }
+    return render_prompt(f"spec_{stem.replace('-', '_')}", **template_vars)
+
+
+def _artifact_system_msg(stem: str) -> str:
+    return f"You are writing {stem}.md for a CIO team. Return ONLY markdown."
+
+
+def _build_consistency_prompt(artifact_snippets: dict[str, str], state: RunState) -> str:
+    inp = cast(CIOAgentInput, state.inputs)
+    return render_prompt(
+        "spec_consistency_check",
+        organization_name=inp.organization_name,
+        strategic_priorities=inp.strategic_priorities,
+        artifact_snippets=artifact_snippets,
+    )
+
+
+_SPEC_CONFIG = SpecStageConfig(
+    spec_artifacts=SPEC_ARTIFACTS,
+    build_artifact_prompt_fn=_build_artifact_prompt,
+    artifact_system_msg_fn=_artifact_system_msg,
+    build_consistency_prompt_fn=_build_consistency_prompt,
+    consistency_system_msg="You are checking 9 CIO artifacts for consistency. Return ONLY JSON.",
+    artifact_snippet_truncate=200,  # CIO uses 200-char truncation
+    snippet_key_fn=lambda s: s,
+)
+
+
 def spec_stage(state: RunState, ctx: StageContext) -> RunState:
     """Stage 3 handler: generate 9 spec markdown artifacts + consistency check.
 
@@ -32,75 +70,4 @@ def spec_stage(state: RunState, ctx: StageContext) -> RunState:
     consistency check. Raises ConsistencyCheckFailed if any check has critical
     severity. Advances to 'execute' on success.
     """
-    inp = cast(CIOAgentInput, state.inputs)
-    llm: LLMProvider = ctx.edits["llm"]
-
-    extracted = json.loads(
-        (ctx.writer.run_dir / "extracted_context.json").read_text(encoding="utf-8")
-    )
-    extracted_context_str = json.dumps(extracted)
-
-    template_vars: dict[str, object] = {
-        "organization_name": inp.organization_name,
-        "strategic_priorities": inp.strategic_priorities,
-        "it_maturity_level": inp.it_maturity_level,
-        "extracted_context": extracted_context_str,
-        "budget_context": inp.budget_context,
-        "digital_initiatives": inp.digital_initiatives,
-        "regulatory_environment": inp.regulatory_environment,
-    }
-
-    artifact_contents: list[str] = []
-
-    for stem in SPEC_ARTIFACTS:
-        prompt = render_prompt(f"spec_{stem.replace('-', '_')}", **template_vars)
-        response = llm.complete(LLMRequest(
-            prompt=prompt,
-            system=f"You are writing {stem}.md for a CIO team. Return ONLY markdown.",
-            temperature=0.2,
-        ))
-        ctx.cost_tracker.add(Cost(
-            input_tokens=response.input_tokens,
-            output_tokens=response.output_tokens,
-            usd=response.usd,
-            model=response.model,
-        ))
-        ctx.writer.write(f"{stem}.md", response.text, kind="spec", stage="spec")
-        artifact_contents.append(response.text)
-
-    artifact_snippets: dict[str, str] = {
-        stem: content[:200]
-        for stem, content in zip(SPEC_ARTIFACTS, artifact_contents)
-    }
-    consistency_prompt = render_prompt(
-        "spec_consistency_check",
-        organization_name=inp.organization_name,
-        strategic_priorities=inp.strategic_priorities,
-        artifact_snippets=artifact_snippets,
-    )
-    consistency_response = llm.complete(LLMRequest(
-        prompt=consistency_prompt,
-        system="You are checking 9 CIO artifacts for consistency. Return ONLY JSON.",
-        temperature=0.0,
-    ))
-    ctx.cost_tracker.add(Cost(
-        input_tokens=consistency_response.input_tokens,
-        output_tokens=consistency_response.output_tokens,
-        usd=consistency_response.usd,
-        model=consistency_response.model,
-    ))
-
-    try:
-        report = extract_json(consistency_response.text)
-    except ValueError as exc:
-        raise ValueError(f"consistency check produced invalid JSON: {exc}") from exc
-
-    ctx.writer.write_json("consistency_report.json", report, kind="data", stage="spec")
-
-    mismatches_raw = report.get("mismatches") if isinstance(report, dict) else None
-    mismatches = mismatches_raw if isinstance(mismatches_raw, list) else []
-    critical = [c for c in mismatches if isinstance(c, dict) and c.get("severity") == "critical"]
-    return state.model_copy(update={
-        "stage": "execute",
-        "requires_revision": bool(critical),
-    })
+    return kernel_spec_stage(_SPEC_CONFIG, state, ctx)

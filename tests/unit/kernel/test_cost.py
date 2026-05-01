@@ -185,3 +185,33 @@ def test_cost_model_field_last_wins_under_aggregation():
     c = Cost(usd=0.0)
     assert (a + c).model == "claude-haiku-4-5-20251001"
     assert (c + a).model == "claude-haiku-4-5-20251001"
+
+
+# --- QA-003: CostCap.from_env() error handling ---------------------------
+
+
+def test_from_env_raises_on_non_numeric_value(monkeypatch):
+    """QA-003: non-numeric AGENTSUITE_COST_CAP_USD raises ValueError with actionable message."""
+    monkeypatch.setenv("AGENTSUITE_COST_CAP_USD", "not-a-number")
+    with pytest.raises(ValueError) as exc:
+        CostCap.from_env()
+    msg = str(exc.value)
+    assert "AGENTSUITE_COST_CAP_USD" in msg
+    assert "not-a-number" in msg
+    assert "5.00" in msg  # actionable example in error text
+
+
+def test_from_env_raises_on_empty_string(monkeypatch):
+    """QA-003: empty-string env var also raises ValueError with actionable message."""
+    monkeypatch.setenv("AGENTSUITE_COST_CAP_USD", "")
+    with pytest.raises(ValueError) as exc:
+        CostCap.from_env()
+    assert "AGENTSUITE_COST_CAP_USD" in str(exc.value)
+
+
+def test_from_env_accepts_valid_numeric_string(monkeypatch):
+    """QA-003: valid numeric string parses correctly — no exception raised."""
+    monkeypatch.setenv("AGENTSUITE_COST_CAP_USD", "10.00")
+    cap = CostCap.from_env()
+    assert cap.hard_kill_usd == pytest.approx(10.0)
+    assert cap.soft_warn_usd == pytest.approx(10.0 * 0.2)

@@ -155,3 +155,94 @@ def test_cost_summary_provider_not_null(tmp_path):
         assert entry["model"] is not None, (
             f"Stage '{entry['stage']}' has model=null in cost_summary.json (CR-102)"
         )
+
+
+# --- ENG-005/UX-003: stage progress format --------------------------------
+
+
+def test_stage_progress_omits_cost_when_zero(capsys):
+    """ENG-005 Part B: zero total_usd produces no '$0.0000' in the progress line."""
+    from agentsuite.kernel.base_agent import _emit_stage_progress
+    _emit_stage_progress("intake", elapsed_s=0.2, total_usd=0.0)
+    captured = capsys.readouterr()
+    assert "[OK] intake complete  (0.2s)" in captured.err
+    assert "$" not in captured.err
+
+
+def test_stage_progress_includes_cost_when_nonzero(capsys):
+    """ENG-005 Part B: nonzero total_usd appears as '$X.XXXX' in the progress line."""
+    from agentsuite.kernel.base_agent import _emit_stage_progress
+    _emit_stage_progress("extract", elapsed_s=1.5, total_usd=0.0123)
+    captured = capsys.readouterr()
+    assert "[OK] extract complete  (1.5s, $0.0123)" in captured.err
+
+
+def test_stage_progress_cost_warning_emitted_once(tmp_path):
+    """ENG-005 Part A: warning is written to stderr the first time the soft cap is crossed."""
+    import io
+    import sys
+
+    # Build an agent that accumulates enough cost to trigger the soft-warn cap
+    # during the intake stage.
+    from agentsuite.kernel.base_agent import BaseAgent, StageHandler
+    from agentsuite.kernel.cost import CostCap, CostTracker
+    from agentsuite.kernel.qa import QARubric, RubricDimension
+    from agentsuite.kernel.schema import AgentRequest, Constraints, Cost
+    from agentsuite.kernel.artifacts import ArtifactWriter
+    from agentsuite.kernel.state_store import StateStore
+
+    class _CostlyAgent(BaseAgent):
+        name = "costly"
+        qa_rubric = QARubric(
+            dimensions=[RubricDimension(name="ok", question="?")],
+            pass_threshold=5.0,
+        )
+
+        def stage_handlers(self) -> dict[str, StageHandler]:
+            def intake(state, ctx):
+                # Exceed the soft-warn cap (1.0 USD default)
+                ctx.cost_tracker.add(Cost(usd=1.5))
+                return state.model_copy(update={"stage": "extract"})
+
+            def extract(state, ctx):
+                return state.model_copy(update={"stage": "spec"})
+
+            def spec(state, ctx):
+                ctx.writer.write("primary.md", "x", kind="spec", stage="spec")
+                return state.model_copy(update={"stage": "execute"})
+
+            def execute(state, ctx):
+                return state.model_copy(update={"stage": "qa"})
+
+            def qa(state, ctx):
+                return state.model_copy(update={"stage": "approval"})
+
+            return {
+                "intake": intake,
+                "extract": extract,
+                "spec": spec,
+                "execute": execute,
+                "qa": qa,
+            }
+
+    agent = _CostlyAgent(output_root=tmp_path)
+    req = AgentRequest(
+        agent_name="costly",
+        role_domain="test",
+        user_request="x",
+        constraints=Constraints(),
+    )
+
+    buf = io.StringIO()
+    old_stderr = sys.stderr
+    sys.stderr = buf
+    try:
+        agent.run(request=req, run_id="warn-test")
+    finally:
+        sys.stderr = old_stderr
+
+    output = buf.getvalue()
+    assert "Warning: cost cap approaching" in output
+    assert "$1.5000" in output
+    # Warning must appear exactly once (not repeated on every subsequent stage)
+    assert output.count("Warning: cost cap approaching") == 1
