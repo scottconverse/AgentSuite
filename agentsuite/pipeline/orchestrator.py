@@ -8,7 +8,7 @@ from typing import Any, Callable
 
 from agentsuite.pipeline.input_resolver import get_input_class, resolve_agent_input
 from agentsuite.pipeline.schema import PipelineState, PipelineStepState
-from agentsuite.pipeline.state_store import PipelineNotFound, PipelineStateStore
+from agentsuite.pipeline.state_store import PipelineStateStore
 
 ProgressCallback = Callable[[str, PipelineStepState, PipelineState], None]
 

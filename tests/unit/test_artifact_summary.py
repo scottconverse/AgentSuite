@@ -1,7 +1,4 @@
 """Unit tests for _artifact_summary CLI helper."""
-import pytest
-from pathlib import Path
-
 from agentsuite.cli import _artifact_summary
 
 

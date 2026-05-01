@@ -1,6 +1,4 @@
 """Integration tests for PipelineOrchestrator (mock LLM)."""
-import os
-
 import pytest
 
 from agentsuite.llm.mock import _default_mock_for_cli
@@ -269,8 +267,6 @@ class TestPipelineList:
                 auto_approve=True,
                 llm=_default_mock_for_cli(),
             )
-        from agentsuite.pipeline.state_store import PipelineStateStore
-
         pipelines_root = tmp_path / "pipelines"
         ids = [d.name for d in pipelines_root.iterdir() if d.is_dir()]
         assert len(ids) == 2

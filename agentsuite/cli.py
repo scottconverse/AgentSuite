@@ -500,7 +500,6 @@ def _register_pipeline() -> None:
     @pipeline_app.command("list")
     def pipeline_list() -> None:
         """List all pipelines in the current output directory, newest first."""
-        from agentsuite.pipeline.schema import PipelineState
         from agentsuite.pipeline.state_store import PipelineStateStore
 
         pipelines_root = _output_root() / "pipelines"

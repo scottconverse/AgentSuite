@@ -1,6 +1,6 @@
 # AgentSuite User Manual
 
-**Version 1.0.11**
+**Version 1.0.13**
 
 ---
 
@@ -836,6 +836,16 @@ Repeat for each subsequent agent, or check status at any time:
 agentsuite pipeline status --pipeline-id pipeline-20260501T120000-abc123
 ```
 
+### Recovering a lost pipeline ID
+
+If you close your terminal and lose the pipeline ID, list all pipelines to find it:
+
+```bash
+agentsuite pipeline list
+```
+
+Output is sorted newest-first and includes the pipeline ID, project slug, status, agents, step progress, and total cost.
+
 ### Auto-approve (headless)
 
 Add `--auto-approve` to skip the gate at every step:
@@ -887,6 +897,7 @@ In Claude Code, Cowork, Codex, or Antigravity, use the three pipeline tools:
 | `agentsuite_pipeline_run` | Start a new pipeline |
 | `agentsuite_pipeline_approve` | Approve the current waiting step |
 | `agentsuite_pipeline_status` | Check pipeline status and step progress |
+| `agentsuite_pipeline_list` | List all pipelines, sorted newest-first |
 
 ---
 
@@ -1121,4 +1132,4 @@ If there are no runs yet for that agent, `--latest` will return an error explain
 
 ---
 
-*AgentSuite v1.0.11 — User Manual*
+*AgentSuite v1.0.13 — User Manual*

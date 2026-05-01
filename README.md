@@ -2,7 +2,7 @@
 
 > Seven role-specific reasoning agents that turn vague intent into precise operating artifacts.
 >
-> **v1.0.11** — Specification Kernel + Founder · Design · Product · Engineering · Marketing · Trust/Risk · CIO Agents
+> **v1.0.13** — Specification Kernel + Founder · Design · Product · Engineering · Marketing · Trust/Risk · CIO Agents + multi-agent pipeline orchestration
 
 ![AgentSuite founder run](docs/screenshots/cli-founder-run.svg)
 
@@ -233,6 +233,9 @@ agentsuite pipeline approve --pipeline-id pipeline-20260501T120000-abc123
 
 # Repeat approve for each subsequent agent, or check status at any time:
 agentsuite pipeline status --pipeline-id pipeline-20260501T120000-abc123
+
+# Lost the pipeline ID? List all pipelines:
+agentsuite pipeline list
 ```
 
 **Agents requiring extra inputs** (engineering, trust_risk, cio) need a JSON file passed via `--agent-inputs`:
@@ -337,9 +340,11 @@ Full architecture diagram with all agents: see `docs/README-FULL.pdf`.
 - v1.0.0–v1.0.8 — Sprint 2 audit + remediation; 1066 tests green; cleanroom PASS
 - v1.0.9 — Sprint 3 audit + remediation; 12 Nit findings resolved; full 4-sprint audit cycle complete
 - v1.0.10 — Sprint 4 — 12 Nit findings resolved; full 57-finding audit cycle complete
+- v1.0.11 — Sprint 5 — audience messaging refresh; seven-agent parity
+- v1.0.12 — Sprint 6 — multi-agent pipeline orchestration (`pipeline run/approve/status`); progress feedback
+- v1.0.13 — Sprint 7 — artifact visibility before approve; `pipeline list`; landing page overhaul
 
 **Roadmap (v1.1.x candidates):**
-- Multi-agent pipelines (chain agents end-to-end)
 - Per-day cost cap
 - 8th agent TBD
 

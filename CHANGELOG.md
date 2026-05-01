@@ -20,7 +20,7 @@ Sprint 7 -- UX completion pass: artifact visibility, pipeline recovery, landing 
 
 ### Changed
 
-- **Landing page fully redesigned:** Dark mode (OLED, `#0F172A`), IBM Plex Sans body, JetBrains Mono code. Terminal demo SVG moved into the hero -- first thing visible. Pipeline quick start added. Agent cards updated with artifact counts. Version bumped to v1.0.12.
+- **Landing page fully redesigned:** Dark mode (OLED, `#0F172A`), IBM Plex Sans body, JetBrains Mono code. Terminal demo SVG moved into the hero -- first thing visible. Pipeline quick start added. Agent cards updated with artifact counts.
 - **`--agent-inputs` error messages improved:** JSON parse errors now include file path, line/column of the problem, and an expected-format example. Non-object JSON reports the actual type received.
 
 ## [1.0.12] - 2026-05-01
