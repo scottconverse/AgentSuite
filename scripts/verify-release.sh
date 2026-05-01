@@ -31,7 +31,11 @@ step "2. Version sync check"
 PYPROJECT_VERSION=$(grep -E '^version = ' pyproject.toml | head -1 | sed -E 's/version = "(.*)"/\1/' | tr -d '\r')
 VERSION_PY=$(grep -E '^__version__' agentsuite/__version__.py | sed -E 's/__version__ = "(.*)"/\1/' | tr -d '\r')
 [ "$PYPROJECT_VERSION" = "$VERSION_PY" ] || fail "version mismatch: pyproject=$PYPROJECT_VERSION, __version__=$VERSION_PY"
-ok "version aligned: $PYPROJECT_VERSION"
+grep -q "$PYPROJECT_VERSION" README.md || fail "README.md does not contain version $PYPROJECT_VERSION"
+grep -q "$PYPROJECT_VERSION" USER-MANUAL.md || fail "USER-MANUAL.md does not contain version $PYPROJECT_VERSION"
+grep -q "$PYPROJECT_VERSION" docs/index.html || fail "docs/index.html does not contain version $PYPROJECT_VERSION"
+grep -q "$PYPROJECT_VERSION" docs/troubleshooting.md || fail "docs/troubleshooting.md does not contain version $PYPROJECT_VERSION"
+ok "version aligned across all files: $PYPROJECT_VERSION"
 
 step "3. CHANGELOG entry exists for current version"
 grep -q "## \[$PYPROJECT_VERSION\]" CHANGELOG.md || fail "CHANGELOG.md missing entry for [$PYPROJECT_VERSION]"

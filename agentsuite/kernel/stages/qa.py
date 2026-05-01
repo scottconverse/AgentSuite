@@ -25,7 +25,7 @@ from agentsuite.llm.base import LLMRequest
 from agentsuite.llm.json_extract import extract_json
 
 
-@dataclass
+@dataclass(frozen=True)
 class QAStageConfig:
     """All agent-specific parameters for the shared QA stage orchestration.
 

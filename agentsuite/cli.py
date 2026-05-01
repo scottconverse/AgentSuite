@@ -199,6 +199,7 @@ def _make_list_runs_fn(agent_name: str) -> Any:
                 "run_id": state.run_id,
                 "agent": state.agent,
                 "stage": state.stage,
+                "started_at": state.started_at.isoformat(),
                 "cost_usd": state.cost_so_far.usd,
             })
         typer.echo(json.dumps(out, indent=2))
@@ -257,14 +258,19 @@ def list_runs_cmd(project_slug: Optional[str] = typer.Option(None)) -> None:
         try:
             state = StateStore(run_dir=d).load()
         except RunStateSchemaVersionError:
-            typer.echo(f"Skipping pre-v0.9 run dir {d.name}", err=True)
+            typer.echo(f"[WARN] Skipping pre-v0.9 run dir {d.name} — delete it and re-run to include it in results.", err=True)
             continue
         if state is None:
             continue
+        if project_slug is not None:
+            run_slug = getattr(state.inputs, "project_slug", None)
+            if run_slug != project_slug:
+                continue
         out.append({
             "run_id": state.run_id,
             "agent": state.agent,
             "stage": state.stage,
+            "started_at": state.started_at.isoformat(),
             "cost_usd": state.cost_so_far.usd,
         })
     typer.echo(json.dumps(out, indent=2))

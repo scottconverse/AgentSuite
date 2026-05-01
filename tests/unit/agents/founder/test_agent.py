@@ -102,19 +102,19 @@ def test_founder_agent_has_correct_class_attributes(tmp_path):
 
 def test_stage_to_status_approval_maps_to_awaiting_approval():
     """CLI JSON status: 'approval' stage must emit 'awaiting_approval'."""
-    from agentsuite.agents.founder.agent import _stage_to_status
+    from agentsuite.kernel.base_agent import stage_to_status as _stage_to_status
     assert _stage_to_status("approval") == "awaiting_approval"
 
 
 def test_stage_to_status_done_passes_through():
     """CLI JSON status: 'done' stage must emit 'done' unchanged."""
-    from agentsuite.agents.founder.agent import _stage_to_status
+    from agentsuite.kernel.base_agent import stage_to_status as _stage_to_status
     assert _stage_to_status("done") == "done"
 
 
 def test_stage_to_status_other_stages_pass_through():
     """CLI JSON status: intermediate stages pass through unchanged."""
-    from agentsuite.agents.founder.agent import _stage_to_status
+    from agentsuite.kernel.base_agent import stage_to_status as _stage_to_status
     for stage in ("intake", "extract", "spec", "execute", "qa"):
         assert _stage_to_status(stage) == stage
 

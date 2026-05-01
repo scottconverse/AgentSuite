@@ -60,7 +60,7 @@ def check_path_confinement(path: Path, project_dir: Path) -> None:
         )
 
 
-@dataclass
+@dataclass(frozen=True)
 class SpecStageConfig:
     """All agent-specific parameters for the shared spec stage orchestration.
 

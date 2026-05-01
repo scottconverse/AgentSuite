@@ -8,6 +8,28 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 - **v1.1.x** — First minor after GA. Candidates from the rc1 Discussions Ideas board (8th agent, per-day cost cap, GPG signed tags if requested). Plus next-sprint watchlist from the 2026-04-30 audit: extract `register_standard_tools()` to deduplicate per-agent mcp_tools.py (W-08), `_INPUTS_BY_AGENT` parity test (W-02), `agentsuite migrate` stub command (W-05), `SECURITY.md` disclosure policy (W-09).
 
+## [1.0.11] - 2026-05-01
+
+Sprint 5 — watchlist items from the 2026-04-30 audit resolved: structural hardening, CLI parity fixes, and test coverage gaps closed.
+
+### Changed
+
+- **Cross-3 — `_stage_to_status` consolidated from 7 copies to one:** The function was defined identically in all 7 `agents/*/agent.py` files. Moved to `agentsuite/kernel/base_agent.py` as `stage_to_status` (public). Each agent now imports it from the kernel. Adding a new stage mapping requires one change, not seven.
+- **UX-A02 — `list-runs` output now includes `started_at`:** Both the top-level `agentsuite list-runs` and per-agent `agentsuite <agent> list-runs` JSON output now include `"started_at"` (ISO 8601) for each run, matching the MCP `list_runs` tool output.
+- **UX-A05 — Product agent `--project-slug` is now optional:** The `agentsuite product run` command no longer requires `--project-slug`. It is now optional (default `None`), consistent with all other 6 agents.
+- **UX-A06 — Top-level `agentsuite list-runs --project-slug` filter now works:** The `--project-slug` option was accepted but silently ignored. It now filters runs by the slug stored in each run's input record, matching the MCP tool behaviour.
+
+### Fixed
+
+- **ENG-S2-006 — `QAStageConfig` and `SpecStageConfig` made immutable:** Both kernel stage config dataclasses now use `@dataclass(frozen=True)`. Accidental mutation of a config after construction now raises `FrozenInstanceError` immediately.
+- **DOCS-PROCESS — `verify-release.sh` now checks all doc files for version sync:** Step 2 of the release gate now greps `README.md`, `USER-MANUAL.md`, `docs/index.html`, and `docs/troubleshooting.md` for the current version string. Caught real drift on first run: `USER-MANUAL.md` header was three versions behind.
+- **DOC-S2-005 — `docs/troubleshooting.md` content updated:** Added sections for path confinement `ValueError` (with example allowed and rejected paths) and the low-cost-to-stderr warning (informational; no action needed).
+
+### Added
+
+- **TEST-S2-001 — 14 stage-wrapper delegation tests added:** `tests/unit/kernel/test_stage_delegation.py` verifies that all 7 agents' `spec_stage` and `qa_stage` wrappers correctly delegate to `kernel_spec_stage` / `kernel_qa_stage` with the right config types. A config-construction bug in any wrapper now fails at test time, not runtime.
+- **TEST-S2-005 — `AGENTSUITE_QUIET=1` integration test added:** `tests/integration/test_founder_pipeline.py` now includes a test verifying that setting `AGENTSUITE_QUIET=1` suppresses all `[OK]` stage-progress lines from stderr.
+
 ## [1.0.10] - 2026-04-30
 
 Sprint 4 — 12 Nit findings from the 2026-04-30 five-role audit resolved. Full audit cycle (57 findings across 4 sprints) complete.
@@ -701,7 +723,8 @@ Initial release.
 - Per-run cost cap only; per-day cap deferred.
 - Single MCP server with env-gated agent enablement (no per-agent server topology).
 
-[Unreleased]: https://github.com/scottconverse/AgentSuite/compare/v1.0.10...HEAD
+[Unreleased]: https://github.com/scottconverse/AgentSuite/compare/v1.0.11...HEAD
+[1.0.11]: https://github.com/scottconverse/AgentSuite/compare/v1.0.10...v1.0.11
 [1.0.10]: https://github.com/scottconverse/AgentSuite/compare/v1.0.9...v1.0.10
 [1.0.9]: https://github.com/scottconverse/AgentSuite/compare/v1.0.8...v1.0.9
 [1.0.8]: https://github.com/scottconverse/AgentSuite/compare/v1.0.7...v1.0.8

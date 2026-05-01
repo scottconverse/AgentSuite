@@ -23,6 +23,13 @@ _log = logging.getLogger(__name__)
 PIPELINE_ORDER: list[Stage] = ["intake", "extract", "spec", "execute", "qa"]
 
 
+def stage_to_status(stage: str) -> str:
+    """Map internal stage names to user-facing status values."""
+    if stage == "approval":
+        return "awaiting_approval"
+    return stage
+
+
 def _emit_stage_progress(stage: Stage, elapsed_s: float, total_usd: float) -> None:
     """Emit one line of stage-completion progress to stderr.
 

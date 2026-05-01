@@ -90,6 +90,26 @@ def test_founder_consistency_check_failure_raises(tmp_path: Path) -> None:
     assert any(m.get("severity") == "critical" for m in report.get("mismatches", []))
 
 
+def test_quiet_mode_suppresses_stage_output(tmp_path, monkeypatch, capfd):
+    """AGENTSUITE_QUIET=1 must suppress the per-stage progress lines from stderr."""
+    monkeypatch.setenv("AGENTSUITE_QUIET", "1")
+    agent = FounderAgent(output_root=tmp_path, llm=_default_mock_for_cli())
+    inp = FounderAgentInput(
+        agent_name="founder",
+        role_domain="creative-ops",
+        user_request="quiet mode test",
+        business_goal="Test quiet suppression",
+        project_slug="quiet-test",
+        constraints=Constraints(),
+    )
+    agent.run(request=inp, run_id="quiet-r1")
+    captured = capfd.readouterr()
+    ok_lines = [line for line in captured.err.splitlines() if line.startswith("[OK]")]
+    assert ok_lines == [], (
+        f"AGENTSUITE_QUIET=1 should suppress all [OK] stage lines, but got: {ok_lines}"
+    )
+
+
 def test_pipeline_hard_cap_exceeded_propagates(tmp_path):
     """HardCapExceeded propagates cleanly through BaseAgent._drive() and is not swallowed."""
     from unittest.mock import patch

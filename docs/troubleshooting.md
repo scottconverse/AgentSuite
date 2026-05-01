@@ -1,6 +1,6 @@
 # AgentSuite Troubleshooting Guide
 
-**Version 1.0.10**
+**Version 1.0.11**
 
 This guide covers the five most common failure modes in AgentSuite, with plain-language explanations and specific steps to resolve each one.
 
@@ -255,6 +255,35 @@ If you are not sure what slug a run used, omit the filter first and scan the ret
 
 ---
 
+## 8. "ValueError: Path ... is outside the project directory"
+
+AgentSuite refuses to read files outside your project directory. This error appears if a voice sample path, source material, or other file path in your request points to a location outside `.agentsuite/` or your current working directory.
+
+**Fix**: Make sure all file paths in `source_materials` or `founder_voice_samples` point to files inside your project directory. Absolute paths to other drives or home directories are not permitted.
+
+**Example paths that work:**
+- `./docs/brand-guide.pdf`
+- `source/voice-samples/ceo-email.txt`
+
+**Example paths that will be rejected:**
+- `/home/user/Downloads/brand-guide.pdf`
+- `C:\Users\name\Documents\old-brand.pdf`
+- `../../other-project/assets/logo.png`
+
+---
+
+## 9. Cost warning appears in terminal output
+
+If a run's total cost is greater than zero but less than $0.01, AgentSuite emits a warning to stderr:
+
+```
+[WARN] Cost $0.0000 recorded — check your LLM provider billing dashboard.
+```
+
+This is informational. It typically appears when using Ollama (local, zero-cost) or a provider that does not return billing information. No action is required unless you expect paid calls to have been made.
+
+---
+
 ## Getting more help
 
 - **GitHub Issues** — report a bug or ask a question: https://github.com/scottconverse/AgentSuite/issues
@@ -264,4 +293,4 @@ If you are not sure what slug a run used, omit the filter first and scan the ret
 
 ---
 
-*AgentSuite v1.0.10 — Troubleshooting Guide*
+*AgentSuite v1.0.11 — Troubleshooting Guide*

@@ -13,7 +13,7 @@ from agentsuite.agents.engineering.stages.extract import extract_stage
 from agentsuite.agents.engineering.stages.intake import intake_stage
 from agentsuite.agents.engineering.stages.qa import qa_stage
 from agentsuite.agents.engineering.stages.spec import spec_stage
-from agentsuite.kernel.base_agent import AgentCLISpec, BaseAgent, StageContext, StageHandler
+from agentsuite.kernel.base_agent import AgentCLISpec, BaseAgent, StageContext, StageHandler, stage_to_status
 from agentsuite.kernel.schema import RunState
 
 
@@ -70,13 +70,6 @@ class EngineeringAgent(BaseAgent):
         }
 
 
-def _stage_to_status(stage: str) -> str:
-    """Map internal stage names to user-facing status values."""
-    if stage == "approval":
-        return "awaiting_approval"
-    return stage
-
-
 def build_cli_spec() -> AgentCLISpec:
     """Return the CLI spec for the Engineering agent."""
     import json
@@ -116,7 +109,7 @@ def build_cli_spec() -> AgentCLISpec:
         typer.echo(json.dumps({
             "run_id": result.run_id,
             "primary_path": str(_output_root() / "runs" / result.run_id / "architecture-decision-record.md"),
-            "status": _stage_to_status(result.stage),
+            "status": stage_to_status(result.stage),
         }, indent=2))
 
     return AgentCLISpec(

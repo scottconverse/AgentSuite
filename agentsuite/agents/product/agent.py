@@ -13,7 +13,7 @@ from agentsuite.agents.product.stages.extract import extract_stage
 from agentsuite.agents.product.stages.intake import intake_stage
 from agentsuite.agents.product.stages.qa import qa_stage
 from agentsuite.agents.product.stages.spec import spec_stage
-from agentsuite.kernel.base_agent import AgentCLISpec, BaseAgent, StageContext, StageHandler
+from agentsuite.kernel.base_agent import AgentCLISpec, BaseAgent, StageContext, StageHandler, stage_to_status
 from agentsuite.kernel.schema import RunState
 
 
@@ -70,13 +70,6 @@ class ProductAgent(BaseAgent):
         }
 
 
-def _stage_to_status(stage: str) -> str:
-    """Map internal stage names to user-facing status values."""
-    if stage == "approval":
-        return "awaiting_approval"
-    return stage
-
-
 def build_cli_spec() -> AgentCLISpec:
     """Return the CLI spec for the Product agent."""
     import json
@@ -86,7 +79,7 @@ def build_cli_spec() -> AgentCLISpec:
         product_name: str = typer.Option(..., help="Product name"),
         target_users: str = typer.Option(..., help="Who the product is for"),
         core_problem: str = typer.Option(..., help="Core problem being solved"),
-        project_slug: str = typer.Option(..., help="Project slug for output dir"),
+        project_slug: str | None = typer.Option(None, help="Stable slug for artifact promotion (e.g. 'my-app'); approved artifacts go to .agentsuite/_kernel/<slug>/"),
         inputs_dir: Path | None = typer.Option(None, help="Dir with research/competitive docs"),
         run_id: str | None = typer.Option(None, help="Run ID (default: auto-generated timestamp+uuid)"),
         force: bool = typer.Option(False, "--force", help="Overwrite existing run directory if it exists"),
@@ -114,7 +107,7 @@ def build_cli_spec() -> AgentCLISpec:
         typer.echo(json.dumps({
             "run_id": result.run_id,
             "primary_path": str(_output_root() / "runs" / result.run_id / "product-requirements-doc.md"),
-            "status": _stage_to_status(result.stage),
+            "status": stage_to_status(result.stage),
         }, indent=2))
 
     return AgentCLISpec(
