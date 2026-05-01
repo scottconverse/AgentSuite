@@ -39,6 +39,9 @@ tests/.live-output.log
 *.pem
 .envrc
 
+# Claude Code local state — gate override files, hooks state
+.claude/
+
 # Lighthouse raw reports — regenerate locally
 docs/lighthouse-*.report.html
 docs/lighthouse-*.report.json
