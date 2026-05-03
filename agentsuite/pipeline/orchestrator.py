@@ -12,6 +12,9 @@ from agentsuite.pipeline.state_store import PipelineStateStore
 
 ProgressCallback = Callable[[str, PipelineStepState, PipelineState], None]
 
+# K2: Type alias for the kernel-level progress callback (mirrors BaseAgent.ProgressCallback)
+KernelProgressCallback = Callable[[dict[str, Any]], None]
+
 
 class PipelineOrchestrator:
     def __init__(self, output_root: Path) -> None:
@@ -30,8 +33,13 @@ class PipelineOrchestrator:
         auto_approve: bool = False,
         llm: Any | None = None,
         on_progress: ProgressCallback | None = None,
+        kernel_progress_callback: KernelProgressCallback | None = None,
     ) -> PipelineState:
-        """Start a new pipeline. Returns state at awaiting_approval or done."""
+        """Start a new pipeline. Returns state at awaiting_approval or done.
+
+        K2: ``kernel_progress_callback`` is forwarded to each agent's
+        ``BaseAgent.run()`` so callers can receive intra-stage events.
+        """
         if not agents:
             raise ValueError("agents list must not be empty")
         pid = pipeline_id or (
@@ -51,7 +59,11 @@ class PipelineOrchestrator:
         )
         store = PipelineStateStore(self.pipelines_root, pid)
         store.save(state)
-        return self._drive(state, store, llm=llm, on_progress=on_progress)
+        return self._drive(
+            state, store, llm=llm,
+            on_progress=on_progress,
+            kernel_progress_callback=kernel_progress_callback,
+        )
 
     def approve(
         self,
@@ -60,6 +72,7 @@ class PipelineOrchestrator:
         approver: str,
         llm: Any | None = None,
         on_progress: ProgressCallback | None = None,
+        kernel_progress_callback: KernelProgressCallback | None = None,
     ) -> PipelineState:
         """Approve current awaiting step, promote artifacts, advance pipeline."""
         store = PipelineStateStore(self.pipelines_root, pipeline_id)
@@ -81,7 +94,11 @@ class PipelineOrchestrator:
 
         state.status = "running"
         store.save(state)
-        return self._drive(state, store, llm=llm, on_progress=on_progress)
+        return self._drive(
+            state, store, llm=llm,
+            on_progress=on_progress,
+            kernel_progress_callback=kernel_progress_callback,
+        )
 
     def status(self, *, pipeline_id: str) -> PipelineState:
         """Return current pipeline state."""
@@ -98,6 +115,7 @@ class PipelineOrchestrator:
         *,
         llm: Any | None,
         on_progress: ProgressCallback | None = None,
+        kernel_progress_callback: KernelProgressCallback | None = None,
     ) -> PipelineState:
         from agentsuite.agents.registry import default_registry
         registry = default_registry()
@@ -130,7 +148,12 @@ class PipelineOrchestrator:
                 agent_extras=extras,
             )
             inp = get_input_class(agent_name)(**input_kwargs)
-            run_state = agent.run(request=inp, run_id=step.run_id)
+            # K2: forward kernel_progress_callback to BaseAgent.run()
+            run_state = agent.run(
+                request=inp,
+                run_id=step.run_id,
+                progress_callback=kernel_progress_callback,
+            )
 
             step.cost_usd = run_state.cost_so_far.usd
             state.total_cost_usd = sum(s.cost_usd for s in state.steps)
