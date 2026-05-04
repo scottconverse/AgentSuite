@@ -1,6 +1,6 @@
 # AgentSuite Troubleshooting Guide
 
-**Version 1.0.13**
+**Version 1.1.0**
 
 This guide covers the five most common failure modes in AgentSuite, with plain-language explanations and specific steps to resolve each one.
 
@@ -293,4 +293,4 @@ This is informational. It typically appears when using Ollama (local, zero-cost)
 
 ---
 
-*AgentSuite v1.0.13 — Troubleshooting Guide*
+*AgentSuite v1.1.0 — Troubleshooting Guide*

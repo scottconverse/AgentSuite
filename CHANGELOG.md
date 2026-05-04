@@ -6,7 +6,25 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 ### Roadmap
 
-- **v1.1.x** — First minor after GA. Candidates from the rc1 Discussions Ideas board (8th agent, per-day cost cap, GPG signed tags if requested). Plus next-sprint watchlist from the 2026-04-30 audit: extract `register_standard_tools()` to deduplicate per-agent mcp_tools.py (W-08), `_INPUTS_BY_AGENT` parity test (W-02), `SECURITY.md` disclosure policy (W-09).
+- **v1.2.x** — Next-sprint watchlist from the 2026-04-30 audit: extract `register_standard_tools()` to deduplicate per-agent mcp_tools.py (W-08), `_INPUTS_BY_AGENT` parity test (W-02), `SECURITY.md` disclosure policy (W-09). Per-day cost cap, 8th agent TBD.
+
+## [1.1.0] - 2026-05-04
+
+Sprint 8 — K1 cross-stage context accumulator; K2 intra-stage progress events for real-time UI feedback.
+
+### Added
+
+- **K1 — Cross-stage context accumulator in `StageContext`:** `StageContext` gains a `cross_stage_context: dict[str, str]` field (default empty dict). After each stage completes, the first 500 words of that stage's primary artifact are read and stored under the stage name. All subsequent stage handlers receive the accumulated context automatically, enabling downstream stages to incorporate prior decisions into their prompts.
+- **K2 — Intra-stage progress events in `BaseAgent.run()`:** `BaseAgent.run()`, `BaseAgent.resume()`, and `BaseAgent._drive()` now accept an optional `progress_callback: Callable[[dict[str, Any]], None]`. The callback is invoked synchronously (never raises — all invocations are wrapped in `try/except`) at two points per stage:
+  - `{"type": "stage_progress", "stage": stage, "step": N, "total": 5, "message": "Starting <Label>"}` — before the stage handler runs.
+  - `{"type": "stage_progress", "stage": stage, "step": N, "total": 5, "message": "<Label> complete"}` — after the stage handler succeeds.
+  - `{"type": "context_update", "stage": stage, "summary": str}` — after each stage, with the first 300 chars of the stage's primary artifact, so callers can surface running context in a UI.
+- **K2 — `kernel_progress_callback` through `PipelineOrchestrator`:** `PipelineOrchestrator.run()`, `PipelineOrchestrator.approve()`, and `PipelineOrchestrator._drive()` now accept an optional `kernel_progress_callback: Callable[[dict[str, Any]], None]`. It is forwarded verbatim to each agent's `BaseAgent.run(progress_callback=...)` so pipeline callers receive the same intra-stage events without any additional wiring.
+- **`_STAGE_LABELS` dict in `base_agent.py`:** Human-readable display labels (`"Intake"`, `"Extraction"`, `"Specification"`, `"Execution"`, `"Quality review"`) used in progress event messages.
+
+### Changed
+
+- `StageContext` dataclass now has a `cross_stage_context` field (additive; existing code constructing `StageContext` without this field still works because the field has a default factory).
 
 ## [1.0.13] - 2026-05-01
 
