@@ -307,12 +307,106 @@ def test_qa_scores_json_contains_passed_key(tmp_path: Path) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Unknown dimension — existing strict behavior preserved
+# Unknown dimensions — strict mode (rubric default) and soft mode (stage path)
+#
+# AgentSuiteLocal v0.9 sprint-2-punchlist V2: gemma4:e4b in production produces
+# QA output with non-canonical dimension names like 'clarity', 'actionability'.
+# The kernel QA stage now opts into soft mode so unknown dimensions are dropped
+# rather than aborting the run with status="error".
 # ---------------------------------------------------------------------------
 
-def test_unknown_dimension_raises(tmp_path: Path) -> None:
-    """LLM returns a dimension not in the rubric — raises ValueError (strict mode preserved)."""
+def test_unknown_dimension_raises_in_strict_mode_default() -> None:
+    """Direct rubric call defaults to strict mode — preserved for back-compat."""
     scores = {d: 8.0 for d in _ALL_DIMS}
     scores["nonexistent_dimension_xyz"] = 9.0
     with pytest.raises(ValueError, match="Unknown dimensions"):
-        _run_qa(tmp_path, json.dumps({"scores": scores, "revision_instructions": []}))
+        FOUNDER_RUBRIC.score(scores=scores, revision_instructions=[])
+
+
+def test_unknown_dimension_raises_in_explicit_strict_mode() -> None:
+    """Explicit ``strict_dimensions=True`` still raises (back-compat)."""
+    scores = {d: 8.0 for d in _ALL_DIMS}
+    scores["nonexistent_dimension_xyz"] = 9.0
+    with pytest.raises(ValueError, match="Unknown dimensions"):
+        FOUNDER_RUBRIC.score(
+            scores=scores,
+            revision_instructions=[],
+            strict_dimensions=True,
+        )
+
+
+def test_unknown_dimension_soft_skip_via_stage(tmp_path: Path) -> None:
+    """Through the QA stage (which opts into soft mode), unknown dimensions
+    are dropped and the run completes — no ValueError, no status='error'."""
+    scores = {d: 8.0 for d in _ALL_DIMS}
+    scores["clarity"] = 9.0  # the literal dimension observed in production V2
+    scores["actionability"] = 8.5
+    state, writer = _run_qa(tmp_path, json.dumps({
+        "scores": scores,
+        "revision_instructions": [],
+    }))
+    # Run completed and reached the approval stage.
+    assert state.stage == "approval"
+    # qa_scores.json was written.
+    qa_data = json.loads((writer.run_dir / "qa_scores.json").read_text())
+    # Unknown dimensions are NOT present in the report.
+    assert "clarity" not in qa_data["scores"]
+    assert "actionability" not in qa_data["scores"]
+    # The canonical dimensions ARE all present.
+    for d in _ALL_DIMS:
+        assert d in qa_data["scores"]
+    # A revision instruction explains the drop.
+    assert any(
+        "not in the rubric" in r and "clarity" in r
+        for r in qa_data["revision_instructions"]
+    ), f"expected revision instruction naming dropped dims; got {qa_data['revision_instructions']}"
+
+
+def test_unknown_dimension_soft_skip_direct_call() -> None:
+    """Direct rubric call with ``strict_dimensions=False`` drops unknowns."""
+    scores = {d: 8.0 for d in _ALL_DIMS}
+    scores["nonexistent"] = 9.0
+    report = FOUNDER_RUBRIC.score(
+        scores=scores,
+        revision_instructions=[],
+        strict_dimensions=False,
+    )
+    assert "nonexistent" not in report.scores
+    assert all(d in report.scores for d in _ALL_DIMS)
+    assert any("not in the rubric" in r for r in report.revision_instructions)
+
+
+# ---------------------------------------------------------------------------
+# Unparseable LLM output — V1 of sprint-2-punchlist
+#
+# Real LLMs sometimes emit prose-only or truncated JSON that ``extract_json``
+# cannot parse. The QA stage soft-degrades: synthesizes empty scores and a
+# revision instruction, so the run reaches "approval" with all-zero scores
+# rather than aborting in status="error".
+# ---------------------------------------------------------------------------
+
+def test_unparseable_json_soft_degrades_to_zero_scores(tmp_path: Path) -> None:
+    """LLM emits prose with no JSON — run completes; scores all 0.0."""
+    state, writer = _run_qa(tmp_path, "I think this is pretty good but not great.")
+    assert state.stage == "approval"
+    qa_data = json.loads((writer.run_dir / "qa_scores.json").read_text())
+    # All canonical dimensions present, all 0.0.
+    for d in _ALL_DIMS:
+        assert qa_data["scores"][d] == 0.0
+    # Run is below threshold and flagged for revision.
+    assert qa_data["passed"] is False
+    assert qa_data["requires_revision"] is True
+    # A revision instruction names the parse failure.
+    assert any(
+        "could not parse LLM output" in r
+        for r in qa_data["revision_instructions"]
+    ), f"expected parse-failure revision instruction; got {qa_data['revision_instructions']}"
+
+
+def test_truncated_json_soft_degrades(tmp_path: Path) -> None:
+    """LLM emits a truncated/malformed JSON object — same soft-degrade path."""
+    state, writer = _run_qa(tmp_path, '{"scores": {"craftsmanship": 8.0,')
+    assert state.stage == "approval"
+    qa_data = json.loads((writer.run_dir / "qa_scores.json").read_text())
+    assert qa_data["passed"] is False
+    assert any("could not parse" in r for r in qa_data["revision_instructions"])

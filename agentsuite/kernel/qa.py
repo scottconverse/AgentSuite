@@ -55,17 +55,39 @@ class QARubric(BaseModel):
         scores: dict[str, float],
         *,
         revision_instructions: list[str],
+        strict_dimensions: bool = True,
     ) -> QAReport:
         """Score the rubric against ``scores`` (dimension name → 0..10).
 
-        Raises ``ValueError`` if ``scores`` contains unknown dimensions.
-        Missing dimensions are assigned 0.0 and a revision instruction is
+        ``strict_dimensions`` (default ``True``) preserves the original
+        contract: unknown dimensions raise ``ValueError``. Set this to
+        ``False`` when the score dict comes from an LLM (which may invent
+        non-canonical dimensions like ``"clarity"`` or ``"actionability"``);
+        unknown dimensions are then dropped, a revision instruction is
+        appended, and the run completes with the recognized dimensions only.
+
+        Missing dimensions are always assigned 0.0 with a revision instruction
         appended so the run completes and the low score flags it for revision.
         """
         expected = {d.name for d in self.dimensions}
         provided = set(scores.keys())
-        if provided - expected:
-            raise ValueError(f"Unknown dimensions: {provided - expected}")
+        extra = provided - expected
+        if extra:
+            if strict_dimensions:
+                raise ValueError(f"Unknown dimensions: {extra}")
+            # Soft mode: drop unknown dimensions, leave a trail in the report.
+            # AgentSuiteLocal v0.9 sprint-2-punchlist Variant 2: real LLMs
+            # (gemma4:e4b observed) produce dimension names like 'clarity' or
+            # 'actionability' that aren't in the agent's canonical rubric.
+            # Erroring on this puts the entire run into status="error" and
+            # leaves the user with no path forward; soft-skipping degrades to
+            # qa_score=None at the consumer (handled by the approval gate UX).
+            scores = {k: v for k, v in scores.items() if k not in extra}
+            revision_instructions = list(revision_instructions) + [
+                f"QA output contained dimensions not in the rubric "
+                f"({sorted(extra)}); they were dropped. Canonical rubric "
+                f"dimensions: {sorted(expected)}."
+            ]
         missing = expected - provided
         scores = dict(scores)  # mutable copy — do not mutate the caller's dict
         # Coerce score values to float: real LLMs may return strings or nulls.

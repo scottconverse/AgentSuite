@@ -4,8 +4,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import pytest
-
 from agentsuite.agents.design.input_schema import DesignAgentInput
 from agentsuite.agents.design.stages.qa import qa_stage
 from agentsuite.kernel.artifacts import ArtifactWriter
@@ -85,12 +83,24 @@ def test_qa_writes_report_and_scores(tmp_path: Path) -> None:
     assert (writer.run_dir / "qa_scores.json").exists()
 
 
-def test_qa_raises_on_invalid_json(tmp_path: Path) -> None:
+def test_qa_soft_degrades_on_invalid_json(tmp_path: Path) -> None:
+    """v1.1.1 (AgentSuiteLocal sprint-2-punchlist V1): invalid JSON no longer
+    aborts the run. The stage soft-degrades to all-zero scores with a
+    parse-failure revision instruction so the run reaches 'approval'."""
+    import json
+
     writer = _seed_run_dir(tmp_path)
     llm = MockLLMProvider(responses={"scoring 9 design-agent": "not json"})
     ctx = StageContext(writer=writer, cost_tracker=CostTracker(), edits={"llm": llm})
-    with pytest.raises(ValueError, match="qa stage produced invalid JSON"):
-        qa_stage(_make_state(), ctx)
+    new_state = qa_stage(_make_state(), ctx)
+    assert new_state.stage == "approval"
+    assert new_state.requires_revision is True
+    qa_data = json.loads((writer.run_dir / "qa_scores.json").read_text())
+    assert qa_data["passed"] is False
+    assert any(
+        "could not parse LLM output" in r
+        for r in qa_data["revision_instructions"]
+    )
 
 
 def test_qa_tracks_cost(tmp_path: Path) -> None:

@@ -8,6 +8,26 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 - **v1.2.x** — Next-sprint watchlist from the 2026-04-30 audit: extract `register_standard_tools()` to deduplicate per-agent mcp_tools.py (W-08), `_INPUTS_BY_AGENT` parity test (W-02), `SECURITY.md` disclosure policy (W-09). Per-day cost cap, 8th agent TBD.
 
+## [1.1.1] - 2026-05-07
+
+Bugfix release. Closes two production failures surfaced by AgentSuiteLocal v0.9 sprint 1's real-model E2E test (`gemma4:e4b`); both were reaching production via the AgentSuiteLocal pin at `agentsuite==1.1.0`.
+
+### Fixed
+
+- **V1 — QA stage now soft-degrades on unparseable LLM output** (`agentsuite/kernel/stages/qa.py`). Previously, when `extract_json(response.text)` failed (truncated JSON, prose-only, malformed code-fence), the stage raised `ValueError("qa stage produced invalid JSON")` and the entire run was marked `status="error"` with no path forward for the user. The stage now synthesizes an empty score dict plus a parse-failure revision instruction; the rubric fills 0.0 for all dimensions, the run reaches `"approval"` with `requires_revision=True`, and `qa_scores.json` is written so downstream consumers (AgentSuiteLocal's approval gate UX in particular) can show a `qa_status="missing"` state instead of a hard error.
+- **V2 — `QARubric.score()` accepts a `strict_dimensions` parameter** (`agentsuite/kernel/qa.py`, default `True` for back-compat). Real LLMs sometimes produce dimension names that aren't in the agent's canonical rubric (observed in production: `'clarity'`, `'actionability'` from gemma4:e4b). With `strict_dimensions=False`, unknown dimensions are dropped, a revision instruction lists the dropped names + the canonical list, and the run completes. The kernel QA stage opts into soft mode (`strict_dimensions=False`) since LLM output is the source there. Direct programmatic callers retain strict-mode behavior unless they explicitly opt in.
+
+### Tests
+
+- Added 7 new tests covering both soft-mode paths: stage-level unparseable JSON, stage-level non-canonical dimensions, and direct rubric-level soft mode. Strict-mode tests preserved (now use either the rubric default or explicit `strict_dimensions=True`).
+- Two existing tests (`test_qa_raises_on_invalid_json` in founder + design unit suites) renamed to `test_qa_soft_degrades_on_invalid_json` and rewritten to assert the new soft-degrade contract.
+- Full suite: 1098 passed, 0 failed (vs. 1093 in v1.1.0).
+
+### Migration notes
+
+- **No breaking change for direct callers.** `QARubric.score()` defaults remain strict (raises on unknown dimensions). Code that relied on the raise behavior continues to work without changes.
+- **Behavior change for kernel QA stage consumers.** Runs that previously errored at the QA stage (V1 or V2 conditions) now complete to `"approval"` with `requires_revision=True` and a revision instruction explaining the degradation. Consumers should check `qa_report.passed` and `qa_report.requires_revision` rather than relying on exception propagation.
+
 ## [1.1.0] - 2026-05-04
 
 Sprint 8 — K1 cross-stage context accumulator; K2 intra-stage progress events for real-time UI feedback.

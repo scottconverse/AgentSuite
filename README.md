@@ -2,7 +2,7 @@
 
 > Seven role-specific reasoning agents that turn vague intent into precise operating artifacts.
 >
-> **v1.1.0** — Specification Kernel + Founder · Design · Product · Engineering · Marketing · Trust/Risk · CIO Agents + multi-agent pipeline orchestration + intra-stage progress events
+> **v1.1.1** — Specification Kernel + Founder · Design · Product · Engineering · Marketing · Trust/Risk · CIO Agents + multi-agent pipeline orchestration + intra-stage progress events
 
 ![AgentSuite founder run](docs/screenshots/cli-founder-run.svg)
 
@@ -344,6 +344,7 @@ Full architecture diagram with all agents: see `docs/README-FULL.pdf`.
 - v1.0.12 — Sprint 6 — multi-agent pipeline orchestration (`pipeline run/approve/status`); progress feedback
 - v1.0.13 — Sprint 7 — artifact visibility before approve; `pipeline list`; landing page overhaul
 - v1.1.0 — K1 cross-stage context accumulator; K2 intra-stage progress events (`stage_progress`, `context_update`) in `BaseAgent.run()` and `PipelineOrchestrator`
+- v1.1.1 — QA stage soft-degradation: V1 unparseable LLM JSON and V2 non-canonical dimension names no longer abort the run; degrade to qa_score=0.0 with revision instruction so the consumer can show qa-unavailable UX
 
 **Roadmap (v1.2.x candidates):**
 - Per-day cost cap

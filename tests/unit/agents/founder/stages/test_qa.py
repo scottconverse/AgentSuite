@@ -2,8 +2,6 @@
 import json
 from pathlib import Path
 
-import pytest
-
 from agentsuite.agents.founder.input_schema import FounderAgentInput
 from agentsuite.agents.founder.rubric import FOUNDER_RUBRIC
 from agentsuite.agents.founder.stages.qa import qa_stage
@@ -76,9 +74,22 @@ def test_qa_marks_requires_revision_on_low_score(tmp_path):
     assert new_state.stage == "approval"
 
 
-def test_qa_raises_on_invalid_json(tmp_path):
+def test_qa_soft_degrades_on_invalid_json(tmp_path):
+    """v1.1.1 (AgentSuiteLocal sprint-2-punchlist V1): invalid JSON no longer
+    aborts the run. The stage soft-degrades to all-zero scores with a
+    parse-failure revision instruction so the run reaches 'approval' and
+    the consumer surfaces qa-unavailable UX."""
+    import json
+
     writer = _seed_with_artifacts(tmp_path)
     llm = MockLLMProvider(responses={"scoring 9 founder": "not json"})
     ctx = StageContext(writer=writer, cost_tracker=CostTracker(), edits={"llm": llm})
-    with pytest.raises(ValueError, match="qa stage produced invalid JSON"):
-        qa_stage(_state(), ctx)
+    new_state = qa_stage(_state(), ctx)
+    assert new_state.stage == "approval"
+    assert new_state.requires_revision is True
+    qa_data = json.loads((writer.run_dir / "qa_scores.json").read_text())
+    assert qa_data["passed"] is False
+    assert any(
+        "could not parse LLM output" in r
+        for r in qa_data["revision_instructions"]
+    )

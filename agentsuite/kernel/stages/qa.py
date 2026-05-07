@@ -99,10 +99,24 @@ def kernel_qa_stage(config: QAStageConfig, state: RunState, ctx: StageContext) -
         model=response.model,
     ))
 
+    # AgentSuiteLocal v0.9 sprint-2-punchlist V1: real LLMs sometimes emit
+    # output that ``extract_json`` cannot parse (truncated JSON, prose-only
+    # response, malformed code-fence). Raising here strands the entire run
+    # in status="error". Soft-degrade instead: synthesize an empty score dict
+    # plus a revision instruction; the rubric will then fill 0.0 for all
+    # dimensions and the run reaches "approval" with qa_score below threshold.
+    # AgentSuiteLocal's approval-gate UX handles qa_status="missing" cleanly.
     try:
         parsed = extract_json(response.text)
     except ValueError as exc:
-        raise ValueError(f"qa stage produced invalid JSON: {exc}") from exc
+        parsed = {
+            "scores": {},
+            "revision_instructions": [
+                f"QA stage could not parse LLM output as JSON ({exc}). "
+                f"All dimensions defaulted to 0.0 — run is below threshold "
+                f"and requires manual review or re-run."
+            ],
+        }
 
     if not isinstance(parsed, dict):
         parsed = {}
@@ -113,7 +127,13 @@ def kernel_qa_stage(config: QAStageConfig, state: RunState, ctx: StageContext) -
     if not isinstance(raw_revisions, list):
         raw_revisions = []
 
-    report = config.rubric.score(scores=raw_scores, revision_instructions=raw_revisions)
+    # strict_dimensions=False: LLM output is the score source; non-canonical
+    # dimensions (V2 of sprint-2-punchlist) get dropped instead of erroring.
+    report = config.rubric.score(
+        scores=raw_scores,
+        revision_instructions=raw_revisions,
+        strict_dimensions=False,
+    )
 
     if config.write_qa_report:
         ctx.writer.write("qa_report.md", report.to_markdown(), kind="qa_report", stage="qa")
