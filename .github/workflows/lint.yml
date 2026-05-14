@@ -8,7 +8,7 @@ on:
 
 jobs:
   ruff-mypy:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64]
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
@@ -24,7 +24,7 @@ jobs:
         run: mypy agentsuite
 
   docs-drift:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64]
     steps:
       - uses: actions/checkout@v6
       - name: Required doc artifacts exist
