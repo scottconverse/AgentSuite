@@ -6,6 +6,17 @@
 
 ![AgentSuite founder run](docs/screenshots/cli-founder-run.svg)
 
+## Which one do I want? AgentSuite or productteam?
+
+These two projects come from the same author and look similar at first glance — both run a multi-agent pipeline with human approval gates. They're built for different jobs.
+
+| | What it does | Best for |
+|---|---|---|
+| **[AgentSuite](https://github.com/scottconverse/AgentSuite)** | 7 reasoning agents (Founder, Design, Product, Engineering, Marketing, Trust/Risk, CIO) produce **reusable artifacts**: brand systems, brief libraries, voice guides, prompt templates, engineering specs. Python package + MCP server. The output is a persistent specification kernel that feeds every future AI session. | Technical founders and developers building inside AI-native IDEs (Claude Code, Cowork, Codex) who are frustrated that every session re-drifts on voice and re-argues settled decisions. You want a kernel that remembers, not one-off generations. |
+| **[productteam](https://github.com/scottconverse/productteam)** | 7-agent software delivery pipeline: concept → PRD → sprint plan → implementation passes → evaluation passes → documentation. The builder never grades its own work; a skeptical evaluator runs tests and tries to break things. Local (Ollama) or cloud (Anthropic / OpenAI / Gemini). Three human gates confirm intent, scope, readiness. | Anyone shipping a small project who wants the agent stack to write the **code**, not the spec. PRD-to-shipped-and-tested in supervised passes. State persistence + recovery tools for long runs. |
+
+**TL;DR.** AgentSuite produces *specifications and artifacts*. productteam produces *running code*. They compose well: use AgentSuite to define the brand / voice / spec kernel, then hand it to productteam (or a human dev team) to build.
+
 AgentSuite is a Python package and MCP server. It exposes role-specific agents (Founder, Design, Product, Engineering, Marketing, Trust/Risk, and CIO shipped) that take loose human intent and produce structured, reusable artifacts: brand systems, brief libraries, voice guides, prompt templates, engineering specs, IT strategies, and more.
 
 The agents are reasoning agents, not content generators. Output is a reusable system, not a one-off asset.
