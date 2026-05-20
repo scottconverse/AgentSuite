@@ -40,7 +40,7 @@ If you need something not in this kit — high-res renders, custom visualization
 
 - **License:** MIT
 - **Distribution:** GitHub only (no PyPI by design — see ADR-0006)
-- **Language:** Python 3.11+
+- **Language:** Python 3.11 or 3.12
 - **Package size:** ~190 KB wheel, ~95 KB sdist
 - **Dependencies:** 5 runtime (pydantic, tenacity, typer, httpx, jinja2) + 1 optional per provider
 - **Test count:** 689 (default invocation), 0 skipped, 3 deselected (cleanroom + 2 live tiers gated by env var)

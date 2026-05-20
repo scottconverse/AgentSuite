@@ -73,22 +73,34 @@ step "8.5. Tag-CI gate — confirm test.yml matrix passed on the tag SHA (if tag
 # tag-push time (TAG_SHA in env or detectable via `git describe --exact-match HEAD`).
 # When run on a non-tagged HEAD it short-circuits with a notice — the gate
 # is forward-looking, fired by the release runbook.
-TAG_REF=$(git describe --exact-match HEAD 2>/dev/null || true)
-if [ -z "${TAG_SHA:-}" ] && [ -n "$TAG_REF" ]; then
-  TAG_SHA=$(git rev-parse "$TAG_REF")
-fi
-
-if [ -z "${TAG_SHA:-}" ]; then
-  ok "no tag SHA in scope — tag-CI gate deferred (run from a tagged HEAD or set TAG_SHA=<sha>)"
+#
+# Emergency-hotfix override: set SKIP_TAG_CI_GATE=1 (mirrors the SKIP_AUDIT
+# pattern in release.yml). Use ONLY when the GitHub Ruleset bypass-actor
+# list has been tightened and a hotfix must ship before CI can complete.
+# See CONTRIBUTING.md "Releases" section for the full hotfix-with-bypass
+# runbook.
+if [ "${SKIP_TAG_CI_GATE:-}" = "1" ]; then
+  printf "\033[1;33m[WARN]\033[0m SKIP_TAG_CI_GATE=1 set — bypassing tag-CI gate (emergency hotfix path).\n"
+  printf "       This should only be used when the Ruleset bypass-actors list has been\n"
+  printf "       tightened and a hotfix needs to ship before CI can complete.\n"
+  printf "       See CONTRIBUTING.md \"Releases\" for the documented hotfix-with-bypass procedure.\n"
 else
-  if ! command -v gh >/dev/null 2>&1; then
-    fail "tag-CI gate requires the gh CLI; install it before tagging a release"
+  TAG_REF=$(git describe --exact-match HEAD 2>/dev/null || true)
+  if [ -z "${TAG_SHA:-}" ] && [ -n "$TAG_REF" ]; then
+    TAG_SHA=$(git rev-parse "$TAG_REF")
   fi
-  RUNS_JSON=$(gh api "repos/scottconverse/AgentSuite/commits/${TAG_SHA}/check-runs" --paginate)
-  # Required job names per DR-D:
-  REQUIRED_31X=("unit-integration-golden (3.11)" "unit-integration-golden (3.12)")
-  for job in "${REQUIRED_31X[@]}"; do
-    CONCLUSION=$(printf '%s' "$RUNS_JSON" | python -c "
+
+  if [ -z "${TAG_SHA:-}" ]; then
+    ok "no tag SHA in scope — tag-CI gate deferred (run from a tagged HEAD or set TAG_SHA=<sha>)"
+  else
+    if ! command -v gh >/dev/null 2>&1; then
+      fail "tag-CI gate requires the gh CLI; install it before tagging a release"
+    fi
+    RUNS_JSON=$(gh api "repos/scottconverse/AgentSuite/commits/${TAG_SHA}/check-runs" --paginate)
+    # Required job names per DR-D:
+    REQUIRED_31X=("unit-integration-golden (3.11)" "unit-integration-golden (3.12)")
+    for job in "${REQUIRED_31X[@]}"; do
+      CONCLUSION=$(printf '%s' "$RUNS_JSON" | python -c "
 import json, sys
 data = json.loads(sys.stdin.read())
 runs = data.get('check_runs', [])
@@ -100,11 +112,12 @@ for r in runs:
 else:
     print('missing')
 " "$job")
-    if [ "$CONCLUSION" != "success" ]; then
-      fail "tag-CI gate: job '$job' conclusion='$CONCLUSION' (expected 'success'). Tag SHA ${TAG_SHA}."
-    fi
-  done
-  ok "tag-CI gate: unit-integration-golden (3.11) AND unit-integration-golden (3.12) both SUCCESS at ${TAG_SHA}"
+      if [ "$CONCLUSION" != "success" ]; then
+        fail "tag-CI gate: job '$job' conclusion='$CONCLUSION' (expected 'success'). Tag SHA ${TAG_SHA}."
+      fi
+    done
+    ok "tag-CI gate: unit-integration-golden (3.11) AND unit-integration-golden (3.12) both SUCCESS at ${TAG_SHA}"
+  fi
 fi
 
 printf "\n\033[1;32mverify-release.sh: ALL CHECKS PASSED — safe to push\033[0m\n"

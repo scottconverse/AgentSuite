@@ -4,7 +4,7 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 ## [Unreleased]
 
-### Changed - 2026-05-20
+### Changed - 2026-05-19
 
 - **Tag-push CI trigger restored.** `.github/workflows/test.yml` now declares
   `push: tags: ['v*']` alongside the existing `pull_request` trigger. The

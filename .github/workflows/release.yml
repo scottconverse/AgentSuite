@@ -5,6 +5,15 @@ on:
     tags:
       - "v*"
 
+concurrency:
+  # Serialize per-ref runs of this workflow. cancel-in-progress is FALSE so a
+  # mid-flight release build on a v* tag is not killed by a concurrent
+  # test.yml run on the same tag — both workflows queue on the single
+  # self-hosted runner and execute in sequence. See CONTRIBUTING.md
+  # "Releases" for the cross-workflow serialization model.
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build-and-publish:
     runs-on: [self-hosted, linux, x64]

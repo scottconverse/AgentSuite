@@ -98,6 +98,26 @@ This script runs all 8 checks (doc artifacts, version sync, CHANGELOG entry, lin
 
 AgentSuite does not publish to PyPI. Releases are distributed via GitHub only.
 
+### CI behavior on tag pushes
+
+Pushing a `v*` tag fires **both** `test.yml` and `release.yml`. `test.yml` matrix-expands to Python 3.11 + 3.12 on tags (PR-time runs 3.12 only — see PR #45 cost-cut decision). `release.yml` builds the wheel/sdist on Python 3.12, runs pip-audit + SBOM + smoke jobs, and creates the GitHub Release. Both workflows declare `concurrency.group: ${{ github.workflow }}-${{ github.ref }}` with `cancel-in-progress: false`. The single self-hosted runner (`scott-desktop-wsl`) serializes the queued jobs — expect ~15–25 minutes of wall-clock per tag push as the jobs drain in sequence. A re-pushed tag (rare) will queue behind the in-flight runs rather than killing them mid-flight.
+
+The `unit-integration-golden (3.11)` and `unit-integration-golden (3.12)` jobs in `test.yml` are required status checks on the `Tag CI gate v*` ruleset (`https://github.com/scottconverse/AgentSuite/rules/16626878`). The tag ref update is rejected by the ruleset until both jobs report `success`. The `release.yml` workflow does not consult the ruleset directly — it executes on the tag push event. If the ruleset rejects the tag ref update, the `release.yml` run will fail on `actions/checkout@v6` (no ref to check out) — that is the expected failure mode, not a bug.
+
+### Emergency hotfix path (skip the tag-CI gate)
+
+If a security hotfix or critical regression fix must ship before CI can complete (rare; document the justification in the CHANGELOG entry), the gate can be skipped via two coordinated steps:
+
+1. **Tighten the Ruleset bypass-actors list** so the tag ref update is permitted for the release operator. Either edit the bypass list in the GitHub UI (`https://github.com/scottconverse/AgentSuite/rules/16626878`) or via the API:
+   ```bash
+   gh api repos/scottconverse/AgentSuite/rulesets/16626878 \
+     --method PUT \
+     --input <json-with-tightened-bypass-actors>
+   ```
+2. **Set `SKIP_TAG_CI_GATE=1` in the env** when running `bash scripts/verify-release.sh`. The script-gate step 8.5 will print a yellow `[WARN]` line and proceed without consulting the check-runs API. This mirrors the existing `SKIP_AUDIT=true` override pattern in `release.yml`.
+
+After the hotfix tag lands, **revert the bypass-actors entry** to its prior tightened state (and add a CHANGELOG note recording the bypass + revert). The bypass is a foot-gun — do not leave it loosened across release boundaries.
+
 ## Code style
 
 - ruff for formatting and linting (`make lint`).

@@ -8,6 +8,8 @@ AgentSuite is a piece of software that takes loose ideas (like "I want a brand s
 
 ## What you need before you start
 
+Requires Python 3.11 or 3.12.
+
 1. **A computer running Windows, Mac, or Linux.**
 2. **Python 3.11 or 3.12 installed.** Get it at https://www.python.org/downloads/. During install, check "Add Python to PATH".
 3. **An AI brain.** Either:

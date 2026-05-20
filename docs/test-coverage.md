@@ -46,7 +46,7 @@ This deselects three tests by marker. As of 2026-04-29, that leaves **689 of 692
 - **Test:** `tests/test_cleanroom_smoke.py::test_cleanroom_script_exits_zero`
 - **Why deselected by default:** Spins up a fresh venv, installs AgentSuite from the working tree, and runs the entire kernel against a mock LLM. Takes ~2 minutes wall-clock and writes to a temporary directory outside the test session's `tmp_path`. Running it inside a normal `pytest` invocation would balloon CI time and could leak state between unrelated tests.
 - **How to run:** `pytest -m cleanroom` (or `make cleanroom` / `bash scripts/run-cleanroom.sh`).
-- **When run:** Pre-push gate on every release per `scripts/verify-release.sh` step 6. Also runs on every tag in CI as the `clean-install-check` job (matrix `ubuntu-latest` / `windows-latest` × Python 3.11 / 3.12).
+- **When run:** Pre-push gate on every release per `scripts/verify-release.sh` step 6. Also runs in CI as the `cleanroom` job on every PR and every `v*` tag push (`[self-hosted, linux, x64]` runner, Python 3.12). The wider matrix shape `unit-integration-golden` covers both Python 3.11 and 3.12 on tag pushes (the project supports `Requires Python 3.11 or 3.12.`).
 
 ## Anti-patterns explicitly rejected
 
