@@ -4,6 +4,37 @@ All notable changes to AgentSuite will be documented in this file. Format follow
 
 ## [Unreleased]
 
+### Changed - 2026-05-20
+
+- **Tag-push CI trigger restored.** `.github/workflows/test.yml` now declares
+  `push: tags: ['v*']` alongside the existing `pull_request` trigger. The
+  matrix's existing `else` arm (`["3.11", "3.12"]`) becomes reachable on
+  tag pushes, so 3.11 actually runs at release boundaries instead of being
+  silently skipped. PR-time still runs 3.12-only per the cost-cut decision
+  in PR #45.
+- **Rationalized Python support claim across docs.** README, USER-MANUAL,
+  and CONTRIBUTING now all contain the exact byte-identical sentence
+  `Requires Python 3.11 or 3.12.` Previously each doc used a different
+  shape (`Python 3.11+`, `Python 3.11 or 3.12 installed`, `You'll need
+  Python 3.11 or 3.12.`) and the README's `+` form admitted future
+  versions the CI matrix never tested.
+- **Tag-CI gate in `scripts/verify-release.sh`.** New step 8.5 queries
+  `repos/scottconverse/AgentSuite/commits/<tag-sha>/check-runs` via the
+  gh CLI and asserts both `unit-integration-golden (3.11)` and
+  `unit-integration-golden (3.12)` are SUCCESS before the release-runbook
+  proceeds. Forward-looking — runs only when invoked at tag-push time.
+
+### Known risks (forward-looking)
+
+- **W13 — Gemini SDK upper-bound risk.** AgentSuite ships
+  `google-genai>=1.0,<3`. A `DeprecationWarning` in `google.genai.types`
+  reads `_UnionGenericAlias is deprecated in Python 3.11 and will be
+  removed in Python 3.17`. Not an AgentSuite code issue, but the bundled
+  Gemini SDK will need an upper-bound bump when Google ships a
+  Python-3.17-compatible SDK release; until then, the upper bound holds.
+  Tracked in `dev-reports/audit-AgentSuite-2026-04-27/next-sprint-watchlist.md`
+  rows W13 + W13-followup.
+
 ### Roadmap
 
 - **v1.2.x** — Next-sprint watchlist from the 2026-04-30 audit: extract `register_standard_tools()` to deduplicate per-agent mcp_tools.py (W-08), `_INPUTS_BY_AGENT` parity test (W-02), `SECURITY.md` disclosure policy (W-09). Per-day cost cap, 8th agent TBD.

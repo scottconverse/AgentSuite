@@ -53,7 +53,7 @@ uvx --from "agentsuite[mcp] @ git+https://github.com/scottconverse/AgentSuite.gi
 
 > AgentSuite is distributed from GitHub only — there is no PyPI publication.
 
-Requirements: Python 3.11+. Either an API key (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or `GEMINI_API_KEY` / `GOOGLE_API_KEY`) OR a local Ollama daemon running at `localhost:11434`.
+Requires Python 3.11 or 3.12. Either an API key (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or `GEMINI_API_KEY` / `GOOGLE_API_KEY`) OR a local Ollama daemon running at `localhost:11434`.
 
 ## Quick start (CLI)
 

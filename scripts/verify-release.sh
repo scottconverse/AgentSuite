@@ -68,4 +68,43 @@ if grep -RIn --exclude-dir=.git --exclude-dir=.venv --exclude-dir=dist --exclude
 fi
 ok "no obvious secrets"
 
+step "8.5. Tag-CI gate — confirm test.yml matrix passed on the tag SHA (if tagging a release)"
+# This step is the script-gate side of DR-D. It runs only when invoked at
+# tag-push time (TAG_SHA in env or detectable via `git describe --exact-match HEAD`).
+# When run on a non-tagged HEAD it short-circuits with a notice — the gate
+# is forward-looking, fired by the release runbook.
+TAG_REF=$(git describe --exact-match HEAD 2>/dev/null || true)
+if [ -z "${TAG_SHA:-}" ] && [ -n "$TAG_REF" ]; then
+  TAG_SHA=$(git rev-parse "$TAG_REF")
+fi
+
+if [ -z "${TAG_SHA:-}" ]; then
+  ok "no tag SHA in scope — tag-CI gate deferred (run from a tagged HEAD or set TAG_SHA=<sha>)"
+else
+  if ! command -v gh >/dev/null 2>&1; then
+    fail "tag-CI gate requires the gh CLI; install it before tagging a release"
+  fi
+  RUNS_JSON=$(gh api "repos/scottconverse/AgentSuite/commits/${TAG_SHA}/check-runs" --paginate)
+  # Required job names per DR-D:
+  REQUIRED_31X=("unit-integration-golden (3.11)" "unit-integration-golden (3.12)")
+  for job in "${REQUIRED_31X[@]}"; do
+    CONCLUSION=$(printf '%s' "$RUNS_JSON" | python -c "
+import json, sys
+data = json.loads(sys.stdin.read())
+runs = data.get('check_runs', [])
+target = sys.argv[1]
+for r in runs:
+    if r.get('name') == target:
+        print(r.get('conclusion') or 'pending')
+        break
+else:
+    print('missing')
+" "$job")
+    if [ "$CONCLUSION" != "success" ]; then
+      fail "tag-CI gate: job '$job' conclusion='$CONCLUSION' (expected 'success'). Tag SHA ${TAG_SHA}."
+    fi
+  done
+  ok "tag-CI gate: unit-integration-golden (3.11) AND unit-integration-golden (3.12) both SUCCESS at ${TAG_SHA}"
+fi
+
 printf "\n\033[1;32mverify-release.sh: ALL CHECKS PASSED — safe to push\033[0m\n"

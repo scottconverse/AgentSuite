@@ -63,6 +63,8 @@ You need three things:
 **1. A computer running Windows, Mac, or Linux.**
 AgentSuite works on all three operating systems.
 
+Requires Python 3.11 or 3.12.
+
 **2. Python 3.11 or 3.12 installed.**
 Python is a free programming language that AgentSuite is built with. You do not need to know how to program — you just need Python installed.
 - Download it at: https://www.python.org/downloads/

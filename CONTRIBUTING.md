@@ -17,7 +17,7 @@ python -m venv .venv
 pytest
 ```
 
-You'll need Python 3.11 or 3.12. For the full doc-build pipeline you also need `pandoc` and (optionally) `mmdc` (mermaid-cli):
+Requires Python 3.11 or 3.12. For the full doc-build pipeline you also need `pandoc` and (optionally) `mmdc` (mermaid-cli):
 
 - pandoc: https://pandoc.org/installing.html
 - mermaid-cli: `npm install -g @mermaid-js/mermaid-cli`
@@ -42,6 +42,8 @@ This project follows the global standards in `~/.claude/CLAUDE.md` and the proje
 | Golden | `tests/golden/` | every commit (CI on PR) | $0 (mock) |
 | Cleanroom | `pytest -m cleanroom` | every PR | $0 (mock) or $5 cap (live) |
 | Live | `tests/live/` (`RUN_LIVE_TESTS=1`) | release tag only | up to $10 total |
+
+See CHANGELOG `[Unreleased]` "Known risks" for **W13** Gemini SDK upper-bound risk (`_UnionGenericAlias` deprecation in `google-genai`).
 
 Run everything in mocked mode:
 
