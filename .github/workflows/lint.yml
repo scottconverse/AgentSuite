@@ -12,7 +12,7 @@ jobs:
   ruff-mypy:
     runs-on: [self-hosted, linux, x64]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
@@ -28,7 +28,7 @@ jobs:
   docs-drift:
     runs-on: [self-hosted, linux, x64]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Required doc artifacts exist
         run: |
           missing=()
