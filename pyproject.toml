@@ -28,7 +28,7 @@ dependencies = [
 
 [project.optional-dependencies]
 anthropic = ["anthropic>=0.40,<1"]
-openai = ["openai>=1.50,<3"]
+openai = ["openai>=3.5.0,<4"]
 gemini = ["google-genai>=1.0,<3"]
 ollama = ["ollama>=0.4,<1"]
 mcp = ["mcp>=1.0,<2"]
