@@ -1,219 +1,345 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230F172A'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='18' font-weight='bold' text-anchor='middle' fill='%2322C55E'%3EA%3C/text%3E%3C/svg%3E">
-  <title>AgentSuite -- reasoning agents for vague intent, precise artifacts</title>
-  <meta name="description" content="Seven role-specific reasoning agents that turn a business goal into 26 structured artifacts -- brand system, product spec, architecture, marketing plan, risk register, IT strategy. Open-source, MIT-licensed. Works in Claude Code, Cowork, Codex, and Google Antigravity.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg:       #0F172A;
-      --surface:  #1E293B;
-      --border:   #334155;
-      --fg:       #F8FAFC;
-      --muted:    #94A3B8;
-      --accent:   #22C55E;
-      --accent-dim: #16A34A;
-      --code-bg:  #1E293B;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: "IBM Plex Sans", -apple-system, system-ui, sans-serif;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 2.5rem 1.5rem;
-      color: var(--fg);
-      background: var(--bg);
-      line-height: 1.65;
-    }
-    h1 { font-size: 2rem; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
-    h1 .v { font-size: 0.85rem; color: var(--accent); margin-left: 0.5rem; font-weight: 400; font-family: "JetBrains Mono", monospace; }
-    .lede { font-size: 1.1rem; color: var(--muted); margin: 0 0 0.75rem; max-width: 65ch; }
-    .for { font-size: 0.95rem; color: var(--muted); margin-bottom: 2rem; }
-    .for strong { color: var(--fg); }
-    h2 { font-size: 1.15rem; font-weight: 600; margin-top: 2.5rem; margin-bottom: 0.75rem; color: var(--fg); border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
-    h3 { font-size: 1rem; font-weight: 500; margin: 1.25rem 0 0.4rem; color: var(--fg); }
-    p { margin-bottom: 0.9rem; color: var(--muted); }
-    p strong { color: var(--fg); }
-    pre {
-      background: var(--code-bg);
-      border: 1px solid var(--border);
-      padding: 1rem 1.25rem;
-      border-radius: 6px;
-      overflow-x: auto;
-      font-size: 0.875rem;
-      font-family: "JetBrains Mono", monospace;
-      line-height: 1.6;
-      margin-bottom: 1rem;
-    }
-    code {
-      background: var(--code-bg);
-      border: 1px solid var(--border);
-      padding: 0.1em 0.35em;
-      border-radius: 3px;
-      font-size: 0.875em;
-      font-family: "JetBrains Mono", monospace;
-    }
-    pre code { background: transparent; border: none; padding: 0; font-size: inherit; }
-    a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 200ms; }
-    a:hover { border-bottom-color: var(--accent); }
-    a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
-    .demo { margin: 1.5rem 0 2.5rem; }
-    .demo img { max-width: 100%; border-radius: 6px; border: 1px solid var(--border); display: block; }
-    .demo-caption { font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 0.75rem 0 1.5rem; }
-    .card { padding: 1rem 1.1rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); }
-    .card h3 { margin: 0 0 0.35rem; font-size: 0.95rem; color: var(--fg); }
-    .card p { margin: 0; color: var(--muted); font-size: 0.875rem; line-height: 1.5; }
-    .cta {
-      display: inline-block;
-      background: var(--accent);
-      color: #0F172A;
-      font-weight: 600;
-      padding: 0.5rem 1.25rem;
-      border-radius: 5px;
-      font-size: 0.95rem;
-      margin: 0.5rem 0 1.5rem;
-      cursor: pointer;
-      transition: background 200ms;
-      border-bottom: none;
-    }
-    .cta:hover { background: var(--accent-dim); border-bottom: none; }
-    .pill { display: inline-block; font-size: 0.75rem; font-family: "JetBrains Mono", monospace; background: var(--surface); border: 1px solid var(--border); border-radius: 3px; padding: 0.1em 0.5em; color: var(--muted); margin-left: 0.4rem; vertical-align: middle; }
-    footer { margin-top: 4rem; padding-top: 1rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85rem; }
-    @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgentSuite — reasoning agents that remember</title>
+<meta name="description" content="Seven role-specific reasoning agents that turn vague intent into reusable operating artifacts. Python package, CLI, and MCP server. Anthropic, OpenAI, Gemini, or local Ollama. MIT.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0B1220; --bg-2:#0F172A; --surface:#111B2E; --surface-2:#172238; --border:#263349; --border-2:#334155;
+  --fg:#F1F5F9; --muted:#94A3B8; --dim:#64748B;
+  --accent:#22C55E; --accent-2:#16A34A; --accent-soft:rgba(34,197,94,.12);
+  --amber:#F59E0B; --amber-soft:rgba(245,158,11,.12);
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"JetBrains Mono",Consolas,monospace;
+  --wrap:min(1140px,calc(100% - 40px));
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--fg);line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.wrap{width:var(--wrap);margin-inline:auto}
+code,pre{font-family:var(--mono)}
+.skip{position:fixed;top:10px;left:10px;z-index:99;background:var(--accent);color:#052e16;padding:8px 12px;border-radius:6px;transform:translateY(-200%)}
+.skip:focus{transform:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+
+/* header */
+.hdr{position:sticky;top:0;z-index:20;background:rgba(11,18,32,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.nav{height:64px;display:flex;align-items:center;gap:28px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:-.01em}
+.logo{width:28px;height:28px;border-radius:7px;background:var(--bg-2);border:1px solid var(--border-2);display:grid;place-items:center;font-family:var(--mono);color:var(--accent);font-weight:700;font-size:15px}
+.nav-links{display:flex;gap:22px;margin-left:auto;font-size:14px;color:var(--muted)}
+.nav-links a:hover{color:var(--fg)}
+.nav .gh{border:1px solid var(--border-2);border-radius:8px;padding:7px 13px;color:var(--fg)}
+.btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:8px;font-weight:600;font-size:14.5px;border:1px solid var(--border-2);background:var(--surface);transition:.15s}
+.btn:hover{border-color:var(--dim);transform:translateY(-1px)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#052e16}
+.btn.primary:hover{background:var(--accent-2)}
+
+/* hero */
+.hero{padding:88px 0 56px;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:-200px 0 auto;height:620px;background:radial-gradient(600px 300px at 20% 30%,rgba(34,197,94,.10),transparent 60%);pointer-events:none}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;position:relative}
+.hero-grid>*,.split>*,.kernel-grid>*,.cols>*,.status>*{min-width:0}
+.tree{overflow-x:auto;white-space:pre}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);border:1px solid rgba(34,197,94,.3);background:var(--accent-soft);border-radius:999px;padding:5px 11px}
+.eyebrow i{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent)}
+h1{font-size:clamp(38px,5.2vw,62px);line-height:1.04;letter-spacing:-.03em;font-weight:700;margin:22px 0 18px}
+h1 em{font-style:normal;color:var(--accent)}
+.lede{font-size:clamp(17px,1.6vw,20px);color:var(--muted);max-width:560px}
+.lede strong{color:var(--fg);font-weight:500}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+.facts{display:flex;flex-wrap:wrap;gap:18px;margin-top:30px;font-size:13px;color:var(--dim);font-family:var(--mono)}
+.facts span::before{content:"✓ ";color:var(--accent)}
+
+/* terminal */
+.term{border:1px solid var(--border-2);border-radius:12px;background:#0A1020;box-shadow:0 30px 80px rgba(0,0,0,.5);overflow:hidden}
+.term-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:12px;color:var(--dim)}
+.term-bar i{width:11px;height:11px;border-radius:50%;background:var(--border-2)}
+.term-bar i:first-child{background:#ef4444}.term-bar i:nth-child(2){background:#f59e0b}.term-bar i:nth-child(3){background:#22c55e}
+.term-bar span{margin-left:auto}
+.term pre{padding:18px 20px;font-size:12.5px;line-height:1.7;color:#CBD5E1;overflow-x:auto}
+.term .c{color:var(--dim)}.term .g{color:var(--accent)}.term .y{color:var(--amber)}.term .b{color:#60A5FA}
+.term-cap{font-size:13px;color:var(--dim);margin-top:12px}
+.term-cap a{color:var(--accent)}
+
+/* sections */
+section{padding:84px 0}
+.kicker{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+h2{font-size:clamp(28px,3.4vw,40px);letter-spacing:-.025em;line-height:1.12;font-weight:700;max-width:720px}
+.sub{color:var(--muted);font-size:17px;max-width:640px;margin-top:14px}
+.head{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:end;margin-bottom:40px}
+.head .sub{margin-top:0}
+
+/* problem */
+.problem{border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg-2)}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:48px}
+.compare{display:grid;gap:14px}
+.compare article{border:1px solid var(--border);border-radius:10px;padding:18px 20px;background:var(--surface)}
+.compare article small{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.compare article.bad small{color:#F87171}.compare article.good small{color:var(--accent)}
+.compare article p{margin-top:6px;color:var(--muted);font-size:15px}
+
+/* pipeline */
+.pipe{display:grid;grid-template-columns:repeat(5,1fr);gap:0;border:1px solid var(--border-2);border-radius:12px;overflow:hidden;background:var(--surface)}
+.pipe div{padding:22px 20px;border-right:1px solid var(--border);position:relative}
+.pipe div:last-child{border-right:0}
+.pipe small{font-family:var(--mono);color:var(--accent);font-size:12px}
+.pipe strong{display:block;font-size:17px;margin:4px 0 6px}
+.pipe p{font-size:13.5px;color:var(--muted)}
+.pipe div::after{content:"→";position:absolute;right:-9px;top:22px;color:var(--dim);background:var(--surface);z-index:2;font-size:14px}
+.pipe div:last-child::after{display:none}
+.gate{margin-top:14px;display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:center}
+.gate .box{border:1px dashed var(--border-2);border-radius:10px;padding:16px 18px;font-size:14px;color:var(--muted)}
+.gate .box b{color:var(--fg);display:block;margin-bottom:3px;font-family:var(--mono);font-size:13px}
+.gate .arrow{font-family:var(--mono);color:var(--accent);font-size:13px;text-align:center}
+.gate .box.kernel{border-style:solid;border-color:rgba(34,197,94,.4);background:var(--accent-soft)}
+
+/* agents */
+.agents{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.agent{border:1px solid var(--border);border-radius:12px;padding:20px;background:var(--surface);transition:.15s}
+.agent:hover{border-color:var(--border-2);background:var(--surface-2)}
+.agent .n{font-family:var(--mono);font-size:11px;color:var(--dim)}
+.agent h3{font-size:17px;margin:4px 0 8px}
+.agent p{font-size:14px;color:var(--muted)}
+.agent .pa{margin-top:12px;font-family:var(--mono);font-size:12px;color:var(--accent)}
+.agent.kern{background:linear-gradient(160deg,var(--surface),var(--surface-2));border-color:rgba(34,197,94,.35)}
+
+/* kernel */
+.kernel-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.tree{border:1px solid var(--border-2);border-radius:12px;background:#0A1020;padding:18px 20px;font-family:var(--mono);font-size:13px;line-height:1.8;color:#CBD5E1}
+.tree .d{color:var(--accent)}.tree .m{color:var(--dim)}
+.bul{display:grid;gap:16px;margin-top:22px}
+.bul div{display:grid;grid-template-columns:28px 1fr;gap:12px;font-size:15px;color:var(--muted)}
+.bul div b{color:var(--fg);display:block}
+.bul i{width:28px;height:28px;border-radius:7px;background:var(--accent-soft);border:1px solid rgba(34,197,94,.3);display:grid;place-items:center;color:var(--accent);font-style:normal;font-family:var(--mono);font-size:12px}
+
+/* providers & MCP */
+.runs{background:var(--bg-2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.card{border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:24px}
+.card h3{font-size:18px;margin-bottom:6px}
+.card p{color:var(--muted);font-size:14.5px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px}
+.chip{font-family:var(--mono);font-size:12.5px;border:1px solid var(--border-2);border-radius:6px;padding:5px 10px;color:var(--fg);background:var(--bg-2)}
+.chip.loc{border-color:rgba(34,197,94,.4);color:var(--accent)}
+.card pre{margin-top:14px;background:#0A1020;border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12.5px;line-height:1.65;color:#CBD5E1;overflow-x:auto}
+.tabs{display:flex;gap:4px;margin-top:14px;border-bottom:1px solid var(--border)}
+.tabs span{font-size:13px;padding:8px 12px;color:var(--dim);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs span.on{color:var(--fg);border-color:var(--accent)}
+
+/* status */
+.status{display:grid;grid-template-columns:1.2fr .8fr;gap:28px}
+.stat-list{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.stat-list div{padding:16px 20px;border-bottom:1px solid var(--border);border-right:1px solid var(--border)}
+.stat-list div:nth-child(2n){border-right:0}
+.stat-list div:nth-last-child(-n+2){border-bottom:0}
+.stat-list small{font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.06em;text-transform:uppercase}
+.stat-list b{display:block;font-weight:500;margin-top:2px}
+.bound{border:1px solid rgba(245,158,11,.35);background:var(--amber-soft);border-radius:12px;padding:22px}
+.bound small{font-family:var(--mono);font-size:11px;color:var(--amber);letter-spacing:.08em;text-transform:uppercase}
+.bound b{display:block;font-size:19px;margin:6px 0 8px}
+.bound p{color:var(--muted);font-size:14.5px}
+
+/* final + footer */
+.final{text-align:center;border-top:1px solid var(--border)}
+.final h2{margin-inline:auto}
+.final .cta-row{justify-content:center}
+footer{border-top:1px solid var(--border);padding:28px 0;font-size:13.5px;color:var(--dim)}
+footer .wrap{display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between}
+footer a:hover{color:var(--fg)}
+
+@media(max-width:960px){
+  .hero-grid,.split,.kernel-grid,.cols,.status,.head{grid-template-columns:1fr}
+  .agents{grid-template-columns:1fr 1fr}
+  .pipe{grid-template-columns:1fr}
+  .pipe div{border-right:0;border-bottom:1px solid var(--border)}
+  .pipe div::after{display:none}
+  .gate{grid-template-columns:1fr}
+  .nav-links a:not(.gh){display:none}
+}
+@media(max-width:600px){.agents{grid-template-columns:1fr}.stat-list{grid-template-columns:1fr}.stat-list div{border-right:0}.hero{padding-top:56px}}
+</style>
 </head>
 <body>
-  <header>
-    <h1>AgentSuite <span class="v">v1.1.1</span></h1>
-    <p class="lede">Turn a business goal into 26 structured artifacts -- brand system, product spec, architecture, marketing plan, risk register -- in one command.</p>
-    <p class="for">For <strong>technical founders</strong> and <strong>developers</strong> building in Claude Code, Cowork, Codex, or Google Antigravity.</p>
-    <a class="cta" href="https://github.com/scottconverse/AgentSuite">View on GitHub</a>
-  </header>
+<a class="skip" href="#main">Skip to content</a>
+<header class="hdr"><div class="wrap nav">
+  <a class="brand" href="#"><span class="logo">A</span>AgentSuite</a>
+  <nav class="nav-links" aria-label="Primary">
+    <a href="#how">How it works</a><a href="#agents">Agents</a><a href="#kernel">The kernel</a><a href="#run">Run it</a><a href="#status">Status</a>
+    <a class="gh" href="https://github.com/scottconverse/AgentSuite">GitHub</a>
+  </nav>
+</div></header>
 
-  <main>
-
-  <div class="demo">
-    <img src="screenshots/cli-founder-run.svg" alt="agentsuite founder run -- five stages, JSON summary, cost tracking" />
-    <p class="demo-caption">A real <code>agentsuite founder run</code> end-to-end: five stages, 14 artifacts, cost summary. <a href="https://github.com/scottconverse/AgentSuite/tree/main/examples/sample-output/founder">Browse the full output directory.</a></p>
+<main id="main">
+<section class="hero"><div class="wrap hero-grid">
+  <div>
+    <span class="eyebrow"><i></i>v1.1.1 · MIT · Python 3.11–3.12</span>
+    <h1>Reasoning agents that <em>remember</em> what you decided.</h1>
+    <p class="lede">Seven role-specific agents turn a loose business goal into structured, reusable artifacts: brand system, product spec, architecture, marketing plan, risk register, IT strategy. <strong>Approved output lands in a kernel every later session reads.</strong></p>
+    <div class="cta-row">
+      <a class="btn primary" href="#run">Install in one line</a>
+      <a class="btn" href="https://github.com/scottconverse/AgentSuite/tree/main/examples/sample-output/founder">Browse a real run →</a>
+    </div>
+    <div class="facts"><span>CLI · Python SDK · MCP server</span><span>Anthropic / OpenAI / Gemini / Ollama</span><span>No telemetry</span></div>
   </div>
+  <div>
+    <div class="term">
+      <div class="term-bar"><i></i><i></i><i></i><span>agentsuite founder run</span></div>
+<pre>$ agentsuite founder run \
+    --business-goal <span class="y">"Launch PatentForgeLocal v1"</span> \
+    --project-slug pfl --inputs-dir ./examples/patentforgelocal
 
-  <h2>Install</h2>
-  <pre><code>pip install "agentsuite[anthropic] @ git+https://github.com/scottconverse/AgentSuite.git"
-# other providers: [openai]  [gemini]  [ollama]  [all]</code></pre>
-  <p>Or run without installing via <code>uvx</code> (MCP mode):</p>
-  <pre><code>uvx --from "agentsuite[mcp] @ git+https://github.com/scottconverse/AgentSuite.git" agentsuite-mcp</code></pre>
+<span class="c">[1/5]</span> intake   <span class="g">complete</span>  <span class="c">inputs_manifest.json</span>
+<span class="c">[2/5]</span> extract  <span class="g">complete</span>  <span class="c">extracted_context.json</span>
+<span class="c">[3/5]</span> spec     <span class="g">complete</span>  <span class="c">brand-system.md  +9 artifacts</span>
+<span class="c">[4/5]</span> execute  <span class="g">complete</span>  <span class="c">brief-template-library/ (11)</span>
+<span class="c">[5/5]</span> qa       <span class="g">complete</span>  <span class="c">qa_report.md · qa_scores.json</span>
 
-  <h2>Single agent</h2>
-  <pre><code>export ANTHROPIC_API_KEY=sk-ant-...
-
-agentsuite founder run \
-  --business-goal "Launch PatentForgeLocal v1" \
-  --project-slug pfl
-
-# Review output, then approve to promote to _kernel/pfl/
-agentsuite founder approve --latest --project-slug pfl --approver you</code></pre>
-
-  <h2>Chain agents (pipeline)</h2>
-  <p>Run multiple agents back-to-back. Each agent's approved output feeds the next via <code>_kernel/&lt;slug&gt;/</code>.</p>
-  <pre><code># Headless -- auto-approves each step
-agentsuite pipeline run \
-  --agents founder,design,product \
-  --project-slug pfl \
-  --business-goal "Launch PatentForgeLocal v1" \
-  --auto-approve
-
-# With review gates (default) -- pauses after each agent
-agentsuite pipeline run \
-  --agents founder,design,product \
-  --project-slug pfl \
-  --business-goal "Launch PatentForgeLocal v1"
-
-# Prints artifact list + approve command. When ready:
-agentsuite pipeline approve --pipeline-id &lt;id&gt;
-
-# Lost the pipeline ID? List all pipelines:
-agentsuite pipeline list</code></pre>
-
-  <h2>MCP (Claude Code / Cowork)</h2>
-  <p>Add to <code>.mcp.json</code> in your project root:</p>
-  <pre><code>{
-  "mcpServers": {
-    "agentsuite": {
-      "command": "uvx",
-      "args": ["agentsuite-mcp"],
-      "env": {"AGENTSUITE_ENABLED_AGENTS": "founder,design,product,engineering,marketing,trust_risk,cio"}
-    }
-  }
-}</code></pre>
-
-  <h2>MCP (Codex)</h2>
-  <p>Add to <code>~/.codex/mcp.toml</code>:</p>
-  <pre><code>[servers.agentsuite]
-command = "uvx"
-args = ["agentsuite-mcp"]
-
-[servers.agentsuite.env]
-AGENTSUITE_ENABLED_AGENTS = "founder,design,product,engineering,marketing,trust_risk,cio"</code></pre>
-
-  <p><strong>Google Antigravity:</strong> MCP-compatible. Use the same <code>uvx agentsuite-mcp</code> command with <code>AGENTSUITE_ENABLED_AGENTS</code> set. See the <a href="https://antigravity.google/download">Antigravity docs</a> for the config format.</p>
-
-  <h2>What each agent produces</h2>
-  <div class="grid">
-    <div class="card">
-      <h3>Founder <span class="pill">14 artifacts</span></h3>
-      <p>Brand system, brief library, voice guide, prompt library, QA report.</p>
+stage: <span class="b">approval</span>   run-id: pfl-20261023-7f3a
+<span class="c">Review brand-system.md + qa_report.md, then:</span>
+$ agentsuite founder approve --run-id pfl-20261023-7f3a \
+    --approver you --project-slug pfl
+<span class="g">✓ promoted → .agentsuite/_kernel/pfl/</span></pre>
     </div>
-    <div class="card">
-      <h3>Design <span class="pill">14 artifacts</span></h3>
-      <p>Visual identity, design system, component spec, brand QA scoring.</p>
-    </div>
-    <div class="card">
-      <h3>Product <span class="pill">14 artifacts</span></h3>
-      <p>PM intent to UI spec to coding handoff, user story map, acceptance criteria.</p>
-    </div>
-    <div class="card">
-      <h3>Engineering <span class="pill">14 artifacts</span></h3>
-      <p>Architecture decisions, API spec, data model, security review, deployment plan, runbook, tech-debt register.</p>
-    </div>
-    <div class="card">
-      <h3>Marketing <span class="pill">14 artifacts</span></h3>
-      <p>Campaign brief, audience profile, messaging framework, content calendar, channel strategy, SEO plan, launch plan.</p>
-    </div>
-    <div class="card">
-      <h3>Trust / Risk <span class="pill">14 artifacts</span></h3>
-      <p>Threat model, risk register, control framework, incident response plan, compliance matrix, audit readiness report.</p>
-    </div>
-    <div class="card">
-      <h3>CIO <span class="pill">14 artifacts</span></h3>
-      <p>IT strategy, technology roadmap, digital transformation plan, enterprise architecture, budget model, workforce plan.</p>
-    </div>
-    <div class="card">
-      <h3>What stays between sessions</h3>
-      <p>Approved artifacts are promoted to <code>_kernel/&lt;slug&gt;/</code> and picked up automatically by the next agent or session.</p>
+    <p class="term-cap">Illustrative transcript of the five stages. The committed <a href="https://github.com/scottconverse/AgentSuite/tree/main/examples/sample-output/founder">sample output</a> is a real run you can read without installing.</p>
+  </div>
+</div></section>
+
+<section class="problem"><div class="wrap split">
+  <div>
+    <p class="kicker">The problem</p>
+    <h2>AI IDEs generate well. They remember nothing.</h2>
+    <p class="sub">Every new session re-introduces context, re-drifts on voice, and re-argues decisions that were settled last week. AgentSuite is the system <em>around</em> generation: artifacts on disk, QA-scored, versioned, and fed forward.</p>
+  </div>
+  <div class="compare">
+    <article class="bad"><small>Without a kernel</small><p>"Write our positioning again." A fresh answer, slightly different from last time, lost when the tab closes.</p></article>
+    <article class="good"><small>With AgentSuite</small><p>Positioning, voice guide, and claims library live in <code>_kernel/&lt;project&gt;/</code>. The next agent, and the next session, start from them.</p></article>
+  </div>
+</div></section>
+
+<section id="how"><div class="wrap">
+  <div class="head"><div><p class="kicker">How a run works</p><h2>Five stages, one approval gate, then promotion.</h2></div><p class="sub">Every agent walks the same deterministic pipeline, so the operator's mental model is identical across roles. Nothing is promoted without a human approve step.</p></div>
+  <div class="pipe">
+    <div><small>01</small><strong>Intake</strong><p>Collect the goal, constraints, and any input files into a manifest.</p></div>
+    <div><small>02</small><strong>Extract</strong><p>Pull structured context out of the inputs.</p></div>
+    <div><small>03</small><strong>Spec</strong><p>Write the primary artifacts: 9 to 10 Markdown and JSON documents per role.</p></div>
+    <div><small>04</small><strong>Execute</strong><p>Generate the reusable brief-template library for that role.</p></div>
+    <div><small>05</small><strong>QA</strong><p>Score every artifact against a rubric. Write <code>qa_report.md</code>.</p></div>
+  </div>
+  <div class="gate">
+    <div class="box"><b>stage: approval</b>The run pauses. You read the spec and the QA report. Cost per stage is already in <code>cost_summary.json</code>.</div>
+    <div class="arrow">approve ⟶</div>
+    <div class="box kernel"><b>.agentsuite/_kernel/&lt;slug&gt;/</b>Approved artifacts are promoted here and consumed by every downstream agent and every later session.</div>
+  </div>
+</div></section>
+
+<section id="agents" style="padding-top:0"><div class="wrap">
+  <div class="head"><div><p class="kicker">Seven agents</p><h2>One operating arc, from founder voice to IT governance.</h2></div><p class="sub">Each agent produces a primary artifact plus a brief-template library in its domain. Chain them with <code>agentsuite pipeline run</code>; each one reads what the previous one promoted.</p></div>
+  <div class="agents">
+    <a class="agent" href="https://github.com/scottconverse/AgentSuite#what-the-agents-produce"><span class="n">01</span><h3>Founder</h3><p>Brand system, voice guide, positioning, audience map, claims library, 11 brief templates.</p><span class="pa">brand-system.md</span></a>
+    <a class="agent" href="https://github.com/scottconverse/AgentSuite#what-the-agents-produce"><span class="n">02</span><h3>Design</h3><p>Visual identity, design system, component spec, brand-fidelity QA scoring.</p><span class="pa">design-system.md</span></a>
+    <a class="agent" href="https://github.com/scottconverse/AgentSuite#what-the-agents-produce"><span class="n">03</span><h3>Product</h3><p>PM intent to UI spec to coding handoff, story map, acceptance criteria.</p><span class="pa">product-spec.md</span></a>
+    <a class="agent" href="https://github.com/scottconverse/AgentSuite#what-the-agents-produce"><span class="n">04</span><h3>Engineering</h3><p>ADR, system design, API spec, data model, security review, deployment plan, runbook.</p><span class="pa">architecture-decision-record.md</span></a>
+    <a class="agent" href="https://github.com/scottconverse/AgentSuite#what-the-agents-produce"><span class="n">05</span><h3>Marketing</h3><p>Campaign brief, messaging framework, content calendar, channel strategy, launch plan.</p><span class="pa">messaging-framework.md</span></a>
+    <a class="agent" href="https://github.com/scottconverse/AgentSuite#what-the-agents-produce"><span class="n">06</span><h3>Trust / Risk</h3><p>Threat model, risk register, control framework, incident response, compliance matrix.</p><span class="pa">threat-model.md</span></a>
+    <a class="agent" href="https://github.com/scottconverse/AgentSuite#what-the-agents-produce"><span class="n">07</span><h3>CIO</h3><p>IT strategy, technology roadmap, enterprise architecture, budget model, workforce plan.</p><span class="pa">it-strategy.md</span></a>
+    <div class="agent kern"><span class="n">∞</span><h3>What persists</h3><p>Approved artifacts promote to the kernel and are picked up automatically by the next agent or the next IDE session.</p><span class="pa">_kernel/&lt;slug&gt;/</span></div>
+  </div>
+</div></section>
+
+<section id="kernel" class="problem"><div class="wrap kernel-grid">
+  <div>
+    <p class="kicker">The kernel</p>
+    <h2>Written once. Versioned. Reused by everything after.</h2>
+    <div class="bul">
+      <div><i>fs</i><span><b>Everything is on disk</b>Markdown and JSON under <code>.agentsuite/runs/&lt;run-id&gt;/</code>. Diff it, commit it, read it in any editor.</span></div>
+      <div><i>qa</i><span><b>Every artifact is scored</b>A rubric produces <code>qa_scores.json</code> and a readable report before you approve anything.</span></div>
+      <div><i>$</i><span><b>Cost is tracked per stage</b>Capped per run, previewable before approval, reported by <code>agentsuite_cost_report</code>.</span></div>
+      <div><i>⟳</i><span><b>Runs resume</b>Interrupted runs continue from their last completed stage. Resume is idempotent by design (ADR-0007).</span></div>
     </div>
   </div>
+  <div class="tree"><span class="d">.agentsuite/</span>
+├── <span class="d">runs/</span>
+│   └── <span class="d">pfl-20261023-7f3a/</span>
+│       ├── inputs_manifest.json
+│       ├── extracted_context.json
+│       ├── brand-system.md
+│       ├── founder-voice-guide.md
+│       ├── product-positioning.md
+│       ├── claims-and-proof-library.md
+│       ├── <span class="d">brief-template-library/</span>   <span class="m">11 files</span>
+│       ├── qa_report.md · qa_scores.json
+│       └── _state.json · _meta.json
+└── <span class="d">_kernel/</span>
+    └── <span class="d">pfl/</span>                        <span class="m">← promoted on approve</span>
+        ├── brand-system.md
+        ├── founder-voice-guide.md
+        └── …</div>
+</div></section>
 
-  <h2>Documentation</h2>
-  <ul style="color:var(--muted);padding-left:1.25rem;line-height:2;">
-    <li><a href="https://github.com/scottconverse/AgentSuite/blob/main/README.md">README</a> -- install, quickstart, pipeline reference, configuration</li>
-    <li><a href="https://github.com/scottconverse/AgentSuite/blob/main/USER-MANUAL.md">USER-MANUAL.md</a> -- plain-language walkthrough, every option explained</li>
-    <li><a href="https://github.com/scottconverse/AgentSuite/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a> -- how to add a new agent</li>
-    <li><a href="https://github.com/scottconverse/AgentSuite/blob/main/CHANGELOG.md">CHANGELOG.md</a> -- full version history</li>
-  </ul>
+<section id="run"><div class="wrap">
+  <div class="head"><div><p class="kicker">Run it</p><h2>Any provider. Any MCP host. Or no install at all.</h2></div><p class="sub">Distributed from GitHub only, by decision (ADR-0006). Set one API key, or run a local Ollama daemon and set nothing.</p></div>
+  <div class="cols">
+    <div class="card">
+      <h3>Install with your provider</h3>
+      <p>One optional extra per provider. The resolver auto-detects whichever key is set, and falls back to a local Ollama daemon at <code>localhost:11434</code>.</p>
+      <div class="chips"><span class="chip">[anthropic]</span><span class="chip">[openai]</span><span class="chip">[gemini]</span><span class="chip loc">[ollama] · offline, $0</span><span class="chip">[all]</span></div>
+<pre>pip install "agentsuite[anthropic] @ git+https://github.com/scottconverse/AgentSuite.git"
 
-  <h2>License</h2>
-  <p>MIT. Source on <a href="https://github.com/scottconverse/AgentSuite">GitHub</a>. Issues and contributions welcome.</p>
+# fully local: pull a Gemma 4 model, then run as usual
+ollama pull gemma4:e4b
+agentsuite founder run --business-goal "Launch My Product v1" --project-slug mp</pre>
+    </div>
+    <div class="card">
+      <h3>Surface the agents as MCP tools</h3>
+      <p>The same package is an MCP server. Agents appear as <code>agentsuite_founder_run</code>, <code>agentsuite_founder_approve</code>, <code>agentsuite_kernel_artifacts</code> and friends inside your IDE.</p>
+      <div class="tabs"><span class="on">Claude Code / Cowork</span><span>Codex</span><span>Google Antigravity</span></div>
+<pre>// .mcp.json
+{ "mcpServers": { "agentsuite": {
+    "command": "uvx", "args": ["agentsuite-mcp"],
+    "env": { "AGENTSUITE_ENABLED_AGENTS":
+      "founder,design,product,engineering,marketing,trust-risk,cio" }
+}}}</pre>
+    </div>
+  </div>
+</div></section>
 
-  </main>
+<section id="status" class="runs"><div class="wrap">
+  <div class="head"><div><p class="kicker">Status</p><h2>Shipped, tested, and honest about its edges.</h2></div></div>
+  <div class="status">
+    <div class="stat-list">
+      <div><small>Version in code</small><b>1.1.1 (latest tag v1.1.0)</b></div>
+      <div><small>License</small><b>MIT</b></div>
+      <div><small>Runtime</small><b>Python 3.11 or 3.12</b></div>
+      <div><small>Distribution</small><b>GitHub only, no PyPI</b></div>
+      <div><small>Dependencies</small><b>5 runtime + 1 per provider</b></div>
+      <div><small>Decision records</small><b>7 ADRs in docs/adr</b></div>
+      <div><small>Testing</small><b>Unit, golden, integration, gated live tiers</b></div>
+      <div><small>Telemetry</small><b>None. No callbacks home.</b></div>
+    </div>
+    <div class="bound"><small>Maturity</small><b>Functional and actively developed.</b><p>Seven agents ship. Design and Product artifact lists are documented in the changelog rather than the README. Google Antigravity support is MCP-compatible but config is documented by Antigravity, not here. Maintained by one person.</p></div>
+  </div>
+</div></section>
 
-  <footer>
-    <p>AgentSuite is built and maintained by <a href="https://github.com/scottconverse">Scott Converse</a>.</p>
-  </footer>
+<section class="final"><div class="wrap">
+  <p class="kicker">Get started</p>
+  <h2>Define the kernel once. Build on it in every session.</h2>
+  <div class="cta-row">
+    <a class="btn primary" href="https://github.com/scottconverse/AgentSuite#install">Install</a>
+    <a class="btn" href="https://github.com/scottconverse/AgentSuite/blob/main/docs/USER-MANUAL.md">User manual</a>
+    <a class="btn" href="https://github.com/scottconverse/AgentSuite/blob/main/CONTRIBUTING.md">Add an agent</a>
+  </div>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+  <span>AgentSuite · MIT · built by <a href="https://github.com/scottconverse">Scott Converse</a></span>
+  <span><a href="https://github.com/scottconverse/AgentSuite/blob/main/CHANGELOG.md">Changelog</a> · <a href="https://github.com/scottconverse/AgentSuite/blob/main/SECURITY.md">Security</a> · <a href="https://github.com/scottconverse/AgentSuite/blob/main/docs/press-kit/README.md">Press kit</a> · <a href="https://github.com/scottconverse/productteam">productteam (sibling: writes code, not specs)</a></span>
+</div></footer>
 </body>
 </html>

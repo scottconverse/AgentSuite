@@ -4,6 +4,8 @@
 >
 > **v1.1.1** — Specification Kernel + Founder · Design · Product · Engineering · Marketing · Trust/Risk · CIO Agents + multi-agent pipeline orchestration + intra-stage progress events
 
+**Website:** <https://scottconverse.github.io/AgentSuite/>
+
 ![AgentSuite founder run](docs/screenshots/cli-founder-run.svg)
 
 ## Which one do I want? AgentSuite or productteam?
