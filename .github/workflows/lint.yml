@@ -9,7 +9,47 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Docs-only changes start no CI run (docs get push, merge and publish only).
+  changes:
+    name: Detect code changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      code: ${{ steps.diff.outputs.code }}
+    steps:
+      - id: diff
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+          PR: ${{ github.event.pull_request.number }}
+          BEFORE: ${{ github.event.before }}
+          SHA: ${{ github.sha }}
+        run: |
+          # code=false only when every changed file is docs. Anything unknown counts as code.
+          docs_re='(\.(md|mdx|rst|docx|pdf)$)|(^|/)(LICENSE|NOTICE)(\.[^/]*)?$|^docs/.*\.(png|jpe?g|svg|gif|webp|html|css)$'
+          keep_re='(^|/)SKILL\.md$|(^|/)(skills|agents|commands|prompts|references)/|^\.claude/'
+          files=""
+          if [ "$EVENT" = pull_request ] || [ "$EVENT" = pull_request_target ]; then
+            files=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR/files" --paginate --jq '.[].filename') || files=""
+          elif [ "$EVENT" = push ] && [ -n "$BEFORE" ] && [ "$BEFORE" != 0000000000000000000000000000000000000000 ]; then
+            files=$(gh api "repos/$GITHUB_REPOSITORY/compare/$BEFORE...$SHA" --jq 'if (.files | length) >= 300 then empty else .files[].filename end') || files=""
+          fi
+          code=true
+          if [ -n "$files" ]; then
+            other=$(printf '%s\n' "$files" | grep -Ev "$docs_re" || true)
+            kept=$(printf '%s\n' "$files" | grep -E "$docs_re" | grep -E "$keep_re" || true)
+            if [ -z "$other" ] && [ -z "$kept" ]; then code=false; fi
+          fi
+          echo "Changed files:"; printf '%s\n' "$files" | head -50
+          echo "code=$code" | tee -a "$GITHUB_OUTPUT"
+
   ruff-mypy:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: [self-hosted, linux, x64]
     steps:
       - uses: actions/checkout@v6
