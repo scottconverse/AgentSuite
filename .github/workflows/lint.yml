@@ -50,7 +50,7 @@ jobs:
   ruff-mypy:
     needs: changes
     if: needs.changes.outputs.code == 'true'
-    runs-on: [self-hosted, linux, x64]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
@@ -66,7 +66,7 @@ jobs:
         run: mypy agentsuite
 
   docs-drift:
-    runs-on: [self-hosted, linux, x64]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - name: Required doc artifacts exist
