@@ -231,7 +231,9 @@ def _typer_app_param_names(typer_app: typer.Typer, path: list[str]) -> list[str]
         # Walk the click command to the leaf using path.
         node: click.Command = click_cmd
         for seg in path:
-            if isinstance(node, click.Group):
+            # Typer 0.27+ ships its own click copy, so its groups are not click.Group.
+            # Any group has a dict of sub-commands; check that instead.
+            if isinstance(getattr(node, "commands", None), dict):
                 # Click prefers hyphenated names; try both.
                 next_node = node.commands.get(seg) or node.commands.get(seg.replace("_", "-"))
                 if next_node is None:
